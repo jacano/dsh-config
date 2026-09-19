@@ -2,11 +2,12 @@
 # a top-level YAML array of loader patch entries (id-targeted config
 # overrides, disables, and insert lists; `!!js` expressions allowed).
 
-# Note: the web app disables this host "tool-web" row and composes the
-# model-facing web tools per agent preset, so this override covers only the
-# host plane. For web sessions the effective switch is the "standard-nosearch"
-# preset (see the README). Kept here for the host plane.
-- id: tool-web
-  config:
-    search: false
-    fetch: true
+# Disable web search.
+#
+# The web app disables the host "tool-web" row and composes the model-facing
+# web tools per agent preset, so a "tool-web" override here would not reach web
+# sessions. Disabling the search provider removes the capability on every plane
+# instead. web_search stays in the tool list but returns a structured error when
+# called, and no search request leaves the machine.
+- id: web-search-deepseek
+  disabled: true

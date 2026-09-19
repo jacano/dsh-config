@@ -7,8 +7,6 @@ ui-theme:
 agent-default-model:
   provider: opencode-go-responses
   model: muse-spark-1.3-contributor
-agent-presets:
-  default: standard-nosearch
 llm-pi-ai:
   providers:
     opencode-go:

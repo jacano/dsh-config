@@ -4,8 +4,8 @@ My [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH)
 setup, to reproduce it fast on another machine.
 
 DSH is a local agent harness with a web UI. It brings no model and no key of its
-own. This repo holds my settings, my profile patches, and one custom agent
-preset that turns off `web_search`. No secret is stored here.
+own. This repo holds my settings and my profile patches. No secret is stored
+here.
 
 The `dsh/` folder mirrors the DSH home directory (`~/.dsh` by default, or the
 `DSH_HOME` variable).
@@ -14,12 +14,10 @@ The `dsh/` folder mirrors the DSH home directory (`~/.dsh` by default, or the
 
 - `dsh/settings.yaml` — user settings: the model providers and the default
   model.
-- `dsh/profiles/web/cordis.patch.yml` — web profile patch layer (host plane).
+- `dsh/profiles/web/cordis.patch.yml` — web profile patch layer. It disables
+  `web_search`.
 - `dsh/profiles/headless/cordis.patch.yml` — headless profile patch layer. It
-  disables `web_search`.
-- `dsh/.agent-presets/standard-nosearch/` — a custom agent preset, a copy of
-  the built-in Standard with `web_search` disabled. It is the default for the
-  web UI.
+  also disables `web_search`, at the tool instead of the provider.
 
 ## Before you start
 
@@ -120,41 +118,36 @@ Code**.
 
 ## Disable web_search
 
-There are two planes, and each one has its own switch.
+A profile patch disables the search provider. This is the small switch. No search
+request leaves the machine, on any plane, and no agent preset is copied.
 
-### Web sessions (the web UI)
-
-The web app disables the host `tool-web` row and composes the model-facing web
-tools **per agent preset**. So the profile patch alone does not change a web
-session. The switch is an agent preset.
-
-I keep a custom preset, `standard-nosearch`: a copy of the built-in **Standard**
-preset with the `tool-web` config set to `search: false, fetch: true`:
+`dsh/profiles/web/cordis.patch.yml`:
 
 ```yaml
-- id: tool-web
-  name: '@deepseek-ai/dsh-tool-web'
-  config:
-    search: false
-    fetch: true
+- id: web-search-deepseek
+  disabled: true
 ```
 
-It is the default through this setting in `settings.yaml`:
+`web_search` stays in the model's tool list and returns a structured error when
+called:
 
-```yaml
-agent-presets:
-  default: standard-nosearch
+```
+Error: configured web provider "deepseek-official" is not registered
 ```
 
-To make your own: copy the built-in Standard preset directory to
-`~/.dsh/.agent-presets/<your-id>/`, edit the `tool-web` config, and set
-`agent-presets.default` to `<your-id>`. Use a **new id**: a built-in preset
-wins a duplicate id, so a copy under the same name is ignored.
+`web_fetch` is not affected.
 
-### Host and headless plane
+Why not patch the `tool-web` row? The web app disables the host `tool-web` row
+and composes the model-facing web tools **per agent preset**. A `tool-web`
+override in `cordis.patch.yml` reaches only the host plane, not a web session.
+There is no supported way to patch a preset: the preset layer has no patch
+semantics, so a full copy of the preset is the only way to remove the tool from a
+web session. The provider patch avoids that copy.
 
-The `headless` profile mounts the host `tool-web` row, so the profile patch is
-the switch there. `dsh/profiles/headless/cordis.patch.yml`:
+In the `headless` profile the host `tool-web` row is active, so the headless
+patch removes the tool itself:
+
+`dsh/profiles/headless/cordis.patch.yml`:
 
 ```yaml
 - id: tool-web
@@ -162,10 +155,6 @@ the switch there. `dsh/profiles/headless/cordis.patch.yml`:
     search: false
     fetch: true
 ```
-
-In the web profile the host row is disabled by `dsh-web-app`, so the same entry
-in `dsh/profiles/web/cordis.patch.yml` covers only the host plane. The preset
-does the work for web sessions.
 
 ## Notes
 
@@ -174,7 +163,6 @@ does the work for web sessions.
   to make another model the default.
 - DSH settings are split by plugin. The model providers live under the
   `llm-pi-ai` section, named after the plugin `@deepseek-ai/dsh-llm-pi-ai`.
-  The default preset lives under the `agent-presets` section.
 - `contextWindow` is metadata for the history compaction and for the display.
   The real limit lives on the server.
 - Never commit keys. Keep them in environment variables. DSH also writes a
@@ -192,8 +180,6 @@ ui-theme:
 agent-default-model:
   provider: opencode-go-responses
   model: muse-spark-1.3-contributor
-agent-presets:
-  default: standard-nosearch
 llm-pi-ai:
   providers:
     opencode-go:
