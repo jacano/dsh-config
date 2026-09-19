@@ -93,6 +93,9 @@ Code**.
 
 ## Providers
 
+The provider names show the wire in parentheses: `(completions)` for
+`openai-completions`, `(responses)` for `openai-responses`.
+
 ### OpenCode Go
 
 - Endpoint: `https://opencode.ai/zen/go/v1` (OpenAI-compatible).
@@ -180,7 +183,7 @@ agent-default-model:
 llm-pi-ai:
   providers:
     opencode-go:
-      displayName: OpenCode Go
+      displayName: OpenCode Go (completions)
       api: openai-completions
       baseURL: https://opencode.ai/zen/go/v1
       apiKeyEnv: OPENCODE_API_KEY
@@ -212,7 +215,7 @@ llm-pi-ai:
           contextWindow: 1048576
           maxTokens: 131072
     command-code:
-      displayName: Command Code
+      displayName: Command Code (completions)
       api: openai-completions
       baseURL: https://api.commandcode.ai/provider/v1
       apiKeyEnv: COMMANDCODE_API_KEY
