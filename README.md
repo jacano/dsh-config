@@ -4,8 +4,7 @@ My [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH)
 setup, to reproduce it fast on another machine.
 
 DSH is a local agent harness with a web UI. It brings no model and no key of its
-own. This repo holds my settings and my profile patches. No secret is stored
-here.
+own. This repo holds my settings and my patch layers. No secret is stored here.
 
 The `dsh/` folder mirrors the DSH home directory (`~/.dsh` by default, or the
 `DSH_HOME` variable).
@@ -14,10 +13,11 @@ The `dsh/` folder mirrors the DSH home directory (`~/.dsh` by default, or the
 
 - `dsh/settings.yaml` — user settings: the model providers and the default
   model.
-- `dsh/profiles/web/cordis.patch.yml` — web profile patch layer. It disables
+- `dsh/cordis.patch.yml` — the machine-local patch layer. DSH applies it to
+  every profile and it outranks each profile's own layer. It disables
   `web_search`.
-- `dsh/profiles/headless/cordis.patch.yml` — headless profile patch layer. It
-  also disables `web_search`, at the tool instead of the provider.
+- `dsh/profiles/web/cordis.patch.yml` — per-profile layer, empty.
+- `dsh/profiles/headless/cordis.patch.yml` — per-profile layer, empty.
 
 ## Before you start
 
@@ -118,18 +118,26 @@ Code**.
 
 ## Disable web_search
 
-A profile patch disables the search provider. This is the small switch. No search
-request leaves the machine, on any plane, and no agent preset is copied.
-
-`dsh/profiles/web/cordis.patch.yml`:
+One file covers every profile: `~/.dsh/cordis.patch.yml` (the home-level patch
+layer). DSH applies it to every profile, and it outranks each profile's own
+`cordis.patch.yml`, so there is nothing to change under `profiles/`.
 
 ```yaml
+- id: tool-web
+  config:
+    search: false
+    fetch: true
 - id: web-search-deepseek
   disabled: true
 ```
 
-`web_search` stays in the model's tool list and returns a structured error when
-called:
+- `tool-web` removes the tool where the host row is active, which is the
+  `headless` profile.
+- `web-search-deepseek` disables the search provider. This is what covers the
+  web UI: its sessions compose the model-facing `tool-web` per agent preset, and
+  a `tool-web` override cannot reach a preset. No search request leaves the
+  machine. `web_search` stays in the model's tool list and returns a structured
+  error when called:
 
 ```
 Error: configured web provider "deepseek-official" is not registered
@@ -137,24 +145,9 @@ Error: configured web provider "deepseek-official" is not registered
 
 `web_fetch` is not affected.
 
-Why not patch the `tool-web` row? The web app disables the host `tool-web` row
-and composes the model-facing web tools **per agent preset**. A `tool-web`
-override in `cordis.patch.yml` reaches only the host plane, not a web session.
-There is no supported way to patch a preset: the preset layer has no patch
-semantics, so a full copy of the preset is the only way to remove the tool from a
-web session. The provider patch avoids that copy.
-
-In the `headless` profile the host `tool-web` row is active, so the headless
-patch removes the tool itself:
-
-`dsh/profiles/headless/cordis.patch.yml`:
-
-```yaml
-- id: tool-web
-  config:
-    search: false
-    fetch: true
-```
+There is no supported way to patch an agent preset, so removing `web_search`
+from a web session would require copying the whole preset. The provider patch
+avoids that copy.
 
 ## Notes
 
@@ -163,6 +156,8 @@ patch removes the tool itself:
   to make another model the default.
 - DSH settings are split by plugin. The model providers live under the
   `llm-pi-ai` section, named after the plugin `@deepseek-ai/dsh-llm-pi-ai`.
+- Patch order: bundle layers, then the profile's `cordis.patch.yml`, then the
+  home-level `~/.dsh/cordis.patch.yml`, then any `--patch` overlay.
 - `contextWindow` is metadata for the history compaction and for the display.
   The real limit lives on the server.
 - Never commit keys. Keep them in environment variables. DSH also writes a

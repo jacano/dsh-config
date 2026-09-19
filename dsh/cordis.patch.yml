@@ -1,0 +1,17 @@
+# Machine-local DSH patch layer. It applies to EVERY profile (web, headless,
+# ...) and outranks each profile's own cordis.patch.yml.
+#
+# Disable web search everywhere:
+#   - web-search-deepseek: disables the search provider, so no search request
+#     leaves the machine. This is what covers the web UI, whose sessions
+#     compose the model-facing tool-web per agent preset (a tool-web override
+#     cannot reach a preset).
+#   - tool-web: removes the tool itself where the host row is active (the
+#     headless profile). In the web profile the host row is disabled, so this
+#     entry is a no-op there.
+- id: tool-web
+  config:
+    search: false
+    fetch: true
+- id: web-search-deepseek
+  disabled: true
