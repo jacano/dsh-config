@@ -1,0 +1,3 @@
+name: Standard mode (no web search)
+description: Standard coding agent with web_search disabled and web_fetch kept.
+order: 10

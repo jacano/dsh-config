@@ -1,16 +1,25 @@
-# DSH config
+# dsh-config
 
 My [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH)
 setup, to reproduce it fast on another machine.
 
 DSH is a local agent harness with a web UI. It brings no model and no key of its
-own. This repo holds my settings file and the steps to add my two model
-providers: **OpenCode Go** and **Command Code**. No secret is stored here.
+own. This repo holds my settings, my profile patches, and one custom agent
+preset that turns off `web_search`. No secret is stored here.
 
-## Files
+The `dsh/` folder mirrors the DSH home directory (`~/.dsh` by default, or the
+`DSH_HOME` variable).
 
-- `settings.yaml` — my DSH user settings, ready to copy to `~/.dsh/settings.yaml`.
-- `README.md` — this guide.
+## Contents
+
+- `dsh/settings.yaml` — user settings: the model providers and the default
+  model.
+- `dsh/profiles/web/cordis.patch.yml` — web profile patch layer (host plane).
+- `dsh/profiles/headless/cordis.patch.yml` — headless profile patch layer. It
+  disables `web_search`.
+- `dsh/.agent-presets/standard-nosearch/` — a custom agent preset, a copy of
+  the built-in Standard with `web_search` disabled. It is the default for the
+  web UI.
 
 ## Before you start
 
@@ -53,23 +62,23 @@ Windows (PowerShell, stored for the user):
 Open a new terminal after this step. A running process does not see a new
 environment variable.
 
-## 3. Install the settings
+## 3. Restore the config
 
-Copy `settings.yaml` to the DSH home folder (default `~/.dsh`, change it with
-the `DSH_HOME` variable). Create the folder if it does not exist.
+Copy the contents of `dsh/` into the DSH home. Create the folder if it does not
+exist.
 
 macOS / Linux:
 
 ```bash
 mkdir -p ~/.dsh
-cp settings.yaml ~/.dsh/settings.yaml
+cp -R dsh/. ~/.dsh/
 ```
 
 Windows (PowerShell):
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.dsh" | Out-Null
-Copy-Item settings.yaml "$HOME\.dsh\settings.yaml" -Force
+Copy-Item -Recurse -Force "dsh\*" "$HOME\.dsh\"
 ```
 
 ## 4. Run
@@ -89,8 +98,9 @@ Code**.
 - Endpoint: `https://opencode.ai/zen/go/v1` (OpenAI-compatible).
 - Extra rule: the gateway wants a stable session header,
   `x-opencode-session`. The route sends a fixed value.
-- Model `muse-spark-1.3-contributor` only answers on the Responses API, so it
-  lives in its own route (`opencode-go-responses`) with `api: openai-responses`.
+- The model `muse-spark-1.3-contributor` only answers on the Responses API, so
+  it lives in its own route (`opencode-go-responses`) with
+  `api: openai-responses`.
 - Key: environment variable `OPENCODE_API_KEY`.
 
 ### Command Code
@@ -108,15 +118,65 @@ Code**.
 | GLM-5.3 Flash | `glm-5.3-flash` | `z-ai/glm-5.3-flash` |
 | Muse Spark 1.3 Contributor | `muse-spark-1.3-contributor` | `meta/muse-spark-1.3-contributor` |
 
+## Disable web_search
+
+There are two planes, and each one has its own switch.
+
+### Web sessions (the web UI)
+
+The web app disables the host `tool-web` row and composes the model-facing web
+tools **per agent preset**. So the profile patch alone does not change a web
+session. The switch is an agent preset.
+
+I keep a custom preset, `standard-nosearch`: a copy of the built-in **Standard**
+preset with the `tool-web` config set to `search: false, fetch: true`:
+
+```yaml
+- id: tool-web
+  name: '@deepseek-ai/dsh-tool-web'
+  config:
+    search: false
+    fetch: true
+```
+
+It is the default through this setting in `settings.yaml`:
+
+```yaml
+agent-presets:
+  default: standard-nosearch
+```
+
+To make your own: copy the built-in Standard preset directory to
+`~/.dsh/.agent-presets/<your-id>/`, edit the `tool-web` config, and set
+`agent-presets.default` to `<your-id>`. Use a **new id**: a built-in preset
+wins a duplicate id, so a copy under the same name is ignored.
+
+### Host and headless plane
+
+The `headless` profile mounts the host `tool-web` row, so the profile patch is
+the switch there. `dsh/profiles/headless/cordis.patch.yml`:
+
+```yaml
+- id: tool-web
+  config:
+    search: false
+    fetch: true
+```
+
+In the web profile the host row is disabled by `dsh-web-app`, so the same entry
+in `dsh/profiles/web/cordis.patch.yml` covers only the host plane. The preset
+does the work for web sessions.
+
 ## Notes
 
-- The default model is `opencode-go / deepseek-v4.1-flash` (the
-  `agent-default-model` section). Change the `provider` and `model` there to
-  make another model the default.
-- `contextWindow` is metadata for the history compaction and for the display.
-  The real limit lives on the server.
+- The default model is `opencode-go-responses / muse-spark-1.3-contributor`
+  (the `agent-default-model` section). Change the `provider` and `model` there
+  to make another model the default.
 - DSH settings are split by plugin. The model providers live under the
   `llm-pi-ai` section, named after the plugin `@deepseek-ai/dsh-llm-pi-ai`.
+  The default preset lives under the `agent-presets` section.
+- `contextWindow` is metadata for the history compaction and for the display.
+  The real limit lives on the server.
 - Never commit keys. Keep them in environment variables. DSH also writes a
   `.credentials.yaml` file in its home; it is not part of this repo.
 
@@ -130,8 +190,10 @@ permission:
 ui-theme:
   preference: dark
 agent-default-model:
-  provider: opencode-go
-  model: deepseek-v4.1-flash
+  provider: opencode-go-responses
+  model: muse-spark-1.3-contributor
+agent-presets:
+  default: standard-nosearch
 llm-pi-ai:
   providers:
     opencode-go:
