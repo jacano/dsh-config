@@ -1,7 +1,0 @@
-# Your patch layer for this dsh profile, applied after every bundle layer:
-# a top-level YAML array of loader patch entries (id-targeted config
-# overrides, disables, and insert lists; `!!js` expressions allowed).
-#
-# Web search is disabled for every profile by the machine-local layer at
-# ~/.dsh/cordis.patch.yml, so this file stays empty.
-[]

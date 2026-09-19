@@ -16,8 +16,10 @@ The `dsh/` folder mirrors the DSH home directory (`~/.dsh` by default, or the
 - `dsh/cordis.patch.yml` — the machine-local patch layer. DSH applies it to
   every profile and it outranks each profile's own layer. It disables
   `web_search`.
-- `dsh/profiles/web/cordis.patch.yml` — per-profile layer, empty.
-- `dsh/profiles/headless/cordis.patch.yml` — per-profile layer, empty.
+
+The per-profile `profiles/<name>/cordis.patch.yml` files are optional and this
+setup does not use them. DSH treats a missing file as "no layer", so everything
+lives in the one home-level file.
 
 ## Before you start
 
