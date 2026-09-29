@@ -1,60 +1,66 @@
 # dsh-config
 
 My [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH)
-setup, to reproduce it fast on another machine.
+setup, to reproduce it fast on another machine: the settings and the patch
+layers of the two flavours it ships in.
 
-DSH is a local agent harness with a web UI. It brings no model and no key of its
-own. This repo holds my settings and my patch layers. No secret is stored here.
+## What DSH is
 
-The `dsh/` folder mirrors the DSH home directory (`~/.dsh` by default, or the
-`DSH_HOME` variable).
+DSH is a **local** agent harness. It runs on your machine, keeps your sessions,
+your workspace and your credentials there, and it brings no model and no key of
+its own: you point it at a provider with your own key. Nothing to sign up to —
+something to install, configure once, and then use from a browser tab or from a
+window on the desktop.
 
-## The web build and the desktop apps share one configuration
+This repo is that configuration and nothing else. No secret is stored here, and
+the only things it holds are the two files DSH reads on startup plus the profile
+of the desktop app.
 
-There is nothing to configure twice. The desktop app is a shell around the same
-harness and the same web app bundle — the profile of the desktop app declares
-`@deepseek-ai/dsh-web-app` among its bundles
-(`dsh/profiles/desktop/package.json`) — and every build reads the same home
-directory `~/.dsh`:
+## Two flavours, one configuration
 
-- the same `settings.yaml` (the providers and the default model),
-- the same patch layers (`~/.dsh/cordis.patch.yml` and, per profile,
-  `profiles/<name>/cordis.patch.yml`),
-- the same credentials (`.credentials.yaml`), sessions and workspaces.
+DSH ships the same harness with two front ends:
 
-So this repo reproduces the web build and the desktop apps at once: restore
-`dsh/`, set the keys, and either one comes up with the same models.
+- **The web build.** `npm install -g @deepseek-ai/dsh`, then `dsh web`. It serves
+  the UI on `127.0.0.1` and prints a link with a token. `npx @deepseek-ai/dsh web`
+  runs it with no install at all. This is the flavour that needs Node.js.
+- **The desktop apps.** An installer per platform, from the table below. The
+  desktop app is a shell around the same web app bundle: the profile of this
+  machine declares `@deepseek-ai/dsh-web-app` among its bundles
+  (`dsh/profiles/desktop/package.json`), so the window runs exactly what
+  `dsh web` serves, and it brings its own runtime, so it needs no Node.js.
 
-One nuance about scope, because it explains the two patch files below: a
-`profiles/<name>/cordis.patch.yml` applies to **that profile only** (there is one
-per profile, and the desktop app has `profiles/desktop/`), while the home-level
-`~/.dsh/cordis.patch.yml` and `settings.yaml` apply to **every** profile, web and
-headless included. Anything that must hold everywhere goes in the home-level
-files; the per-profile file is where the graphical settings forms persist what
-you edit in the app.
+**Both read the same home directory, `~/.dsh`**: the same `settings.yaml`, the
+same patch layers, the same credentials, the same sessions and workspaces. There
+is nothing to configure twice — the model menu, the permissions and the theme you
+set in one are what the other starts with — and this repo is that one
+configuration, so restoring `dsh/` covers the two flavours at once.
 
-## Download
+One nuance about scope, because it explains the two patch files this repo holds:
+a `profiles/<name>/cordis.patch.yml` applies to **that profile only** (each
+profile has one, and the desktop app works in `profiles/desktop/`), while the
+home-level `~/.dsh/cordis.patch.yml` and `settings.yaml` apply to **every**
+profile, the web and headless ones included. Anything that must hold everywhere
+goes in the home-level files; the per-profile file is where the graphical
+settings forms persist what you edit inside the app.
 
-The two official desktop builds of the current release
-(`0.1.7-rc.1.20260924.1`):
+### Download
 
-| Build | Download |
-| --- | --- |
-| Desktop, Windows x64 | [deepseek-harness-0.1.7-rc.1.20260924.1-win-x64.exe](https://download.deepseek.com/dsh-desk/bin/win-x64/deepseek-harness-0.1.7-rc.1.20260924.1-win-x64.exe) |
-| Desktop, macOS Apple Silicon | [deepseek-harness-0.1.7-rc.1.20260924.1-mac-arm64.dmg](https://download.deepseek.com/dsh-desk/bin/mac-arm64/deepseek-harness-0.1.7-rc.1.20260924.1-mac-arm64.dmg) |
+| Flavour | Build | File |
+| --- | --- | --- |
+| Web | any platform with Node.js 22+ | `npm install -g @deepseek-ai/dsh` (or `npx @deepseek-ai/dsh web`) |
+| Desktop | Windows x64 | [deepseek-harness-0.1.7-rc.1.20260924.1-win-x64.exe](https://download.deepseek.com/dsh-desk/bin/win-x64/deepseek-harness-0.1.7-rc.1.20260924.1-win-x64.exe) |
+| Desktop | macOS Apple Silicon | [deepseek-harness-0.1.7-rc.1.20260924.1-mac-arm64.dmg](https://download.deepseek.com/dsh-desk/bin/mac-arm64/deepseek-harness-0.1.7-rc.1.20260924.1-mac-arm64.dmg) |
 
-Those are the two builds published at that version — there is no Intel-mac,
-Windows-on-ARM or Linux package under `download.deepseek.com/dsh-desk/bin/`.
-
-The web build is not downloaded: it comes from npm (see step 1). `dsh web`
-serves the UI on `127.0.0.1` and the desktop app runs the same UI in a window,
-which is why one configuration covers both.
+Those are the two desktop builds published for the current release
+(`0.1.7-rc.1.20260924.1`): there is no Intel-mac, Windows-on-ARM or Linux package
+under `download.deepseek.com/dsh-desk/bin/`. The web flavour is not downloaded at
+all; it comes from npm.
 
 ## Contents
 
 - `dsh/settings.yaml` — user settings: the model providers and the default
   model. Every profile reads it, so it is the file that makes the web build and
-  the desktop build show the same menu.
+  the desktop app show the same menu.
 - `dsh/cordis.patch.yml` — the home-level patch layer. DSH applies it to every
   profile and it outranks each profile's own layer. It disables `web_search`.
 - `dsh/profiles/desktop/` — the desktop profile as this machine has it:
@@ -68,7 +74,7 @@ then any `--patch` overlay.
 
 ## Before you start
 
-- Node.js 22 or newer, for the web build.
+- Node.js 22 or newer, for the web flavour. The desktop installers need none.
 - A **Command Code** account and API key. That is the only provider that is
   active in this setup.
 - An **OpenCode Go** subscription and API key, only if you want to re-enable the
@@ -76,20 +82,15 @@ then any `--patch` overlay.
 
 ## 1. Install DeepSeek Harness
 
-Web build (the same harness, UI in a browser):
+Web flavour:
 
 ```bash
 npm install -g @deepseek-ai/dsh
 dsh --version
 ```
 
-A quick look with no install:
-
-```bash
-npx @deepseek-ai/dsh web
-```
-
-Desktop build: run the installer from the **Download** table above.
+Desktop flavour: run the installer of your platform from the **Download** table
+above.
 
 ## 2. Set the API keys
 
@@ -134,14 +135,14 @@ Copy-Item -Recurse -Force "dsh\*" "$HOME\.dsh\"
 
 ## 4. Run
 
-Web build:
+Web flavour:
 
 ```bash
 dsh web
 ```
 
-Desktop build: start the app. The web UI listens on `127.0.0.1` and prints a link
-with a token, and the desktop window loads the same UI.
+Desktop flavour: start the app. The web UI listens on `127.0.0.1` and prints a
+link with a token, and the desktop window loads the same UI.
 
 Either way the model menu shows one group, **Command Code**, with five models.
 The OpenCode groups are commented out in the configuration, so they are not in
