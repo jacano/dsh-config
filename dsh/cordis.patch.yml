@@ -1,17 +1,134 @@
-# Machine-local DSH patch layer. It applies to EVERY profile (web, headless,
-# ...) and outranks each profile's own cordis.patch.yml.
+# The one configuration of this machine.
 #
-# Disable web search everywhere:
-#   - web-search-deepseek: disables the search provider, so no search request
-#     leaves the machine. This is what covers the web UI, whose sessions
-#     compose the model-facing tool-web per agent preset (a tool-web override
-#     cannot reach a preset).
-#   - tool-web: removes the tool itself where the host row is active (the
-#     headless profile). In the web profile the host row is disabled, so this
-#     entry is a no-op there.
-- id: tool-web
+# Every profile reads this file — the desktop app (profile `desktop`), the web
+# build (`dsh web`, which is profile `web`) and the headless one — and it
+# outranks each profile's own cordis.patch.yml. So there is nothing to keep in
+# two places: the model menu, the permissions, the theme and the default model
+# all live here.
+#
+# Nothing in this file touches web search: it stays as the harness ships it.
+#
+# `name` is the plugin an entry configures, and the value under `config` is that
+# entry's config. A block commented out is a provider that is out of the model
+# menu and one "# " away from coming back.
+- id: ui-settings-general
+  name: "@deepseek-ai/dsh-client-ui-settings-general"
   config:
-    search: false
-    fetch: true
-- id: web-search-deepseek
-  disabled: true
+    welcomeNoticeVersion: 2026-08-13.1
+- id: permission
+  name: "@deepseek-ai/dsh-permission-presets"
+  config:
+    presets:
+      read-only:
+        sandbox: read-only
+        approval: ask
+      workspace-write:
+        sandbox: workspace-write
+        approval: ask
+      danger-full-access:
+        sandbox: danger-full-access
+        approval: never
+    defaultPreset: danger-full-access
+- id: ui-theme
+  name: "@deepseek-ai/dsh-client-ui-theme"
+  config:
+    preference: dark
+- id: agent-default-model
+  name: "@deepseek-ai/dsh-agent-default-model"
+  config:
+    provider: deepseek-official
+    model: deepseek-flash
+    reasoningEffort: high
+- id: llm-pi-ai
+  name: "@deepseek-ai/dsh-llm-pi-ai"
+  config:
+    providers:
+      # --- OpenCode, commented out: out of the model menu, and one "# " away from
+      # coming back. The key OPENCODE_API_KEY is only needed while this is active.
+      # opencode-go:
+      #   displayName: OpenCode Go (openai-completions)
+      #   api: openai-completions
+      #   baseURL: https://opencode.ai/zen/go/v1
+      #   apiKeyEnv: OPENCODE_API_KEY
+      #   headers:
+      #     x-opencode-session: ses_dsh_8f2a1c4e7b6d4a90
+      #   defaultContextWindow: 1048576
+      #   defaultMaxTokens: 32768
+      #   models:
+      #     - id: deepseek-v4.1-flash
+      #       name: DeepSeek V4.1 Flash (OpenCode Go, openai-completions)
+      #       contextWindow: 1048576
+      #       maxTokens: 32768
+      #     - id: glm-5.3-flash
+      #       name: GLM-5.3 Flash (OpenCode Go, openai-completions)
+      #       contextWindow: 1000000
+      #       maxTokens: 131072
+      #     - id: space-bunny-free
+      #       name: Space Bunny Free (OpenCode Go, openai-completions)
+      #       contextWindow: 1048576
+      #       maxTokens: 524288
+      # opencode-go-responses:
+      #   displayName: OpenCode Go (openai-responses)
+      #   api: openai-responses
+      #   baseURL: https://opencode.ai/zen/go/v1
+      #   apiKeyEnv: OPENCODE_API_KEY
+      #   headers:
+      #     x-opencode-session: ses_dsh_8f2a1c4e7b6d4a90
+      #   defaultContextWindow: 1048576
+      #   defaultMaxTokens: 131072
+      #   models:
+      #     - id: muse-spark-1.3-contributor
+      #       name: Muse Spark 1.3 Contributor (OpenCode Go, openai-responses)
+      #       contextWindow: 1048576
+      #       maxTokens: 131072
+      command-code:
+        displayName: Command Code (openai-completions)
+        api: openai-completions
+        baseURL: https://api.commandcode.ai/provider/v1
+        apiKeyEnv: COMMANDCODE_API_KEY
+        defaultContextWindow: 1000000
+        defaultMaxTokens: 32768
+        models:
+          - id: deepseek/deepseek-v4.1-flash
+            name: DeepSeek V4.1 Flash (Command Code, openai-completions)
+            contextWindow: 1000000
+            maxTokens: 32768
+          - id: deepseek/deepseek-v4.1-flash-fast
+            name: DeepSeek V4.1 Flash Fast (Command Code, openai-completions)
+            contextWindow: 1000000
+            maxTokens: 32768
+          - id: z-ai/glm-5.3-flash
+            name: GLM-5.3 Flash (Command Code, openai-completions)
+            contextWindow: 1048576
+            maxTokens: 131072
+          - id: meta/muse-spark-1.3-contributor
+            name: Muse Spark 1.3 Contributor (Command Code, openai-completions)
+            contextWindow: 1048576
+            maxTokens: 131072
+          - id: stealth/space-bunny-alpha
+            name: Space Bunny Alpha (Command Code, openai-completions)
+            contextWindow: 1000000
+            maxTokens: 131072
+- id: ui-chat
+  name: "@deepseek-ai/dsh-client-ui-chat"
+  config:
+    transcriptView: standard
+    performanceUsage: detailed
+- id: ui-settings
+  name: "@deepseek-ai/dsh-client-ui-settings"
+  config:
+    enabled: true
+- id: ui-settings-account
+  # This plugin belongs to the desktop app's client bundle. A profile that does
+  # not carry it (the CLI's `web` and `headless` ones) logs
+  # `patch: entry "ui-settings-account" not found` and skips the entry, which is
+  # the only warning this file produces.
+  name: "@deepseek-ai/dsh-client-ui-settings-account"
+  config:
+    version: 1
+    step: done
+    usage: detailed
+    developerTools: true
+    purpose: null
+    process: standard
+    completion: api-key

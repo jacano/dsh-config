@@ -1,8 +1,7 @@
 # dsh-config
 
 My [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH)
-setup, to reproduce it fast on another machine: the settings and the patch
-layers of the two flavours it ships in.
+setup: **one file**, to reproduce it fast on another machine.
 
 ## What DSH is
 
@@ -12,36 +11,25 @@ its own: you point it at a provider with your own key. Nothing to sign up to —
 something to install, configure once, and then use from a browser tab or from a
 window on the desktop.
 
-This repo is that configuration and nothing else. No secret is stored here, and
-the only things it holds are the two files DSH reads on startup plus the profile
-of the desktop app.
+This repo is that configuration and nothing else. No secret is stored here.
 
 ## Two flavours, one configuration
 
-DSH ships the same harness with two front ends:
+DSH ships the same harness with two front ends, and each one is a *profile*:
 
-- **The web build.** `npm install -g @deepseek-ai/dsh`, then `dsh web`. It serves
-  the UI on `127.0.0.1` and prints a link with a token. `npx @deepseek-ai/dsh web`
-  runs it with no install at all. This is the flavour that needs Node.js.
-- **The desktop apps.** An installer per platform, from the table below. The
-  desktop app is a shell around the same web app bundle: the profile of this
-  machine declares `@deepseek-ai/dsh-web-app` among its bundles
-  (`dsh/profiles/desktop/package.json`), so the window runs exactly what
-  `dsh web` serves, and it brings its own runtime, so it needs no Node.js.
+- **The web build** — `npm install -g @deepseek-ai/dsh`, then `dsh web`, which is
+  an alias of `--profile web`. It serves the UI on `127.0.0.1` and prints a link
+  with a token. `npx @deepseek-ai/dsh web` runs it with no install. This is the
+  flavour that needs Node.js.
+- **The desktop apps** — an installer per platform, from the table below, which
+  works in `--profile desktop`. The app is a shell around the same web app bundle
+  (the profile carries `@deepseek-ai/dsh-web-app`), so the window runs what
+  `dsh web` serves, and it brings its own runtime: no Node.js needed.
 
-**Both read the same home directory, `~/.dsh`**: the same `settings.yaml`, the
-same patch layers, the same credentials, the same sessions and workspaces. There
-is nothing to configure twice — the model menu, the permissions and the theme you
-set in one are what the other starts with — and this repo is that one
-configuration, so restoring `dsh/` covers the two flavours at once.
-
-One nuance about scope, because it explains the two patch files this repo holds:
-a `profiles/<name>/cordis.patch.yml` applies to **that profile only** (each
-profile has one, and the desktop app works in `profiles/desktop/`), while the
-home-level `~/.dsh/cordis.patch.yml` and `settings.yaml` apply to **every**
-profile, the web and headless ones included. Anything that must hold everywhere
-goes in the home-level files; the per-profile file is where the graphical
-settings forms persist what you edit inside the app.
+**Both read the same home directory, `~/.dsh`.** The model menu, the permissions,
+the theme and the default model are the same for the two, and because the whole
+configuration lives in the home-level patch layer, that is a property of the
+design and not a promise: no profile can drift from another.
 
 ### Download
 
@@ -56,29 +44,43 @@ Those are the two desktop builds published for the current release
 under `download.deepseek.com/dsh-desk/bin/`. The web flavour is not downloaded at
 all; it comes from npm.
 
-## Contents
+## The one file
 
-- `dsh/settings.yaml` — user settings: the model providers and the default
-  model. Every profile reads it, so it is the file that makes the web build and
-  the desktop app show the same menu.
-- `dsh/cordis.patch.yml` — the home-level patch layer. DSH applies it to every
-  profile and it outranks each profile's own layer. It disables `web_search`.
-- `dsh/profiles/desktop/` — the desktop profile as this machine has it:
-  `cordis.patch.yml` (what the app's settings forms write: permissions, theme,
-  default model, providers), plus the profile's `cordis.yml`, `package.json` and
-  `pnpm-workspace.yaml`, which DSH composes the profile from.
+- `dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`. It holds every setting
+  this setup has: the model providers and their models, the default model, the
+  permission presets, the theme and the client toggles.
 
-Patch order, from the weakest to the strongest: the bundles of the profile, then
-the profile's `cordis.patch.yml`, then the home-level `~/.dsh/cordis.patch.yml`,
-then any `--patch` overlay.
+Why the home level and not the profile's own layer: DSH composes a profile from
+its bundles, then `profiles/<name>/cordis.patch.yml` (that profile only), then
+`~/.dsh/cordis.patch.yml` (every profile, and it wins), then any `--patch`
+overlay. The web build and the desktop app are two different profiles, so the
+home-level file is the only place where one edit configures both.
+
+The file is a YAML array of loader patch entries: `id` names the entry to
+configure, `name` the plugin behind it, and the value under `config` replaces
+that entry's config. A block commented out is a provider that is out of the menu
+and one `# ` away from coming back.
+
+There is no `settings.yaml` in this repo, and that is deliberate. DSH used to
+keep the user settings in `~/.dsh/settings.yaml`; it now writes them into the
+patch layer and renames the old file to `settings.yaml.imported` on the first
+write (the app documents this). A `settings.yaml` is a leftover of that
+migration, not a place DSH reads, so keeping one here would only invite edits
+that do nothing. If your home still holds a `settings.yaml.imported`, it is that
+leftover and you can ignore it.
+
+The profile's own `cordis.patch.yml` is unused here, and DSH treats a missing one
+as "no layer". Note what this means when you edit settings **inside the app**: the
+graphical forms write to the profile layer, which sits *below* this file, so a
+form edit is shadowed by what this file sets. Edit this file by hand, or remove
+the entry here if you would rather drive that setting from the app.
 
 ## Before you start
 
 - Node.js 22 or newer, for the web flavour. The desktop installers need none.
-- A **Command Code** account and API key. That is the only provider that is
-  active in this setup.
+- A **Command Code** account and API key: the only provider that is active here.
 - An **OpenCode Go** subscription and API key, only if you want to re-enable the
-  OpenCode entries, which are commented out in both files.
+  OpenCode entries, which are commented out.
 
 ## 1. Install DeepSeek Harness
 
@@ -94,7 +96,7 @@ above.
 
 ## 2. Set the API keys
 
-The settings file never holds a secret. It only names the environment variables
+The configuration never holds a secret. It only names the environment variables
 that hold the keys, so set them once per machine.
 
 macOS / Linux (bash or zsh):
@@ -116,21 +118,20 @@ environment variable.
 
 ## 3. Restore the config
 
-Copy the contents of `dsh/` into the DSH home. Create the folder if it does not
-exist.
+One file, into the DSH home.
 
 macOS / Linux:
 
 ```bash
 mkdir -p ~/.dsh
-cp -R dsh/. ~/.dsh/
+cp dsh/cordis.patch.yml ~/.dsh/cordis.patch.yml
 ```
 
 Windows (PowerShell):
 
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.dsh" | Out-Null
-Copy-Item -Recurse -Force "dsh\*" "$HOME\.dsh\"
+Copy-Item "dsh\cordis.patch.yml" "$HOME\.dsh\cordis.patch.yml" -Force
 ```
 
 ## 4. Run
@@ -141,12 +142,17 @@ Web flavour:
 dsh web
 ```
 
-Desktop flavour: start the app. The web UI listens on `127.0.0.1` and prints a
-link with a token, and the desktop window loads the same UI.
+Desktop flavour: start the app.
 
 Either way the model menu shows one group, **Command Code**, with five models.
-The OpenCode groups are commented out in the configuration, so they are not in
-the menu until you remove the `# ` from their blocks.
+The OpenCode groups are commented out in the file, so they are not in the menu
+until you remove the `# ` from their blocks.
+
+To see what DSH composes from the file before you start a session:
+
+```bash
+dsh --profile web --dump-config | less
+```
 
 ## Providers
 
@@ -168,8 +174,7 @@ the two entries of OpenCode Go: one service, two API shapes.
 
 ### OpenCode Go — commented out
 
-Two entries, one per API shape, and both are comments in `settings.yaml` and in
-`dsh/profiles/desktop/cordis.patch.yml`:
+Two entries, one per API shape, both commented out in the file:
 
 - `opencode-go` — `https://opencode.ai/zen/go/v1`, `api: openai-completions`:
   DeepSeek V4.1 Flash, GLM-5.3 Flash, Space Bunny Free.
@@ -191,98 +196,20 @@ Two entries, one per API shape, and both are comments in `settings.yaml` and in
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` | `muse-spark-1.3-contributor` |
 | Space Bunny Alpha / Free | `stealth/space-bunny-alpha` | `space-bunny-free` |
 
-## Disable web_search
-
-One file covers every profile: `~/.dsh/cordis.patch.yml` (the home-level patch
-layer). DSH applies it to every profile, and it outranks each profile's own
-`cordis.patch.yml`, so there is nothing to change under `profiles/`.
-
-```yaml
-- id: tool-web
-  config:
-    search: false
-    fetch: true
-- id: web-search-deepseek
-  disabled: true
-```
-
-- `tool-web` removes the tool where the host row is active, which is the
-  `headless` profile.
-- `web-search-deepseek` disables the search provider. This is what covers the
-  web UI: its sessions compose the model-facing `tool-web` per agent preset, and
-  a `tool-web` override cannot reach a preset. No search request leaves the
-  machine. `web_search` stays in the model's tool list and returns a structured
-  error when called:
-
-```
-Error: configured web provider "deepseek-official" is not registered
-```
-
-`web_fetch` is not affected.
-
-There is no supported way to patch an agent preset, so removing `web_search`
-from a web session would require copying the whole preset. The provider patch
-avoids that copy.
-
 ## Notes
 
-- The default model is `deepseek-official / deepseek-flash` (the
-  `agent-default-model` section), which is the model row the harness brings of
-  its own. Change the `provider` and `model` there to make another model the
-  default.
-- DSH writes the settings you edit in the graphical forms into the patch layer of
-  the active profile, which is why `dsh/profiles/desktop/cordis.patch.yml` holds
-  the same provider block as `dsh/settings.yaml`. Edit one place and copy it to
-  the other, or edit `settings.yaml` only, which every profile reads.
-- DSH settings are split by plugin. The model providers live under the
-  `llm-pi-ai` section, named after the plugin `@deepseek-ai/dsh-llm-pi-ai`.
+- The default model is `deepseek-official / deepseek-flash`, the row the harness
+  brings of its own. Change `provider` and `model` in the `agent-default-model`
+  entry to make another model the default.
+- Web search is left as the harness ships it: no entry in the file touches it.
+- The compositions of the `web` and `headless` profiles log one warning,
+  `patch: entry "ui-settings-account" not found`, because that plugin belongs to
+  the desktop app's client bundle. The desktop profile has it, the others skip
+  the entry, and nothing else is affected.
+- DSH settings are split by plugin, and `id` is the key: the model providers live
+  in the `llm-pi-ai` entry, named after the plugin `@deepseek-ai/dsh-llm-pi-ai`.
 - `contextWindow` is metadata for the history compaction and for the display.
   The real limit lives on the server.
 - Never commit keys. Keep them in environment variables. DSH also writes a
-  `.credentials.yaml` file in its home; it is not part of this repo.
-
-## settings.yaml
-
-```yaml
-ui-onboarding:
-  welcomeNoticeVersion: 2026-08-13.1
-permission:
-  defaultPreset: danger-full-access
-ui-theme:
-  preference: dark
-agent-default-model:
-  provider: deepseek-official
-  model: deepseek-flash
-llm-pi-ai:
-  providers:
-    command-code:
-      displayName: Command Code (openai-completions)
-      api: openai-completions
-      baseURL: https://api.commandcode.ai/provider/v1
-      apiKeyEnv: COMMANDCODE_API_KEY
-      defaultContextWindow: 1000000
-      defaultMaxTokens: 32768
-      models:
-        - id: deepseek/deepseek-v4.1-flash
-          name: DeepSeek V4.1 Flash (Command Code, openai-completions)
-          contextWindow: 1000000
-          maxTokens: 32768
-        - id: deepseek/deepseek-v4.1-flash-fast
-          name: DeepSeek V4.1 Flash Fast (Command Code, openai-completions)
-          contextWindow: 1000000
-          maxTokens: 32768
-        - id: z-ai/glm-5.3-flash
-          name: GLM-5.3 Flash (Command Code, openai-completions)
-          contextWindow: 1048576
-          maxTokens: 131072
-        - id: meta/muse-spark-1.3-contributor
-          name: Muse Spark 1.3 Contributor (Command Code, openai-completions)
-          contextWindow: 1048576
-          maxTokens: 131072
-        - id: stealth/space-bunny-alpha
-          name: Space Bunny Alpha (Command Code, openai-completions)
-          contextWindow: 1000000
-          maxTokens: 131072
-    # opencode-go and opencode-go-responses are commented out; see dsh/settings.yaml
-    # for the full blocks, which are ready to be uncommented.
-```
+  `.credentials.yaml` file in its home; it is not part of this repo, and
+  `.gitignore` here refuses it.
