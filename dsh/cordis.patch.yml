@@ -1,16 +1,10 @@
-# The one configuration of this machine.
+# The one configuration of this machine: every profile reads it — the desktop app,
+# `dsh web` (which is `--profile web`) and the headless one — and it outranks a
+# profile's own patch layer.
 #
-# Every profile reads this file — the desktop app (profile `desktop`), the web
-# build (`dsh web`, which is profile `web`) and the headless one — and it
-# outranks each profile's own cordis.patch.yml. So there is nothing to keep in
-# two places: the model menu, the permissions, the theme and the default model
-# all live here.
-#
-# Nothing in this file touches web search: it stays as the harness ships it.
-#
-# `name` is the plugin an entry configures, and the value under `config` is that
-# entry's config. A block commented out is a provider that is out of the model
-# menu and one "# " away from coming back.
+# `id` names the entry, `name` the plugin behind it, and the value under `config`
+# is that entry's config. A block commented out is a provider that is out of the
+# model menu and one "# " away from coming back.
 - id: ui-settings-general
   name: "@deepseek-ai/dsh-client-ui-settings-general"
   config:
@@ -43,8 +37,7 @@
   name: "@deepseek-ai/dsh-llm-pi-ai"
   config:
     providers:
-      # --- OpenCode, commented out: out of the model menu, and one "# " away from
-      # coming back. The key OPENCODE_API_KEY is only needed while this is active.
+      # OpenCode, commented out: out of the menu, one "# " from coming back.
       # opencode-go:
       #   displayName: OpenCode Go (openai-completions)
       #   api: openai-completions
@@ -119,10 +112,8 @@
   config:
     enabled: true
 - id: ui-settings-account
-  # This plugin belongs to the desktop app's client bundle. A profile that does
-  # not carry it (the CLI's `web` and `headless` ones) logs
-  # `patch: entry "ui-settings-account" not found` and skips the entry, which is
-  # the only warning this file produces.
+  # A plugin of the desktop client: the `web` and `headless` profiles have no such
+  # entry, log `patch: entry "ui-settings-account" not found` and skip it.
   name: "@deepseek-ai/dsh-client-ui-settings-account"
   config:
     version: 1
