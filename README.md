@@ -79,7 +79,7 @@ Copy-Item "dsh\cordis.patch.yml" "$HOME\.dsh\" -Force
 ```
 
 **4. Run** `dsh web`, or start the desktop app. The model menu shows one group,
-**Command Code**, with five models. `dsh --profile web --dump-config` prints what
+**Command Code**, with six models. `dsh --profile web --dump-config` prints what
 DSH composes from the file, which is the way to check it by hand.
 
 ## Providers and models
@@ -95,6 +95,7 @@ Every name in the menu carries the wire it speaks, `openai-completions` for
 | DeepSeek V4.1 Flash | `deepseek/deepseek-v4.1-flash` |
 | DeepSeek V4.1 Flash Fast | `deepseek/deepseek-v4.1-flash-fast` |
 | GLM-5.3 Flash | `z-ai/glm-5.3-flash` |
+| GLM-5.3 FlashX | `z-ai/glm-5.3-flashx` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
 | Space Bunny Alpha | `stealth/space-bunny-alpha` |
 
@@ -107,8 +108,36 @@ their test window lasts, and their ids can disappear when it ends.
 second one because Muse Spark only answers on that shape. Its blocks in the file
 name the models.
 
+## Thinking levels
+
+A model offers an **Effort** submenu in the model picker only if its entry
+declares `reasoningEfforts`. DSH's Settings → Models form deliberately leaves the
+field alone — it is a per-model capability, and the models under one provider
+disagree about it — so this file is the only place it is set.
+
+Command Code accepts `reasoning_effort` on all six models at the same five
+levels — `low`, `medium`, `high`, `xhigh`, `max`, each sent as itself on
+`POST /chat/completions` — and answers **HTTP 400** to `minimal` and `none`.
+
+Two findings from probing the endpoint, both of which shaped the file:
+
+- **Every model thinks by default.** With no `reasoning_effort` they all return
+  reasoning text, and nothing turns it off: `thinking: {type: disabled}`,
+  `thinking: false` and `enable_thinking: false` each come back 200 and are then
+  ignored. So no entry declares `off:`. An "Off" that leaves the model thinking
+  would be worse than no "Off" at all.
+- **The levels are a knob, not a ladder.** Reasoning token counts move with the
+  level, but on an easy problem the run-to-run variance is wider than the gap
+  between two neighbouring levels. Treat `low` as "cheaper", not "worse".
+
+Muse Spark 1.3 is the one that reports `reasoning_tokens` honestly. The others
+return reasoning text with `reasoning_tokens: 0`, so the counter understates what
+the model did; the text in the transcript is the reliable signal.
+
 ## Notes
 
+- The patch file is read at boot and never watched: after editing it, restart
+  `dsh web` or the desktop app. A running session does not pick up the change.
 - The default model is `deepseek-official / deepseek-flash`, the row the harness
   brings of its own. Change the `agent-default-model` entry for another one.
 - The `web` and `headless` compositions log one warning,
