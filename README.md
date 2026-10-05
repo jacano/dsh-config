@@ -138,8 +138,18 @@ the model did; the text in the transcript is the reliable signal.
 
 - The patch file is read at boot and never watched: after editing it, restart
   `dsh web` or the desktop app. A running session does not pick up the change.
-- The default model is `deepseek-official / deepseek-flash`, the row the harness
-  brings of its own. Change the `agent-default-model` entry for another one.
+- The default model is `command-code / deepseek/deepseek-v4.1-flash`: the same
+  DeepSeek model, served by Command Code rather than by the official API, so it
+  never touches DeepSeek credits.
+- The official API route is off: the `llm-deepseek` entry carries
+  `disabled: true`, so `deepseek-official` is not registered at all. It leaves
+  the model menu, and a session that once stored `deepseek-flash` can no longer
+  be billed for it either. Delete that entry to get the four factory models back.
+- `web_search` is a separate consumer of the same `DEEPSEEK_API_KEY` and is
+  still on: `dsh-web-search-deepseek` registers itself under its own id
+  `deepseek-official`, talks to `https://api.deepseek.com/anthropic/v1` and
+  never goes through `ctx.llm`, so disabling the chat route leaves it working —
+  and failing on an empty balance.
 - The `web` and `headless` compositions log one warning,
   `entry "ui-settings-account" not found`: that plugin belongs to the desktop
   client bundle. Harmless.
