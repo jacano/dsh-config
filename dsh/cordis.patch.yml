@@ -89,6 +89,15 @@
         apiKeyEnv: COMMANDCODE_API_KEY
         defaultContextWindow: 1000000
         defaultMaxTokens: 32768
+        # Vision on the whole route. Without this the resolved input is [text] and
+        # pi-ai's transformMessages() silently swaps every image for the literal
+        # text "(image omitted: model does not support images)" — the dsh-agent
+        # seam refuses even earlier, at read_image/admission, naming the model.
+        # The six models below all read images, so declaring it once here beats
+        # repeating `input: [text, image]` on entries that already say it: an
+        # entry's own `input` WINS over this fallback, so a future text-only model
+        # added to the list must declare `input: [text]` to opt back out.
+        defaultInput: [text, image]
         # Per-model reasoning on this route, probed against api.commandcode.ai: all
         # six models take `reasoning_effort` at the same five levels (low, medium,
         # high, xhigh, max) and answer HTTP 400 to `minimal` and `none`.

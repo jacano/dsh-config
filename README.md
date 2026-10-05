@@ -134,10 +134,52 @@ Muse Spark 1.3 is the one that reports `reasoning_tokens` honestly. The others
 return reasoning text with `reasoning_tokens: 0`, so the counter understates what
 the model did; the text in the transcript is the reliable signal.
 
+## Images
+
+All six models under Command Code read images, so the route declares the
+modality once:
+
+```yaml
+command-code:
+  defaultInput: [text, image]
+```
+
+`input` is a **per-model capability**, decided at the seam — the harness never
+asks a gateway what it accepts, so an undeclared modality defaults to `[text]`
+and an image is refused. Two gates follow from that default, and it is worth
+knowing which one you hit:
+
+- **At admission** (`read_image`, a paste, a drop) the agent refuses before the
+  image is stored, naming the model: `model "stealth/space-bunny-alpha" does not
+  declare image input; switch to an image-capable model to read images`.
+- **In the request** (`transform-messages.js`) every image part is quietly
+  replaced by the literal text `(image omitted: model does not support images)`.
+  The message is durable, the turn completes, and the model simply never saw the
+  picture — the worse of the two failures, because nothing reports it.
+
+The asymmetry is deliberate in the harness, and it is the reason to declare a
+modality only where it is true: under-claiming costs you a clear refusal, while
+over-claiming admits an image the provider rejects mid-turn, after the message is
+already durable, leaving the session repeating a request that cannot succeed.
+
+`defaultInput` is a **fallback, not an override** — a model's own `input` wins
+over it. So a future text-only model added to the list has to say so explicitly:
+
+```yaml
+- id: some/text-only-model
+  input: [text]
+```
+
+Payload bounds are left at their defaults, which are sized for this: images are
+normalized to 2048px, re-encoded per request, and the oldest ones are replaced by
+text placeholders once a request passes `maxRequestImageBytes` (20MiB), so a
+long session keeps completing requests instead of hitting a size cap.
+
 ## Notes
 
 - The patch file is read at boot and never watched: after editing it, restart
   `dsh web` or the desktop app. A running session does not pick up the change.
+  This is why adding `defaultInput: [text, image]` takes a restart to go live.
 - The default model is `command-code / deepseek/deepseek-v4.1-flash`: the same
   DeepSeek model, served by Command Code rather than by the official API, so it
   never touches DeepSeek credits.
