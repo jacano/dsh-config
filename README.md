@@ -90,36 +90,26 @@ Command Code rather than by the official API, so it never touches DeepSeek credi
 
 ## Notes
 
-- **Effort levels.** Every model takes `reasoning_effort` at the same five levels
-  — `low`, `medium`, `high`, `xhigh`, `max`, each sent as itself on
-  `POST /chat/completions` — and answers HTTP 400 to `minimal` and `none`. They
-  all think by default and nothing turns it off (`thinking: {type: disabled}` and
-  `enable_thinking: false` answer 200 and are ignored), so no entry declares
-  `off:`, and `low` is cheaper rather than worse. Only the entries'
-  `reasoningEfforts` puts the Effort submenu in the picker; the Settings → Models
-  form leaves that field alone.
-- **Images.** All six models read images, so the route declares
-  `defaultInput: [text, image]` once. It is a fallback, not an override — a
-  text-only model added later must declare `input: [text]`. Under-claiming costs a
-  clear refusal at admission; over-claiming swaps the image for the literal
-  `(image omitted: model does not support images)` mid-request, with nothing
-  reporting it.
-- **The official DeepSeek provider is off entirely**: `disabled: true` on the
-  API-key chat route, the account chat route, the search provider and the
-  request-field registry. No `deepseek-official` route exists, and no
-  `DEEPSEEK_API_KEY` is stored. The registry is also what keeps
-  `session-log-deepseek` and `plugin-package-inventory-deepseek` dormant, so
-  neither the session log nor the plugin inventory rides along on an official
-  request. Delete that block for the factory routes.
-- **`web_search`** stays in a session's tool list — an agent preset composes it,
-  and a preset has no patch semantics — but with the search provider gone every
-  call fails with `WEB_PROVIDER_UNAVAILABLE`.
+- **Effort.** The six models take the same five levels (`low`, `medium`, `high`,
+  `xhigh`, `max`, sent as themselves) and answer 400 to `minimal` and `none`. They
+  always think and no switch stops it, so none declares `off:`. The picker submenu
+  comes from each entry's `reasoningEfforts`; Settings → Models leaves it alone.
+- **Images.** All six read images, declared once as `defaultInput: [text, image]`.
+  A text-only model added later must declare `input: [text]`, or its images are
+  silently replaced by `(image omitted: model does not support images)`.
+- **DeepSeek is off entirely**: API-key route, account route, search provider and
+  request-field registry all `disabled: true`, and no `DEEPSEEK_API_KEY` stored.
+  The registry is also what keeps `session-log-deepseek` and
+  `plugin-package-inventory-deepseek` dormant, so neither rides on an official
+  request.
+- **`web_search`** is still listed and fails with `WEB_PROVIDER_UNAVAILABLE`: an
+  agent preset composes it, and no patch reaches a preset.
 - **Left on purpose:** `deepseek-account`, `account-controller` and
   `ui-settings-account` are the account page, not the provider. The
-  developer-tools switch that gates the preset selector and the Trajectory tab is
-  `ui-settings.enabled`, whose default is already `true`.
-- Never commit keys: DSH writes `.credentials.yaml` into its home, and the
-  `.gitignore` here refuses it.
+  developer-tools switch behind the preset selector and the Trajectory tab is
+  `ui-settings.enabled`, `true` by default.
+- Never commit keys: `.credentials.yaml` lives in the DSH home and `.gitignore`
+  refuses it.
 
 ## Web and headless
 
