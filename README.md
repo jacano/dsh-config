@@ -26,10 +26,23 @@ So one file configures the two, by construction and not by discipline.
 | Flavour | Build | Get it |
 | --- | --- | --- |
 | Web | any platform with Node.js 22+ | `npm install -g @deepseek-ai/dsh` |
-| Desktop | Windows x64 | [deepseek-harness-0.1.7-rc.1.20260924.1-win-x64.exe](https://download.deepseek.com/dsh-desk/bin/win-x64/deepseek-harness-0.1.7-rc.1.20260924.1-win-x64.exe) |
-| Desktop | macOS Apple Silicon | [deepseek-harness-0.1.7-rc.1.20260924.1-mac-arm64.dmg](https://download.deepseek.com/dsh-desk/bin/mac-arm64/deepseek-harness-0.1.7-rc.1.20260924.1-mac-arm64.dmg) |
+| Desktop | Windows x64 | [deepseek-harness-0.2.0-rc.2-win-x64.exe](https://download.deepseek.com/dsh-desk/bin/win-x64/deepseek-harness-0.2.0-rc.2-win-x64.exe) |
+| Desktop | macOS Apple Silicon | [deepseek-harness-0.2.0-rc.2-mac-arm64.zip](https://download.deepseek.com/dsh-desk/bin/mac-arm64/deepseek-harness-0.2.0-rc.2-mac-arm64.zip) |
+| Desktop | macOS Intel | [deepseek-harness-0.2.0-rc.2-mac-x64.zip](https://download.deepseek.com/dsh-desk/bin/mac-x64/deepseek-harness-0.2.0-rc.2-mac-x64.zip) |
 
-Those two desktop builds are the only ones published for that release.
+Those three desktop builds are the only ones published for that release. macOS
+ships a `.zip` in 0.2.0; the 0.1.7 line shipped a `.dmg`.
+
+The pinned links go stale with every release, so the app does not read this
+table: it reads the updater feed for its platform, on the `nightly` channel.
+
+```
+https://download.deepseek.com/dsh-desk/feeds/<win-x64|mac-arm64|mac-x64>/nightly.yml
+```
+
+That file names the current version and the current asset, which is where the
+links above come from. The npm line is version-free and follows the `latest`
+tag.
 
 ## The one file
 
@@ -86,7 +99,7 @@ Copy-Item "dsh\cordis.patch.yml" "$HOME\.dsh\" -Force
 ```
 
 **4. Run** `dsh web`, or start the desktop app. The model menu shows one group,
-**Command Code**, with six models. `dsh --profile web --dump-config` prints what
+**Command Code**, with eight models. `dsh --profile web --dump-config` prints what
 DSH composes from the file, which is the way to check it by hand.
 
 ## Providers and models
@@ -105,9 +118,14 @@ Every name in the menu carries the wire it speaks, `openai-completions` for
 | GLM-5.3 FlashX | `z-ai/glm-5.3-flashx` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
 | Space Bunny Alpha | `stealth/space-bunny-alpha` |
+| MiMo V2.6 Flash | `xiaomi/mimo-v2.6-flash` |
+| Step 5 Preview | `stepfun/Step-5-Preview` |
 
 Space Bunny Alpha and the OpenCode Free models are stealth releases: free while
-their test window lasts, and their ids can disappear when it ends.
+their test window lasts, and their ids can disappear when it ends. The last two
+rows were added later and probed the same way as the rest; their vendor names
+come from the gateway's own catalog entry, which is why MiMo reads `V2.6 Flash`
+and not the hyphenated spelling.
 
 **OpenCode Go, commented out** — two entries of one service on
 `https://opencode.ai/zen/go/v1`, key `OPENCODE_API_KEY`: `opencode-go`
@@ -122,7 +140,7 @@ declares `reasoningEfforts`. DSH's Settings → Models form deliberately leaves 
 field alone — it is a per-model capability, and the models under one provider
 disagree about it — so this file is the only place it is set.
 
-Command Code accepts `reasoning_effort` on all six models at the same five
+Command Code accepts `reasoning_effort` on all eight models at the same five
 levels — `low`, `medium`, `high`, `xhigh`, `max`, each sent as itself on
 `POST /chat/completions` — and answers **HTTP 400** to `minimal` and `none`.
 
@@ -139,11 +157,13 @@ Two findings from probing the endpoint, both of which shaped the file:
 
 Muse Spark 1.3 is the one that reports `reasoning_tokens` honestly. The others
 return reasoning text with `reasoning_tokens: 0`, so the counter understates what
-the model did; the text in the transcript is the reliable signal.
+the model did; the text in the transcript is the reliable signal. MiMo V2.6 Flash
+and Step 5 Preview were the exception in their probe, both returning a non-zero
+count — but one sample is not a measurement.
 
 ## Images
 
-All six models under Command Code read images, so the route declares the
+All eight models under Command Code read images, so the route declares the
 modality once:
 
 ```yaml
