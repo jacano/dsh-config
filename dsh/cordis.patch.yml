@@ -16,10 +16,6 @@
         sandbox: danger-full-access
         approval: never
     defaultPreset: danger-full-access
-- id: ui-theme
-  name: "@deepseek-ai/dsh-client-ui-theme"
-  config:
-    preference: dark
 - id: agent-default-model
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
@@ -96,10 +92,6 @@
             contextWindow: 1048576
             maxTokens: 131072
             reasoningEfforts: *efforts
-- id: ui-chat
-  name: "@deepseek-ai/dsh-client-ui-chat"
-  config:
-    transcriptView: standard
 - id: ui-settings-account
   name: "@deepseek-ai/dsh-client-ui-settings-account"
   config:

@@ -46,13 +46,12 @@ tag.
 
 ## The one file
 
-`dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`. It holds everything: the
-providers and their models, the default model, the permission presets, the theme
-and the client toggles.
+`dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`. It holds the machine's own
+decisions: the providers and their models, the default model, the permission
+presets, and the rows that take DeepSeek out of the composition.
 
 It is a YAML array of loader patch entries: `id` names the entry, `name` the
-plugin behind it, and `config` replaces that entry's config. A block commented
-out is a provider that is out of the model menu, one `# ` away from coming back.
+plugin behind it, and `config` replaces that entry's config.
 
 Everything in this repo is written in English: the README, the comments in the
 patch file, and the commit messages.
@@ -64,7 +63,8 @@ Three things worth knowing about the layering:
   file covers both flavours and why no profile can drift from another.
 - The harness writes the settings you edit in its own forms into the profile
   layer, which sits below this file, so a form edit is shadowed. Edit this file,
-  or drop the entry here if you would rather drive that setting from the app.
+  or drop the entry here if you would rather drive that setting from the app —
+  which is why nothing here pins the theme or the work-details mode.
 - A patch that carries `name` and does not match the row's plugin is **skipped
   with a warning**, not applied: `patch: name mismatch for "id" (expected ...,
   got ...), skipping`. Bundles repurpose ids across releases — the desktop bundle
