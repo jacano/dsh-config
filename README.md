@@ -24,12 +24,8 @@ same file.
 
 Install from the table, then:
 
-**1. Set the key**, once per machine. Open a new terminal afterwards: a running
-process does not see a new variable.
-
-```bash
-export COMMANDCODE_API_KEY="your-command-code-key"
-```
+**1. Set the key**, once per machine, then restart the app: a running process does
+not see a new variable.
 
 ```powershell
 [Environment]::SetEnvironmentVariable('COMMANDCODE_API_KEY', 'your-command-code-key', 'User')
@@ -37,18 +33,17 @@ export COMMANDCODE_API_KEY="your-command-code-key"
 
 **2. Restore the file.**
 
-```bash
-mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
-```
-
 ```powershell
 New-Item -ItemType Directory -Force "$HOME\.dsh" | Out-Null
 Copy-Item "dsh\cordis.patch.yml" "$HOME\.dsh\" -Force
 ```
 
+```bash
+mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
+```
+
 **3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
-shows one group, **Command Code**, with six models. `dsh --profile web
---dump-config` prints what DSH composes from the file.
+shows one group, **Command Code**, with six models.
 
 ## The one file
 
@@ -118,14 +113,25 @@ Command Code rather than by the official API, so it never touches DeepSeek credi
   request. Delete that block for the factory routes.
 - **`web_search`** stays in a session's tool list — an agent preset composes it,
   and a preset has no patch semantics — but with the search provider gone every
-  call fails with `WEB_PROVIDER_UNAVAILABLE`. The host `tool-web` row, the one
-  `headless` uses, loses the tool outright with `search: false`.
+  call fails with `WEB_PROVIDER_UNAVAILABLE`.
 - **Left on purpose:** `deepseek-account`, `account-controller` and
   `ui-settings-account` are the account page, not the provider. The
   developer-tools switch that gates the preset selector and the Trajectory tab is
   `ui-settings.enabled`, whose default is already `true`.
-- **Two harmless warnings** on `web` and `headless`: `entry
-  "llm-deepseek-account" not found` and `entry "ui-settings-account" not found`.
-  Both rows are desktop-only.
 - Never commit keys: DSH writes `.credentials.yaml` into its home, and the
   `.gitignore` here refuses it.
+
+## Web and headless
+
+The same file drives them and the models are the same. What differs:
+
+- Set the key with `export COMMANDCODE_API_KEY="your-command-code-key"` in the
+  shell that starts `dsh`, instead of the Windows user variable.
+- They log two warnings the desktop profile does not: `entry
+  "llm-deepseek-account" not found` and `entry "ui-settings-account" not found`.
+  Both rows are desktop-only, so those compositions have nothing to disable at
+  those ids.
+- The host `tool-web` row — the one `headless` uses — loses `web_search` outright
+  with `search: false`.
+- `dsh --profile web --dump-config` prints what DSH composes from the file, which
+  is the way to check it by hand.
