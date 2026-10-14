@@ -39,14 +39,9 @@
   disabled: true
 - id: deepseek-llm-api-extensions
   disabled: true
-- id: session-log-deepseek
-  disabled: true
-- id: plugin-package-inventory-deepseek
-  disabled: true
-# `deepseek-account`, `account-controller` and `ui-settings-account` stay on: the
-# last owns the `developerTools` form that gates the preset selector and the
-# Trajectory tab, and `tool-web` here cannot reach the copy an agent preset
-# composes, so the search-provider disable above is the real switch.
+# `deepseek-account`, `account-controller` and `ui-settings-account` stay on: they
+# are the account page, not the provider. `tool-web` cannot reach the copy an
+# agent preset composes, so the search-provider disable above is the real switch.
 - id: tool-web
   config:
     search: false
@@ -110,7 +105,3 @@
   name: "@deepseek-ai/dsh-client-ui-settings-account"
   config:
     step: done
-    usage: detailed
-    developerTools: true
-    process: standard
-    completion: api-key

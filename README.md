@@ -224,11 +224,11 @@ long session keeps completing requests instead of hitting a size cap.
   `search: false`.
 - Left alone on purpose, because they are the client's account chrome and not the
   provider: `deepseek-account` (the platform account service),
-  `account-controller` and `ui-settings-account`. That last one owns the
-  `developerTools` config form, which is the gate over the preset selector and
-  the Trajectory tab, so turning it off breaks UI that is in use. Add
-  `disabled: true` to the first two if the Settings → Account page should go away
-  as well, and accept that the section degrades.
+  `account-controller` and `ui-settings-account`. Add `disabled: true` to the
+  first two if the Settings → Account page should go away as well, and accept
+  that the section degrades. The developer-tools switch that the preset selector
+  and the Trajectory tab read is a different field, `ui-settings.enabled`, whose
+  schema default is `true` — which is why no entry sets it.
 - The `web` and `headless` compositions log two warnings, `entry
   "llm-deepseek-account" not found` and `entry "ui-settings-account" not found`:
   both rows belong to the desktop bundle, and those compositions have nothing to
