@@ -1,10 +1,3 @@
-# The one configuration of this machine: every profile reads it — the desktop app,
-# `dsh web` (which is `--profile web`) and the headless one — and it outranks a
-# profile's own patch layer.
-#
-# `id` names the entry, `name` the plugin behind it, and the value under `config`
-# is that entry's config. A block commented out is a provider that is out of the
-# model menu and one "# " away from coming back.
 - id: ui-settings-general
   name: "@deepseek-ai/dsh-client-ui-settings-general"
   config:
@@ -34,67 +27,33 @@
     model: deepseek/deepseek-v4.1-flash
     reasoningEffort: high
 
-# ── DeepSeek official, off entirely ───────────────────────────────────────────
-#
-# Nothing of the official provider stays registered: not the API-key chat route,
-# not the account one, not the search one, and not the field plane that only ever
-# rode along on official requests. With no route registered there is no model in
-# the menu, no card in Settings → Models, and a session that once stored
-# deepseek-flash can no longer be billed for it.
-#
-# These entries carry no `name` on purpose. The id `llm-deepseek` no longer points
-# at the same plugin in every layer: the desktop bundle mounts
-# `@deepseek-ai/dsh-llm-deepseek-api-key` there — the one that declares the
-# "DeepSeek" provider that showed up in Settings → Models with the green "API key
-# configured" dot — while the npm install mounts
-# `@deepseek-ai/dsh-llm-deepseek`. A patch whose `name` does not match the
-# bundle's is skipped SILENTLY (`patch: name mismatch ... skipping`, one loader
-# warning and nothing else), which is exactly what used to happen: the disable
-# never applied. Without `name` the patch matches by id, which is the stable
-# handle.
-#
-# To get the factory official route back, delete this block.
-- id: llm-deepseek # official API-key route (provider "DeepSeek")
+# DeepSeek official, off. These rows carry no `name` on purpose: `llm-deepseek`
+# mounts `@deepseek-ai/dsh-llm-deepseek-api-key` in the desktop bundle and
+# `@deepseek-ai/dsh-llm-deepseek` in the npm install, and a patch whose `name`
+# does not match its row is skipped with a warning, not applied.
+- id: llm-deepseek
   disabled: true
-- id: llm-deepseek-account # official account route (provider "DeepSeek Account")
+- id: llm-deepseek-account
   disabled: true
-- id: web-search-deepseek # search provider of the official route
+- id: web-search-deepseek
   disabled: true
-# The field plane that only attached to official requests. With the registry off,
-# `session-log-deepseek` and `plugin-package-inventory-deepseek` stop applying on
-# their own (they inject it), so neither the session log nor the plugin inventory
-# rides along on an official request any more.
 - id: deepseek-llm-api-extensions
   disabled: true
 - id: session-log-deepseek
   disabled: true
 - id: plugin-package-inventory-deepseek
   disabled: true
-#
-# What stays alive on purpose, and is not the provider: `deepseek-account` (the
-# platform account service), `account-controller` (its remote) and
-# `ui-settings-account` (the Settings → Account page and the sidebar avatar).
-# That last one owns the `developerTools` and `usage` config forms, and
-# `developerTools` is the gate over the preset selector and the Trajectory tab,
-# so turning it off breaks UI that is in use. If the Account page should go away
-# too, add `disabled: true` to `deepseek-account` and `account-controller` and
-# accept the degraded section.
-#
-# The host `tool-web` row (active in headless; the desktop bundle already turns it
-# off): beyond the provider, drop the tool's own search. `config` is replaced
-# whole, never merged, which is why the two factory fields are restated too; and
-# it does not reach the `tool-web` an agent preset composes, because a preset has
-# no patch semantics — which is why the real switch is the provider above.
+# `deepseek-account`, `account-controller` and `ui-settings-account` stay on: the
+# last owns the `developerTools` form that gates the preset selector and the
+# Trajectory tab, and `tool-web` here cannot reach the copy an agent preset
+# composes, so the search-provider disable above is the real switch.
 - id: tool-web
   config:
     search: false
-    fetch: true
-    searchTimeoutMs: 60000
 - id: llm-pi-ai
   name: "@deepseek-ai/dsh-llm-pi-ai"
   config:
     providers:
-      # OpenCode, commented out: out of the menu, one "# " from coming back.
       # opencode-go:
       #   displayName: OpenCode Go (openai-completions)
       #   api: openai-completions
@@ -137,33 +96,18 @@
         baseURL: https://api.commandcode.ai/provider/v1
         apiKeyEnv: COMMANDCODE_API_KEY
         defaultContextWindow: 1000000
-        defaultMaxTokens: 32768
-        # Vision on the whole route. Without this the resolved input is [text] and
-        # pi-ai's transformMessages() silently swaps every image for the literal
-        # text "(image omitted: model does not support images)" — the dsh-agent
-        # seam refuses even earlier, at read_image/admission, naming the model.
-        # The eight models below all read images, so declaring it once here beats
-        # repeating `input: [text, image]` on entries that already say it: an
-        # entry's own `input` WINS over this fallback, so a future text-only model
-        # added to the list must declare `input: [text]` to opt back out.
+        # A fallback, not an override: an entry's own `input` wins, so a
+        # text-only model added here must declare `input: [text]`.
         defaultInput: [text, image]
-        # Per-model reasoning on this route, probed against api.commandcode.ai: all
-        # eight models take `reasoning_effort` at the same five levels (low, medium,
-        # high, xhigh, max) and answer HTTP 400 to `minimal` and `none`.
-        #
-        # Every one of them thinks by default — with no parameter they return
-        # reasoning text — and none can be turned off: `thinking: {type: disabled}`,
-        # `thinking: false` and `enable_thinking: false` all come back 200 and are
-        # then ignored. So no entry declares `off:` below. Offering an "Off" that
-        # does not turn thinking off would be worse than offering none: pi-ai pins
-        # every undeclared level to null, which keeps Off and Minimal out of the
-        # picker's Effort submenu and leaves the five real levels visible.
+        # Every model thinks by default and no switch turns it off, so none
+        # declares `off:`; `minimal` and `none` are refused with HTTP 400, and
+        # all eight take the same five levels, hence the alias.
         models:
           - id: deepseek/deepseek-v4.1-flash
             name: DeepSeek V4.1 Flash (Command Code, openai-completions)
             contextWindow: 1000000
             maxTokens: 32768
-            reasoningEfforts:
+            reasoningEfforts: &efforts
               low: low
               medium: medium
               high: high
@@ -173,77 +117,37 @@
             name: DeepSeek V4.1 Flash Fast (Command Code, openai-completions)
             contextWindow: 1000000
             maxTokens: 32768
-            reasoningEfforts:
-              low: low
-              medium: medium
-              high: high
-              xhigh: xhigh
-              max: max
+            reasoningEfforts: *efforts
           - id: z-ai/glm-5.3-flash
             name: GLM-5.3 Flash (Command Code, openai-completions)
             contextWindow: 1048576
             maxTokens: 131072
-            reasoningEfforts:
-              low: low
-              medium: medium
-              high: high
-              xhigh: xhigh
-              max: max
+            reasoningEfforts: *efforts
           - id: z-ai/glm-5.3-flashx
             name: GLM-5.3 FlashX (Command Code, openai-completions)
             contextWindow: 1000000
             maxTokens: 131072
-            reasoningEfforts:
-              low: low
-              medium: medium
-              high: high
-              xhigh: xhigh
-              max: max
+            reasoningEfforts: *efforts
           - id: meta/muse-spark-1.3-contributor
             name: Muse Spark 1.3 Contributor (Command Code, openai-completions)
             contextWindow: 1048576
             maxTokens: 131072
-            reasoningEfforts:
-              low: low
-              medium: medium
-              high: high
-              xhigh: xhigh
-              max: max
+            reasoningEfforts: *efforts
           - id: stealth/space-bunny-alpha
             name: Space Bunny Alpha (Command Code, openai-completions)
             contextWindow: 1000000
             maxTokens: 131072
-            reasoningEfforts:
-              low: low
-              medium: medium
-              high: high
-              xhigh: xhigh
-              max: max
-          # Probed the same way as the rest. Both read images, so the route
-          # fallback above covers them and neither declares `input`. MiMo refuses
-          # max_tokens 262144, so it takes the house 131072; Step accepts 262144
-          # and is declared at 131072 too, the value the other 1M-context routes
-          # here carry.
+            reasoningEfforts: *efforts
           - id: xiaomi/mimo-v2.6-flash
             name: MiMo V2.6 Flash (Command Code, openai-completions)
             contextWindow: 1048576
             maxTokens: 131072
-            reasoningEfforts:
-              low: low
-              medium: medium
-              high: high
-              xhigh: xhigh
-              max: max
+            reasoningEfforts: *efforts
           - id: stepfun/Step-5-Preview
             name: Step 5 Preview (Command Code, openai-completions)
             contextWindow: 1000000
             maxTokens: 131072
-            reasoningEfforts:
-              low: low
-              medium: medium
-              high: high
-              xhigh: xhigh
-              max: max
+            reasoningEfforts: *efforts
 - id: ui-chat
   name: "@deepseek-ai/dsh-client-ui-chat"
   config:
@@ -254,14 +158,10 @@
   config:
     enabled: true
 - id: ui-settings-account
-  # A plugin of the desktop client: the `web` and `headless` profiles have no such
-  # entry, log `patch: entry "ui-settings-account" not found` and skip it.
   name: "@deepseek-ai/dsh-client-ui-settings-account"
   config:
-    version: 1
     step: done
     usage: detailed
     developerTools: true
-    purpose: null
     process: standard
     completion: api-key

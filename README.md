@@ -128,7 +128,8 @@ Space Bunny Alpha and the OpenCode Free models are stealth releases: free while
 their test window lasts, and their ids can disappear when it ends. The last two
 rows were added later and probed the same way as the rest; their vendor names
 come from the gateway's own catalog entry, which is why MiMo reads `V2.6 Flash`
-and not the hyphenated spelling.
+and not the hyphenated spelling. MiMo refuses `max_tokens` 262144, so it takes
+the house 131072; Step accepts 262144 and is declared at 131072 as well.
 
 **OpenCode Go, commented out** — two entries of one service on
 `https://opencode.ai/zen/go/v1`, key `OPENCODE_API_KEY`: `opencode-go`
