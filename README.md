@@ -54,7 +54,10 @@ It is a YAML array of loader patch entries: `id` names the entry, `name` the
 plugin behind it, and `config` replaces that entry's config. A block commented
 out is a provider that is out of the model menu, one `# ` away from coming back.
 
-Two things worth knowing about the layering:
+Everything in this repo is written in English: the README, the comments in the
+patch file, and the commit messages.
+
+Three things worth knowing about the layering:
 
 - DSH gives every profile a layer of its own and reads a home-level one after it,
   which wins. The configuration lives in that home-level file, which is why one

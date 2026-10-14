@@ -34,35 +34,36 @@
     model: deepseek/deepseek-v4.1-flash
     reasoningEffort: high
 
-# ── DeepSeek oficial, apagado entero ──────────────────────────────────────────
+# ── DeepSeek official, off entirely ───────────────────────────────────────────
 #
-# No queda registrado nada del proveedor oficial: ni la ruta de chat por API
-# key, ni la de cuenta, ni la de búsqueda, ni el plano de campos que solo viajaba
-# en peticiones oficiales. Sin ruta registrada no hay modelo en el menú, no hay
-# tarjeta en Ajustes → Modelos y ni una sesión vieja que guardó deepseek-flash
-# puede volver a cobrarse.
+# Nothing of the official provider stays registered: not the API-key chat route,
+# not the account one, not the search one, and not the field plane that only ever
+# rode along on official requests. With no route registered there is no model in
+# the menu, no card in Settings → Models, and a session that once stored
+# deepseek-flash can no longer be billed for it.
 #
-# Estas entradas van SIN `name` a propósito. El id `llm-deepseek` ya no apunta al
-# mismo plugin en todas las capas: el bundle del escritorio monta ahí
-# `@deepseek-ai/dsh-llm-deepseek-api-key` — el que declara el proveedor
-# "DeepSeek" que salía en Ajustes → Modelos con el punto verde "API key
-# configured" — mientras la instalación npm monta `@deepseek-ai/dsh-llm-deepseek`.
-# Un parche cuyo `name` no casa con el del bundle se salta EN SILENCIO
-# (`patch: name mismatch ... skipping`, solo un warning del loader), que es
-# exactamente lo que pasaba antes: el apagado nunca llegó a aplicarse. Sin `name`
-# el parche casa por id, que es el identificador estable.
+# These entries carry no `name` on purpose. The id `llm-deepseek` no longer points
+# at the same plugin in every layer: the desktop bundle mounts
+# `@deepseek-ai/dsh-llm-deepseek-api-key` there — the one that declares the
+# "DeepSeek" provider that showed up in Settings → Models with the green "API key
+# configured" dot — while the npm install mounts
+# `@deepseek-ai/dsh-llm-deepseek`. A patch whose `name` does not match the
+# bundle's is skipped SILENTLY (`patch: name mismatch ... skipping`, one loader
+# warning and nothing else), which is exactly what used to happen: the disable
+# never applied. Without `name` the patch matches by id, which is the stable
+# handle.
 #
-# Para recuperar la ruta oficial de fábrica, borra este bloque.
-- id: llm-deepseek # ruta oficial por API key (proveedor "DeepSeek")
+# To get the factory official route back, delete this block.
+- id: llm-deepseek # official API-key route (provider "DeepSeek")
   disabled: true
-- id: llm-deepseek-account # ruta oficial por cuenta (proveedor "DeepSeek Account")
+- id: llm-deepseek-account # official account route (provider "DeepSeek Account")
   disabled: true
-- id: web-search-deepseek # proveedor de búsqueda de la ruta oficial
+- id: web-search-deepseek # search provider of the official route
   disabled: true
-# Plano de campos que solo se adjuntaban a peticiones oficiales. Apagado el
-# registro, `session-log-deepseek` y `plugin-package-inventory-deepseek` dejan de
-# aplicar por su cuenta (lo inyectan), así que ni el log de sesión ni el
-# inventario de plugins viajan ya en una petición oficial.
+# The field plane that only attached to official requests. With the registry off,
+# `session-log-deepseek` and `plugin-package-inventory-deepseek` stop applying on
+# their own (they inject it), so neither the session log nor the plugin inventory
+# rides along on an official request any more.
 - id: deepseek-llm-api-extensions
   disabled: true
 - id: session-log-deepseek
@@ -70,21 +71,20 @@
 - id: plugin-package-inventory-deepseek
   disabled: true
 #
-# Lo que queda vivo a propósito, y no es el proveedor: `deepseek-account`
-# (servicio de la cuenta de plataforma), `account-controller` (su remote) y
-# `ui-settings-account` (página Ajustes → Cuenta y avatar de la barra). Esa
-# última es la dueña de los config-form `developerTools` y `usage`, y
-# `developerTools` es la puerta del selector de presets y de la pestaña
-# Trajectory: apagarla rompe UI que sí se usa. Si quieres fuera también la
-# página de Cuenta, añade `deepseek-account` y `account-controller` con
-# `disabled: true` y asume la sección degradada.
+# What stays alive on purpose, and is not the provider: `deepseek-account` (the
+# platform account service), `account-controller` (its remote) and
+# `ui-settings-account` (the Settings → Account page and the sidebar avatar).
+# That last one owns the `developerTools` and `usage` config forms, and
+# `developerTools` is the gate over the preset selector and the Trajectory tab,
+# so turning it off breaks UI that is in use. If the Account page should go away
+# too, add `disabled: true` to `deepseek-account` and `account-controller` and
+# accept the degraded section.
 #
-# El host `tool-web` (activo en headless; el bundle del escritorio ya lo
-# desactiva): además del proveedor, fuera la búsqueda del propio tool. `config`
-# se reemplaza entero, no se fusiona, por eso van también los dos campos de
-# fábrica; y no alcanza al `tool-web` que compone un preset de agente, porque un
-# preset no tiene semántica de parches — de ahí que el interruptor de verdad sea
-# el proveedor de arriba.
+# The host `tool-web` row (active in headless; the desktop bundle already turns it
+# off): beyond the provider, drop the tool's own search. `config` is replaced
+# whole, never merged, which is why the two factory fields are restated too; and
+# it does not reach the `tool-web` an agent preset composes, because a preset has
+# no patch semantics — which is why the real switch is the provider above.
 - id: tool-web
   config:
     search: false
