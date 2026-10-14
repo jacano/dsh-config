@@ -7,9 +7,7 @@ DSH is a local agent harness. Sessions and credentials stay on your machine, and
 it brings no model and no key of its own: you point it at a provider with your own
 key. This repo is that configuration and nothing else, and no secret lives here.
 
-The **desktop app** is the one this is written for: it carries its own runtime, so
-no Node and no terminal. The web line is the same harness on Node, reading the
-same file.
+The **desktop app** is the one this is written for.
 
 ## Install
 
@@ -18,7 +16,7 @@ same file.
 | Desktop | Windows x64 | [deepseek-harness-0.2.0-rc.2-win-x64.exe](https://download.deepseek.com/dsh-desk/bin/win-x64/deepseek-harness-0.2.0-rc.2-win-x64.exe) |
 | Desktop | macOS Apple Silicon | [deepseek-harness-0.2.0-rc.2-mac-arm64.zip](https://download.deepseek.com/dsh-desk/bin/mac-arm64/deepseek-harness-0.2.0-rc.2-mac-arm64.zip) |
 | Desktop | macOS Intel | [deepseek-harness-0.2.0-rc.2-mac-x64.zip](https://download.deepseek.com/dsh-desk/bin/mac-x64/deepseek-harness-0.2.0-rc.2-mac-x64.zip) |
-| Web | Node.js 22+ | `npm install -g @deepseek-ai/dsh`, then `dsh web` |
+| Web | any platform | `npm install -g @deepseek-ai/dsh`, then `dsh web` |
 
 ## Setup
 
