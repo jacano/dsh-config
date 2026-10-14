@@ -1,83 +1,37 @@
 # dsh-config
 
 My [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH)
-setup: **one file**, to reproduce it on another machine.
+setup: one file, to reproduce on another machine.
 
-## What DSH is
+DSH is a local agent harness. Sessions and credentials stay on your machine, and
+it brings no model and no key of its own: you point it at a provider with your own
+key. This repo is that configuration and nothing else, and no secret lives here.
 
-A local agent harness. It runs on your machine, keeps your sessions and your
-credentials there, and brings no model and no key of its own: you point it at a
-provider with your own key. This repo is that configuration and nothing else, and
-no secret lives here.
+## Install
 
-## Two flavours, one configuration
-
-DSH ships the same harness with two front ends, one profile each:
-
-- **Web** — `npm install -g @deepseek-ai/dsh`, then `dsh web` (an alias of
-  `--profile web`). Serves the UI on `127.0.0.1`. Needs Node.js 22 or newer.
-- **Desktop** — the installers below, profile `desktop`. A shell around the same
-  web app bundle, with its own runtime: no Node.js.
-
-Both read the same `~/.dsh`, and the whole configuration lives in the home-level
-patch layer, which every profile reads and which outranks a profile's own layer.
-So one file configures the two, by construction and not by discipline.
-
-| Flavour | Build | Get it |
+| Flavour | Platform | Get it |
 | --- | --- | --- |
-| Web | any platform with Node.js 22+ | `npm install -g @deepseek-ai/dsh` |
+| Web | Node.js 22+ | `npm install -g @deepseek-ai/dsh`, then `dsh web` |
 | Desktop | Windows x64 | [deepseek-harness-0.2.0-rc.2-win-x64.exe](https://download.deepseek.com/dsh-desk/bin/win-x64/deepseek-harness-0.2.0-rc.2-win-x64.exe) |
 | Desktop | macOS Apple Silicon | [deepseek-harness-0.2.0-rc.2-mac-arm64.zip](https://download.deepseek.com/dsh-desk/bin/mac-arm64/deepseek-harness-0.2.0-rc.2-mac-arm64.zip) |
 | Desktop | macOS Intel | [deepseek-harness-0.2.0-rc.2-mac-x64.zip](https://download.deepseek.com/dsh-desk/bin/mac-x64/deepseek-harness-0.2.0-rc.2-mac-x64.zip) |
 
-Those three desktop builds are the only ones published for that release. macOS
-ships a `.zip` in 0.2.0; the 0.1.7 line shipped a `.dmg`.
-
-The pinned links go stale with every release, so the app does not read this
-table: it reads the updater feed for its platform, on the `nightly` channel.
+Those are the only desktop builds published for that release. The links pin a
+version and go stale with the next one; each app reads its own updater feed
+instead, on the `nightly` channel:
 
 ```
 https://download.deepseek.com/dsh-desk/feeds/<win-x64|mac-arm64|mac-x64>/nightly.yml
 ```
 
-That file names the current version and the current asset, which is where the
-links above come from. The npm line is version-free and follows the `latest`
-tag.
-
-## The one file
-
-`dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`. It holds the machine's own
-decisions: the providers and their models, the default model, the permission
-presets, and the rows that take DeepSeek out of the composition.
-
-It is a YAML array of loader patch entries: `id` names the entry, `name` the
-plugin behind it, and `config` replaces that entry's config.
-
-Everything in this repo is written in English: the README, the comments in the
-patch file, and the commit messages.
-
-Three things worth knowing about the layering:
-
-- DSH gives every profile a layer of its own and reads a home-level one after it,
-  which wins. The configuration lives in that home-level file, which is why one
-  file covers both flavours and why no profile can drift from another.
-- The harness writes the settings you edit in its own forms into the profile
-  layer, which sits below this file, so a form edit is shadowed. Edit this file,
-  or drop the entry here if you would rather drive that setting from the app —
-  which is why nothing here pins the theme or the work-details mode.
-- A patch that carries `name` and does not match the row's plugin is **skipped
-  with a warning**, not applied: `patch: name mismatch for "id" (expected ...,
-  got ...), skipping`. Bundles repurpose ids across releases — the desktop bundle
-  mounts `@deepseek-ai/dsh-llm-deepseek-api-key` at `llm-deepseek`, the npm one
-  mounts `@deepseek-ai/dsh-llm-deepseek` — so a `name` copied from one flavour
-  silently disables nothing in the other. The rows here whose plugin has moved
-  carry no `name` and match by id, which is the stable handle.
+The npm line is version-free and follows the `latest` tag.
 
 ## Setup
 
-**1. Install** — the npm line or the installer of the table above.
+Install from the table, then:
 
-**2. Set the key**, once per machine:
+**1. Set the key**, once per machine. Open a new terminal afterwards: a running
+process does not see a new variable.
 
 ```bash
 export COMMANDCODE_API_KEY="your-command-code-key"
@@ -87,9 +41,7 @@ export COMMANDCODE_API_KEY="your-command-code-key"
 [Environment]::SetEnvironmentVariable('COMMANDCODE_API_KEY', 'your-command-code-key', 'User')
 ```
 
-Open a new terminal afterwards: a running process does not see a new variable.
-
-**3. Restore the file:**
+**2. Restore the file.**
 
 ```bash
 mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
@@ -100,17 +52,39 @@ New-Item -ItemType Directory -Force "$HOME\.dsh" | Out-Null
 Copy-Item "dsh\cordis.patch.yml" "$HOME\.dsh\" -Force
 ```
 
-**4. Run** `dsh web`, or start the desktop app. The model menu shows one group,
-**Command Code**, with six models. `dsh --profile web --dump-config` prints what
-DSH composes from the file, which is the way to check it by hand.
+**3. Run** `dsh web` or the desktop app. The model menu shows one group, **Command
+Code**, with six models. `dsh --profile web --dump-config` prints what DSH
+composes from the file.
 
-## Providers and models
+## The one file
 
-Every name in the menu carries the wire it speaks, `openai-completions` for
-`POST /chat/completions`.
+`dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`: the providers and their
+models, the default model, the permission presets, and the rows that take DeepSeek
+out of the composition. Every profile reads it, and the home layer outranks a
+profile's own, so one file covers both flavours.
 
-**Command Code, active** — `https://api.commandcode.ai/provider/v1`,
-`openai-completions`, key `COMMANDCODE_API_KEY`:
+It is a YAML array of loader patch entries: `id` names the row, `name` the plugin
+behind it, and `config` replaces that row's config whole.
+
+Three things it depends on:
+
+- **A `name` that does not match its row is skipped with a warning**, not applied.
+  Bundles repurpose ids across releases — `llm-deepseek` mounts
+  `@deepseek-ai/dsh-llm-deepseek-api-key` on the desktop and
+  `@deepseek-ai/dsh-llm-deepseek` from npm — so the rows whose plugin has moved
+  carry no `name` and match by id.
+- **Settings forms write below this file**, so anything pinned here shadows them.
+  That is why the theme and the work-details mode are not pinned: they belong to
+  Settings.
+- **The file is read at boot and never watched.** Restart after editing it.
+
+Everything in this repo is written in English: the README, the file's comments,
+the commit messages.
+
+## Models
+
+Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`, key
+`COMMANDCODE_API_KEY`:
 
 | Model | Id on the wire |
 | --- | --- |
@@ -121,117 +95,44 @@ Every name in the menu carries the wire it speaks, `openai-completions` for
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
 | MiMo V2.6 Flash | `xiaomi/mimo-v2.6-flash` |
 
-MiMo V2.6 Flash was added later and probed the same way as the rest; its vendor
-name comes from the gateway's own catalog entry, which is why it reads `V2.6
-Flash` and not the hyphenated spelling. It refuses `max_tokens` 262144, so it
-takes the house 131072.
-
-## Thinking levels
-
-A model offers an **Effort** submenu in the model picker only if its entry
-declares `reasoningEfforts`. DSH's Settings → Models form deliberately leaves the
-field alone — it is a per-model capability, and the models under one provider
-disagree about it — so this file is the only place it is set.
-
-Command Code accepts `reasoning_effort` on all six models at the same five
-levels — `low`, `medium`, `high`, `xhigh`, `max`, each sent as itself on
-`POST /chat/completions` — and answers **HTTP 400** to `minimal` and `none`.
-
-Two findings from probing the endpoint, both of which shaped the file:
-
-- **Every model thinks by default.** With no `reasoning_effort` they all return
-  reasoning text, and nothing turns it off: `thinking: {type: disabled}`,
-  `thinking: false` and `enable_thinking: false` each come back 200 and are then
-  ignored. So no entry declares `off:`. An "Off" that leaves the model thinking
-  would be worse than no "Off" at all.
-- **The levels are a knob, not a ladder.** Reasoning token counts move with the
-  level, but on an easy problem the run-to-run variance is wider than the gap
-  between two neighbouring levels. Treat `low` as "cheaper", not "worse".
-
-Muse Spark 1.3 is the one that reports `reasoning_tokens` honestly. The others
-return reasoning text with `reasoning_tokens: 0`, so the counter understates what
-the model did; the text in the transcript is the reliable signal. MiMo V2.6 Flash
-was the exception in its probe, returning a non-zero count — but one sample is not
-a measurement.
-
-## Images
-
-All six models under Command Code read images, so the route declares the
-modality once:
-
-```yaml
-command-code:
-  defaultInput: [text, image]
-```
-
-`input` is a **per-model capability**, decided at the seam — the harness never
-asks a gateway what it accepts, so an undeclared modality defaults to `[text]`
-and an image is refused. Two gates follow from that default, and it is worth
-knowing which one you hit:
-
-- **At admission** (`read_image`, a paste, a drop) the agent refuses before the
-  image is stored, naming the model: `model "<id>" does not declare image input;
-  switch to an image-capable model to read images`.
-- **In the request** (`transform-messages.js`) every image part is quietly
-  replaced by the literal text `(image omitted: model does not support images)`.
-  The message is durable, the turn completes, and the model simply never saw the
-  picture — the worse of the two failures, because nothing reports it.
-
-The asymmetry is deliberate in the harness, and it is the reason to declare a
-modality only where it is true: under-claiming costs you a clear refusal, while
-over-claiming admits an image the provider rejects mid-turn, after the message is
-already durable, leaving the session repeating a request that cannot succeed.
-
-`defaultInput` is a **fallback, not an override** — a model's own `input` wins
-over it. So a future text-only model added to the list has to say so explicitly:
-
-```yaml
-- id: some/text-only-model
-  input: [text]
-```
-
-Payload bounds are left at their defaults, which are sized for this: images are
-normalized to 2048px, re-encoded per request, and the oldest ones are replaced by
-text placeholders once a request passes `maxRequestImageBytes` (20MiB), so a
-long session keeps completing requests instead of hitting a size cap.
+MiMo V2.6 Flash reads the way its gateway catalog entry spells it, and refuses
+`max_tokens` 262144, so it takes the house 131072. The default model is
+`deepseek/deepseek-v4.1-flash`: the same DeepSeek model, served by Command Code
+rather than by the official API, so it never touches DeepSeek credits.
 
 ## Notes
 
-- The patch file is read at boot and never watched: after editing it, restart
-  `dsh web` or the desktop app. A running session does not pick up the change.
-  This is why adding `defaultInput: [text, image]` takes a restart to go live.
-- The default model is `command-code / deepseek/deepseek-v4.1-flash`: the same
-  DeepSeek model, served by Command Code rather than by the official API, so it
-  never touches DeepSeek credits.
-- **Nothing of the official DeepSeek provider is registered.** Its block in the
-  file sets `disabled: true` on the API-key chat route (`llm-deepseek`), the
-  account chat route (`llm-deepseek-account`) and the search provider
-  (`web-search-deepseek`), so no `deepseek-official` route exists at all: the
-  model leaves the menu, the card leaves Settings → Models, and a session that
-  once stored `deepseek-flash` can no longer be billed for it either.
-  `DEEPSEEK_API_KEY` is not in `.credentials.yaml` either, so there is nothing
-  left to resolve a key. Delete that block to get the factory routes back.
-- The same block turns off the official-request plumbing:
-  `deepseek-llm-api-extensions` is the registry that only ever attached fields to
-  official requests, and with it off `session-log-deepseek` (which ships the
-  session log with a request) and `plugin-package-inventory-deepseek` (which
-  ships the active plugin inventory) stop applying by themselves.
-- `web_search` stays in a session's tool list — the model-facing web tools are
-  composed per agent preset, and an agent preset has no patch semantics, so no
-  `tool-web` override reaches it — but with the search provider gone every call
-  fails with `WEB_PROVIDER_UNAVAILABLE` and no request leaves the machine. The
-  host `tool-web` row, which is the one `headless` uses, is unlisted there by
-  `search: false`.
-- Left alone on purpose, because they are the client's account chrome and not the
-  provider: `deepseek-account` (the platform account service),
-  `account-controller` and `ui-settings-account`. Add `disabled: true` to the
-  first two if the Settings → Account page should go away as well, and accept
-  that the section degrades. The developer-tools switch that the preset selector
-  and the Trajectory tab read is a different field, `ui-settings.enabled`, whose
-  schema default is `true` — which is why no entry sets it.
-- The `web` and `headless` compositions log two warnings, `entry
-  "llm-deepseek-account" not found` and `entry "ui-settings-account" not found`:
-  both rows belong to the desktop bundle, and those compositions have nothing to
-  disable at those ids. Harmless.
-- Never commit keys. DSH writes a `.credentials.yaml` in its home, and the
+- **Effort levels.** Every model takes `reasoning_effort` at the same five levels
+  — `low`, `medium`, `high`, `xhigh`, `max`, each sent as itself on
+  `POST /chat/completions` — and answers HTTP 400 to `minimal` and `none`. They
+  all think by default and nothing turns it off (`thinking: {type: disabled}` and
+  `enable_thinking: false` answer 200 and are ignored), so no entry declares
+  `off:`, and `low` is cheaper rather than worse. Only the entries'
+  `reasoningEfforts` puts the Effort submenu in the picker; the Settings → Models
+  form leaves that field alone.
+- **Images.** All six models read images, so the route declares
+  `defaultInput: [text, image]` once. It is a fallback, not an override — a
+  text-only model added later must declare `input: [text]`. Under-claiming costs a
+  clear refusal at admission; over-claiming swaps the image for the literal
+  `(image omitted: model does not support images)` mid-request, with nothing
+  reporting it.
+- **The official DeepSeek provider is off entirely**: `disabled: true` on the
+  API-key chat route, the account chat route, the search provider and the
+  request-field registry. No `deepseek-official` route exists, and no
+  `DEEPSEEK_API_KEY` is stored. The registry is also what keeps
+  `session-log-deepseek` and `plugin-package-inventory-deepseek` dormant, so
+  neither the session log nor the plugin inventory rides along on an official
+  request. Delete that block for the factory routes.
+- **`web_search`** stays in a session's tool list — an agent preset composes it,
+  and a preset has no patch semantics — but with the search provider gone every
+  call fails with `WEB_PROVIDER_UNAVAILABLE`. The host `tool-web` row, the one
+  `headless` uses, loses the tool outright with `search: false`.
+- **Left on purpose:** `deepseek-account`, `account-controller` and
+  `ui-settings-account` are the account page, not the provider. The
+  developer-tools switch that gates the preset selector and the Trajectory tab is
+  `ui-settings.enabled`, whose default is already `true`.
+- **Two harmless warnings** on `web` and `headless`: `entry
+  "llm-deepseek-account" not found` and `entry "ui-settings-account" not found`.
+  Both rows are desktop-only.
+- Never commit keys: DSH writes `.credentials.yaml` into its home, and the
   `.gitignore` here refuses it.
