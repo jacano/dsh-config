@@ -24,12 +24,19 @@ same file.
 
 Install from the table, then:
 
-**1. Set the key**, once per machine, then restart the app: a running process does
-not see a new variable.
+**1. Set the key**, once per machine. Settings → Models → **Command Code** takes
+it and stores it in `~/.dsh/.credentials.yaml`, which is resolved per request: no
+environment variable, nothing to restart.
 
-```powershell
-[Environment]::SetEnvironmentVariable('COMMANDCODE_API_KEY', 'your-command-code-key', 'User')
+By hand, that file is:
+
+```yaml
+version: 1
+refs:
+  COMMANDCODE_API_KEY: "your-command-code-key"
 ```
+
+An environment variable of that name outranks the file, so drop it if you have one.
 
 **2. Restore the file.**
 
@@ -100,15 +107,13 @@ Command Code rather than by the official API, so it never touches DeepSeek credi
   `ui-settings-account` are the account page, not the provider. The
   developer-tools switch behind the preset selector and the Trajectory tab is
   `ui-settings.enabled`, `true` by default.
-- Never commit keys: `.credentials.yaml` lives in the DSH home and `.gitignore`
-  refuses it.
+- Never commit keys: they live in `~/.dsh/.credentials.yaml`, outside this repo,
+  and the `.gitignore` here refuses the file.
 
 ## Web and headless
 
 The same file drives them and the models are the same. What differs:
 
-- Set the key with `export COMMANDCODE_API_KEY="your-command-code-key"` in the
-  shell that starts `dsh`, instead of the Windows user variable.
 - They log two warnings the desktop profile does not: `entry
   "llm-deepseek-account" not found` and `entry "ui-settings-account" not found`.
   Both rows are desktop-only, so those compositions have nothing to disable at
