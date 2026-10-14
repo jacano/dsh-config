@@ -49,6 +49,13 @@ Two things worth knowing about the layering:
 - The harness writes the settings you edit in its own forms into the profile
   layer, which sits below this file, so a form edit is shadowed. Edit this file,
   or drop the entry here if you would rather drive that setting from the app.
+- A patch that carries `name` and does not match the row's plugin is **skipped
+  with a warning**, not applied: `patch: name mismatch for "id" (expected ...,
+  got ...), skipping`. Bundles repurpose ids across releases — the desktop bundle
+  mounts `@deepseek-ai/dsh-llm-deepseek-api-key` at `llm-deepseek`, the npm one
+  mounts `@deepseek-ai/dsh-llm-deepseek` — so a `name` copied from one flavour
+  silently disables nothing in the other. The rows here whose plugin has moved
+  carry no `name` and match by id, which is the stable handle.
 
 ## Setup
 
@@ -183,17 +190,35 @@ long session keeps completing requests instead of hitting a size cap.
 - The default model is `command-code / deepseek/deepseek-v4.1-flash`: the same
   DeepSeek model, served by Command Code rather than by the official API, so it
   never touches DeepSeek credits.
-- The official API route is off: the `llm-deepseek` entry carries
-  `disabled: true`, so `deepseek-official` is not registered at all. It leaves
-  the model menu, and a session that once stored `deepseek-flash` can no longer
-  be billed for it either. Delete that entry to get the four factory models back.
-- `web_search` is a separate consumer of the same `DEEPSEEK_API_KEY` and is
-  still on: `dsh-web-search-deepseek` registers itself under its own id
-  `deepseek-official`, talks to `https://api.deepseek.com/anthropic/v1` and
-  never goes through `ctx.llm`, so disabling the chat route leaves it working —
-  and failing on an empty balance.
-- The `web` and `headless` compositions log one warning,
-  `entry "ui-settings-account" not found`: that plugin belongs to the desktop
-  client bundle. Harmless.
+- **Nothing of the official DeepSeek provider is registered.** Its block in the
+  file sets `disabled: true` on the API-key chat route (`llm-deepseek`), the
+  account chat route (`llm-deepseek-account`) and the search provider
+  (`web-search-deepseek`), so no `deepseek-official` route exists at all: the
+  model leaves the menu, the card leaves Settings → Models, and a session that
+  once stored `deepseek-flash` can no longer be billed for it either.
+  `DEEPSEEK_API_KEY` is not in `.credentials.yaml` either, so there is nothing
+  left to resolve a key. Delete that block to get the factory routes back.
+- The same block turns off the official-request plumbing:
+  `deepseek-llm-api-extensions` is the registry that only ever attached fields to
+  official requests, and with it off `session-log-deepseek` (which ships the
+  session log with a request) and `plugin-package-inventory-deepseek` (which
+  ships the active plugin inventory) stop applying by themselves.
+- `web_search` stays in a session's tool list — the model-facing web tools are
+  composed per agent preset, and an agent preset has no patch semantics, so no
+  `tool-web` override reaches it — but with the search provider gone every call
+  fails with `WEB_PROVIDER_UNAVAILABLE` and no request leaves the machine. The
+  host `tool-web` row, which is the one `headless` uses, is unlisted there by
+  `search: false`.
+- Left alone on purpose, because they are the client's account chrome and not the
+  provider: `deepseek-account` (the platform account service),
+  `account-controller` and `ui-settings-account`. That last one owns the
+  `developerTools` config form, which is the gate over the preset selector and
+  the Trajectory tab, so turning it off breaks UI that is in use. Add
+  `disabled: true` to the first two if the Settings → Account page should go away
+  as well, and accept that the section degrades.
+- The `web` and `headless` compositions log two warnings, `entry
+  "llm-deepseek-account" not found` and `entry "ui-settings-account" not found`:
+  both rows belong to the desktop bundle, and those compositions have nothing to
+  disable at those ids. Harmless.
 - Never commit keys. DSH writes a `.credentials.yaml` in its home, and the
   `.gitignore` here refuses it.
