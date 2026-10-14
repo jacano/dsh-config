@@ -20,16 +20,6 @@ same file.
 | Desktop | macOS Intel | [deepseek-harness-0.2.0-rc.2-mac-x64.zip](https://download.deepseek.com/dsh-desk/bin/mac-x64/deepseek-harness-0.2.0-rc.2-mac-x64.zip) |
 | Web | Node.js 22+ | `npm install -g @deepseek-ai/dsh`, then `dsh web` |
 
-Those are the only desktop builds published for that release. The links pin a
-version and go stale with the next one; each app reads its own updater feed
-instead, on the `nightly` channel:
-
-```
-https://download.deepseek.com/dsh-desk/feeds/<win-x64|mac-arm64|mac-x64>/nightly.yml
-```
-
-The npm line is version-free and follows the `latest` tag.
-
 ## Setup
 
 Install from the table, then:
@@ -99,10 +89,9 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
 | MiMo V2.6 Flash | `xiaomi/mimo-v2.6-flash` |
 
-MiMo V2.6 Flash reads the way its gateway catalog entry spells it, and refuses
-`max_tokens` 262144, so it takes the house 131072. The default model is
-`deepseek/deepseek-v4.1-flash`: the same DeepSeek model, served by Command Code
-rather than by the official API, so it never touches DeepSeek credits.
+MiMo V2.6 Flash refuses `max_tokens` 262144, so it takes the house 131072. The
+default model is `deepseek/deepseek-v4.1-flash`: the same DeepSeek model, served by
+Command Code rather than by the official API, so it never touches DeepSeek credits.
 
 ## Notes
 
