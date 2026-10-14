@@ -25,7 +25,6 @@
   config:
     provider: command-code
     model: deepseek/deepseek-v4.1-flash
-    reasoningEffort: high
 
 # DeepSeek official, off. These rows carry no `name` on purpose: `llm-deepseek`
 # mounts `@deepseek-ai/dsh-llm-deepseek-api-key` in the desktop bundle and
