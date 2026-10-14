@@ -86,8 +86,7 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 | MiMo V2.6 Flash | `xiaomi/mimo-v2.6-flash` |
 
 MiMo V2.6 Flash refuses `max_tokens` 262144, so it takes the house 131072. The
-default model is `deepseek/deepseek-v4.1-flash`: the same DeepSeek model, served by
-Command Code rather than by the official API, so it never touches DeepSeek credits.
+default model is `deepseek/deepseek-v4.1-flash`.
 
 ## Notes
 
@@ -101,8 +100,7 @@ Command Code rather than by the official API, so it never touches DeepSeek credi
 - **DeepSeek is off entirely**: API-key route, account route, search provider and
   request-field registry all `disabled: true`, and no `DEEPSEEK_API_KEY` stored.
   The registry is also what keeps `session-log-deepseek` and
-  `plugin-package-inventory-deepseek` dormant, so neither rides on an official
-  request.
+  `plugin-package-inventory-deepseek` dormant.
 - **`web_search`** is still listed and fails with `WEB_PROVIDER_UNAVAILABLE`: an
   agent preset composes it, and no patch reaches a preset.
 - **Left on purpose:** `deepseek-account`, `account-controller` and
