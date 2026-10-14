@@ -87,11 +87,6 @@
             contextWindow: 1048576
             maxTokens: 131072
             reasoningEfforts: *efforts
-          - id: xiaomi/mimo-v2.6-flash
-            name: MiMo V2.6 Flash (Command Code, openai-completions)
-            contextWindow: 1048576
-            maxTokens: 131072
-            reasoningEfforts: *efforts
 - id: ui-settings-account
   name: "@deepseek-ai/dsh-client-ui-settings-account"
   config:

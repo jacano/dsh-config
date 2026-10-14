@@ -49,7 +49,7 @@ mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
 ```
 
 **3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
-shows one group, **Command Code**, with six models.
+shows one group, **Command Code**, with five models.
 
 ## The one file
 
@@ -80,18 +80,16 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 | GLM-5.3 Flash | `z-ai/glm-5.3-flash` |
 | GLM-5.3 FlashX | `z-ai/glm-5.3-flashx` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
-| MiMo V2.6 Flash | `xiaomi/mimo-v2.6-flash` |
 
-MiMo V2.6 Flash refuses `max_tokens` 262144, so it takes the house 131072. The
-default model is `deepseek/deepseek-v4.1-flash`.
+The default model is `deepseek/deepseek-v4.1-flash`.
 
 ## Notes
 
-- **Effort.** The six models take the same five levels (`low`, `medium`, `high`,
+- **Effort.** The five models take the same five levels (`low`, `medium`, `high`,
   `xhigh`, `max`, sent as themselves) and answer 400 to `minimal` and `none`. They
   always think and no switch stops it, so none declares `off:`. The picker submenu
   comes from each entry's `reasoningEfforts`; Settings → Models leaves it alone.
-- **Images.** All six read images, declared once as `defaultInput: [text, image]`.
+- **Images.** All five read images, declared once as `defaultInput: [text, image]`.
   A text-only model added later must declare `input: [text]`, or its images are
   silently replaced by `(image omitted: model does not support images)`.
 - **DeepSeek is off entirely**: API-key route, account route, search provider and
