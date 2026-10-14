@@ -87,8 +87,7 @@ export COMMANDCODE_API_KEY="your-command-code-key"
 [Environment]::SetEnvironmentVariable('COMMANDCODE_API_KEY', 'your-command-code-key', 'User')
 ```
 
-Add `OPENCODE_API_KEY` as well only if you uncomment the OpenCode blocks. Open a
-new terminal afterwards: a running process does not see a new variable.
+Open a new terminal afterwards: a running process does not see a new variable.
 
 **3. Restore the file:**
 
@@ -102,13 +101,13 @@ Copy-Item "dsh\cordis.patch.yml" "$HOME\.dsh\" -Force
 ```
 
 **4. Run** `dsh web`, or start the desktop app. The model menu shows one group,
-**Command Code**, with eight models. `dsh --profile web --dump-config` prints what
+**Command Code**, with six models. `dsh --profile web --dump-config` prints what
 DSH composes from the file, which is the way to check it by hand.
 
 ## Providers and models
 
 Every name in the menu carries the wire it speaks, `openai-completions` for
-`POST /chat/completions` or `openai-responses` for `POST /responses`.
+`POST /chat/completions`.
 
 **Command Code, active** — `https://api.commandcode.ai/provider/v1`,
 `openai-completions`, key `COMMANDCODE_API_KEY`:
@@ -120,22 +119,12 @@ Every name in the menu carries the wire it speaks, `openai-completions` for
 | GLM-5.3 Flash | `z-ai/glm-5.3-flash` |
 | GLM-5.3 FlashX | `z-ai/glm-5.3-flashx` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
-| Space Bunny Alpha | `stealth/space-bunny-alpha` |
 | MiMo V2.6 Flash | `xiaomi/mimo-v2.6-flash` |
-| Step 5 Preview | `stepfun/Step-5-Preview` |
 
-Space Bunny Alpha and the OpenCode Free models are stealth releases: free while
-their test window lasts, and their ids can disappear when it ends. The last two
-rows were added later and probed the same way as the rest; their vendor names
-come from the gateway's own catalog entry, which is why MiMo reads `V2.6 Flash`
-and not the hyphenated spelling. MiMo refuses `max_tokens` 262144, so it takes
-the house 131072; Step accepts 262144 and is declared at 131072 as well.
-
-**OpenCode Go, commented out** — two entries of one service on
-`https://opencode.ai/zen/go/v1`, key `OPENCODE_API_KEY`: `opencode-go`
-(`openai-completions`) and `opencode-go-responses` (`openai-responses`), the
-second one because Muse Spark only answers on that shape. Its blocks in the file
-name the models.
+MiMo V2.6 Flash was added later and probed the same way as the rest; its vendor
+name comes from the gateway's own catalog entry, which is why it reads `V2.6
+Flash` and not the hyphenated spelling. It refuses `max_tokens` 262144, so it
+takes the house 131072.
 
 ## Thinking levels
 
@@ -144,7 +133,7 @@ declares `reasoningEfforts`. DSH's Settings → Models form deliberately leaves 
 field alone — it is a per-model capability, and the models under one provider
 disagree about it — so this file is the only place it is set.
 
-Command Code accepts `reasoning_effort` on all eight models at the same five
+Command Code accepts `reasoning_effort` on all six models at the same five
 levels — `low`, `medium`, `high`, `xhigh`, `max`, each sent as itself on
 `POST /chat/completions` — and answers **HTTP 400** to `minimal` and `none`.
 
@@ -162,12 +151,12 @@ Two findings from probing the endpoint, both of which shaped the file:
 Muse Spark 1.3 is the one that reports `reasoning_tokens` honestly. The others
 return reasoning text with `reasoning_tokens: 0`, so the counter understates what
 the model did; the text in the transcript is the reliable signal. MiMo V2.6 Flash
-and Step 5 Preview were the exception in their probe, both returning a non-zero
-count — but one sample is not a measurement.
+was the exception in its probe, returning a non-zero count — but one sample is not
+a measurement.
 
 ## Images
 
-All eight models under Command Code read images, so the route declares the
+All six models under Command Code read images, so the route declares the
 modality once:
 
 ```yaml
@@ -181,8 +170,8 @@ and an image is refused. Two gates follow from that default, and it is worth
 knowing which one you hit:
 
 - **At admission** (`read_image`, a paste, a drop) the agent refuses before the
-  image is stored, naming the model: `model "stealth/space-bunny-alpha" does not
-  declare image input; switch to an image-capable model to read images`.
+  image is stored, naming the model: `model "<id>" does not declare image input;
+  switch to an image-capable model to read images`.
 - **In the request** (`transform-messages.js`) every image part is quietly
   replaced by the literal text `(image omitted: model does not support images)`.
   The message is durable, the turn completes, and the model simply never saw the
