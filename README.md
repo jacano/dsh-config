@@ -47,28 +47,20 @@ shows one group, **Command Code**, with six models.
 
 ## The one file
 
-`dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`: the providers and their
-models, the default model, the permission presets, and the rows that take DeepSeek
-out of the composition. Every profile reads it, and the home layer outranks a
-profile's own, so one file covers both flavours.
+`dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`. Every profile reads it and it
+outranks the profile's own layer, so one file covers both flavours. It is a YAML
+array of loader patch entries: `id` names the row, `name` the plugin, `config`
+replaces that row's config whole.
 
-It is a YAML array of loader patch entries: `id` names the row, `name` the plugin
-behind it, and `config` replaces that row's config whole.
+- A `name` that does not match its row is skipped with a warning, not applied.
+  Bundles repurpose ids — `llm-deepseek` is `dsh-llm-deepseek-api-key` on the
+  desktop and `dsh-llm-deepseek` from npm — so rows whose plugin has moved carry
+  no `name` and match by id.
+- Settings forms write below this file, so a preference pinned here shadows the
+  form; theme and work-details are left to Settings for that reason.
+- Read at boot, never watched: restart after editing.
 
-Three things it depends on:
-
-- **A `name` that does not match its row is skipped with a warning**, not applied.
-  Bundles repurpose ids across releases — `llm-deepseek` mounts
-  `@deepseek-ai/dsh-llm-deepseek-api-key` on the desktop and
-  `@deepseek-ai/dsh-llm-deepseek` from npm — so the rows whose plugin has moved
-  carry no `name` and match by id.
-- **Settings forms write below this file**, so anything pinned here shadows them.
-  That is why the theme and the work-details mode are not pinned: they belong to
-  Settings.
-- **The file is read at boot and never watched.** Restart after editing it.
-
-Everything in this repo is written in English: the README, the file's comments,
-the commit messages.
+Everything here is written in English.
 
 ## Models
 
