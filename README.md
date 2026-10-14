@@ -25,8 +25,8 @@ same file.
 Install from the table, then:
 
 **1. Set the key**, once per machine. Settings → Models → **Command Code** takes
-it and stores it in `~/.dsh/.credentials.yaml`, which is resolved per request: no
-environment variable, nothing to restart.
+it and stores it in `~/.dsh/.credentials.yaml`, which is resolved per request, so
+nothing needs a restart.
 
 By hand, that file is:
 
@@ -36,7 +36,6 @@ refs:
   COMMANDCODE_API_KEY: "your-command-code-key"
 ```
 
-An environment variable of that name outranks the file, so drop it if you have one.
 On macOS and Linux, `chmod 600` it: the store refuses a document readable beyond
 its owner.
 
