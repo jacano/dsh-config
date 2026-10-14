@@ -37,6 +37,8 @@ refs:
 ```
 
 An environment variable of that name outranks the file, so drop it if you have one.
+On macOS and Linux, `chmod 600` it: the store refuses a document readable beyond
+its owner.
 
 **2. Restore the file.**
 
