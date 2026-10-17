@@ -57,13 +57,16 @@
         # declares `off:`; `minimal` and `none` are refused with HTTP 400, and
         # every model takes the same five levels, hence the alias.
         models:
-          # V4.1 only. This display name repeats Command Code's live catalog
-          # verbatim — tag, not claim. The plain-Flash row this supersedes has
-          # no entry, so old sessions pinned to `deepseek/deepseek-v4.1-flash`
-          # have nothing to resume on. Names carry only the model; the wire is
-          # on the provider above.
+          # The V4.1 pair, named by what a probe on 2026-10-17 actually showed,
+          # not by a build number neither row reports: Command Code serves them
+          # from different upstreams (different request-id shapes, different
+          # reasoning fields), only the Fast one accepts a thinking-off request
+          # — 0 reasoning tokens against ~80-175 for the plain row — and its
+          # catalog display name carries "(latest)". Neither row names its own
+          # snapshot when asked, so no date is claimed here. The wire lives on
+          # the provider above.
           - id: deepseek/deepseek-v4.1-flash-fast
-            name: DeepSeek V4.1 Flash Fast (latest)
+            name: DeepSeek V4.1 Flash Fast (latest, thinking optional)
             contextWindow: 1000000
             maxTokens: 32768
             reasoningEfforts: &efforts
@@ -72,6 +75,11 @@
               high: high
               xhigh: xhigh
               max: max
+          - id: deepseek/deepseek-v4.1-flash
+            name: DeepSeek V4.1 Flash (thinking always on)
+            contextWindow: 1000000
+            maxTokens: 32768
+            reasoningEfforts: *efforts
           - id: z-ai/glm-5.3-flash
             name: GLM-5.3 Flash
             contextWindow: 1048576
