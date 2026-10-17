@@ -75,13 +75,16 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 
 | Model | Id on the wire |
 | --- | --- |
-| DeepSeek V4.1 Flash | `deepseek/deepseek-v4.1-flash` |
-| DeepSeek V4.1 Flash Fast | `deepseek/deepseek-v4.1-flash-fast` |
+| DeepSeek V4.1 Flash Fast (latest) | `deepseek/deepseek-v4.1-flash-fast` |
+| DeepSeek V4.1 Flash (previous) | `deepseek/deepseek-v4.1-flash` |
 | GLM-5.3 Flash | `z-ai/glm-5.3-flash` |
 | GLM-5.3 FlashX | `z-ai/glm-5.3-flashx` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
 
-The default model is `deepseek/deepseek-v4.1-flash`.
+The default model is `deepseek/deepseek-v4.1-flash-fast`. Command Code marks that
+row `(latest)` on the wire — it serves the current V4.1 refresh — and the
+`(previous)` row stays in the menu so a session can be pinned back to the earlier
+snapshot.
 
 ## Notes
 
