@@ -57,13 +57,13 @@
         # declares `off:`; `minimal` and `none` are refused with HTTP 400, and
         # every model takes the same five levels, hence the alias.
         models:
-          # The V4.1 pair, newest first. Command Code's live catalog tags the
-          # Fast row "(latest)": the 1017 refresh ships under that same id, the
-          # way V4 Flash's 0731 refresh ships under its plain one. So the plain
-          # Flash row is the previous snapshot, and it stays registered under a
-          # name that says so rather than being dropped.
+          # V4.1 only. This display name repeats Command Code's live catalog
+          # verbatim — tag, not claim. The plain-Flash row this supersedes has
+          # no entry, so old sessions pinned to `deepseek/deepseek-v4.1-flash`
+          # have nothing to resume on. Names carry only the model; the wire is
+          # on the provider above.
           - id: deepseek/deepseek-v4.1-flash-fast
-            name: DeepSeek V4.1 Flash Fast (1017, latest, Command Code, openai-completions)
+            name: DeepSeek V4.1 Flash Fast (latest)
             contextWindow: 1000000
             maxTokens: 32768
             reasoningEfforts: &efforts
@@ -72,23 +72,18 @@
               high: high
               xhigh: xhigh
               max: max
-          - id: deepseek/deepseek-v4.1-flash
-            name: DeepSeek V4.1 Flash (previous, Command Code, openai-completions)
-            contextWindow: 1000000
-            maxTokens: 32768
-            reasoningEfforts: *efforts
           - id: z-ai/glm-5.3-flash
-            name: GLM-5.3 Flash (Command Code, openai-completions)
+            name: GLM-5.3 Flash
             contextWindow: 1048576
             maxTokens: 131072
             reasoningEfforts: *efforts
           - id: z-ai/glm-5.3-flashx
-            name: GLM-5.3 FlashX (Command Code, openai-completions)
+            name: GLM-5.3 FlashX
             contextWindow: 1000000
             maxTokens: 131072
             reasoningEfforts: *efforts
           - id: meta/muse-spark-1.3-contributor
-            name: Muse Spark 1.3 Contributor (Command Code, openai-completions)
+            name: Muse Spark 1.3 Contributor
             contextWindow: 1048576
             maxTokens: 131072
             reasoningEfforts: *efforts
