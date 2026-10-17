@@ -75,31 +75,21 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 
 | Model | Id on the wire |
 | --- | --- |
-| DeepSeek V4.1 Flash Fast (latest, thinking optional) | `deepseek/deepseek-v4.1-flash-fast` |
-| DeepSeek V4.1 Flash (thinking always on) | `deepseek/deepseek-v4.1-flash` |
+| DeepSeek V4.1 Flash Fast | `deepseek/deepseek-v4.1-flash-fast` |
+| DeepSeek V4.1 Flash | `deepseek/deepseek-v4.1-flash` |
 | GLM-5.3 Flash | `z-ai/glm-5.3-flash` |
 | GLM-5.3 FlashX | `z-ai/glm-5.3-flashx` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
 
-The default model is `deepseek/deepseek-v4.1-flash-fast`, the row whose catalog
-display name carries `(latest)`. The two V4.1 names describe what a probe measured
-on 2026-10-17, not a build number: Command Code serves the pair from different
-upstreams, and only the Fast row accepts a request with thinking switched off. Ask
-either row what it is and both answer `unknown`, so neither name claims a snapshot.
+The default model is `deepseek/deepseek-v4.1-flash-fast`, the row Command Code's
+catalog tags `(latest)`.
 
 ## Notes
 
-- **Effort.** Both V4.1 rows answer 200 to `off`, `low`, `medium`, `high`, `xhigh`
-  and `max`, and 400 to `none` and `minimal` (measured 2026-10-17); the two GLM
-  rows and Muse Spark take the five levels without `off`. Only the Fast row acts on
-  `off` — 0 reasoning tokens against ~80-175 for the plain row, which thinks
-  regardless of `off`, `thinking: {type: disabled}` or `enable_thinking: false`.
-  That switch is not reachable from the picker: DSH spells `off` by *omitting* the
-  reasoning option, which is what the provider already does by default, so no entry
-  declares `off:` and the ladder stays at five levels. The submenu comes from each
-  entry's `reasoningEfforts`; Settings → Models leaves it alone.
-- **Output cap.** The wire accepted `max_tokens` up to 393216 on both V4.1 rows
-  (same probe), so the 32768 in the entries is a choice, not a provider limit.
+- **Effort.** Every entry declares the same five levels (`low`, `medium`, `high`,
+  `xhigh`, `max`, sent as themselves), and the route answers 400 to `minimal` and
+  `none`. The ladder is therefore declared once and aliased. The submenu comes from
+  each entry's `reasoningEfforts`; Settings → Models leaves it alone.
 - **Images.** All five read images, declared once as `defaultInput: [text, image]`.
   A text-only model added later must declare `input: [text]`, or its images are
   silently replaced by `(image omitted: model does not support images)`.

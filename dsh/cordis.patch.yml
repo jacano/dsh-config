@@ -57,16 +57,10 @@
         # declares `off:`; `minimal` and `none` are refused with HTTP 400, and
         # every model takes the same five levels, hence the alias.
         models:
-          # The V4.1 pair, named by what a probe on 2026-10-17 actually showed,
-          # not by a build number neither row reports: Command Code serves them
-          # from different upstreams (different request-id shapes, different
-          # reasoning fields), only the Fast one accepts a thinking-off request
-          # — 0 reasoning tokens against ~80-175 for the plain row — and its
-          # catalog display name carries "(latest)". Neither row names its own
-          # snapshot when asked, so no date is claimed here. The wire lives on
-          # the provider above.
+          # Both V4.1 rows, named like every other entry: brand, version, tier.
+          # Command Code's catalog tags only the Fast one "(latest)".
           - id: deepseek/deepseek-v4.1-flash-fast
-            name: DeepSeek V4.1 Flash Fast (latest, thinking optional)
+            name: DeepSeek V4.1 Flash Fast
             contextWindow: 1000000
             maxTokens: 32768
             reasoningEfforts: &efforts
@@ -76,7 +70,7 @@
               xhigh: xhigh
               max: max
           - id: deepseek/deepseek-v4.1-flash
-            name: DeepSeek V4.1 Flash (thinking always on)
+            name: DeepSeek V4.1 Flash
             contextWindow: 1000000
             maxTokens: 32768
             reasoningEfforts: *efforts
