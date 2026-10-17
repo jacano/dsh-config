@@ -57,12 +57,13 @@
         # declares `off:`; `minimal` and `none` are refused with HTTP 400, and
         # every model takes the same five levels, hence the alias.
         models:
-          # The V4.1 pair, newest first. Command Code's own catalog marks the
-          # Fast deployment "(latest)" — the row serving the current V4.1
-          # refresh — so the plain Flash row is the previous snapshot. It stays
-          # registered under a name that says so, rather than being dropped.
+          # The V4.1 pair, newest first. Command Code's live catalog tags the
+          # Fast row "(latest)": the 1017 refresh ships under that same id, the
+          # way V4 Flash's 0731 refresh ships under its plain one. So the plain
+          # Flash row is the previous snapshot, and it stays registered under a
+          # name that says so rather than being dropped.
           - id: deepseek/deepseek-v4.1-flash-fast
-            name: DeepSeek V4.1 Flash Fast (latest, Command Code, openai-completions)
+            name: DeepSeek V4.1 Flash Fast (1017, latest, Command Code, openai-completions)
             contextWindow: 1000000
             maxTokens: 32768
             reasoningEfforts: &efforts

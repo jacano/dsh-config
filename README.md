@@ -75,23 +75,25 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 
 | Model | Id on the wire |
 | --- | --- |
-| DeepSeek V4.1 Flash Fast (latest) | `deepseek/deepseek-v4.1-flash-fast` |
+| DeepSeek V4.1 Flash Fast (1017, latest) | `deepseek/deepseek-v4.1-flash-fast` |
 | DeepSeek V4.1 Flash (previous) | `deepseek/deepseek-v4.1-flash` |
 | GLM-5.3 Flash | `z-ai/glm-5.3-flash` |
 | GLM-5.3 FlashX | `z-ai/glm-5.3-flashx` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
 
-The default model is `deepseek/deepseek-v4.1-flash-fast`. Command Code marks that
-row `(latest)` on the wire — it serves the current V4.1 refresh — and the
-`(previous)` row stays in the menu so a session can be pinned back to the earlier
-snapshot.
+The default model is `deepseek/deepseek-v4.1-flash-fast`, the row Command Code
+tags `(latest)`: the 1017 refresh of V4.1 ships under that same id, so DSH reaches
+it with no new entry. The `(previous)` row stays in the menu for a session pinned
+to the earlier snapshot.
 
 ## Notes
 
-- **Effort.** The five models take the same five levels (`low`, `medium`, `high`,
-  `xhigh`, `max`, sent as themselves) and answer 400 to `minimal` and `none`. They
-  always think and no switch stops it, so none declares `off:`. The picker submenu
-  comes from each entry's `reasoningEfforts`; Settings → Models leaves it alone.
+- **Effort.** The five entries send the same five levels (`low`, `medium`, `high`,
+  `xhigh`, `max`, as themselves) and answer 400 to `minimal` and `none`. The 1017
+  row also honours `off` — zero reasoning tokens, verified 2026-10-17 — while the
+  previous row ignores it; the ladder is shared across the five entries, so none
+  declares `off:` and the picker does not offer it. The submenu comes from each
+  entry's `reasoningEfforts`; Settings → Models leaves it alone.
 - **Images.** All five read images, declared once as `defaultInput: [text, image]`.
   A text-only model added later must declare `input: [text]`, or its images are
   silently replaced by `(image omitted: model does not support images)`.
