@@ -58,7 +58,10 @@
         # every model takes the same five levels, hence the alias.
         models:
           # Both V4.1 rows, named like every other entry: brand, version, tier.
-          # Command Code's catalog tags only the Fast one "(latest)".
+          # Since the 2026-10-19 rollout both slugs serve the same 1017 snapshot
+          # and both carry "(latest)" in the catalog; no separate "…-1017" id is
+          # callable (400). They still differ at the wire: only the Fast lane
+          # answers a thinking-off request with 0 reasoning tokens.
           - id: deepseek/deepseek-v4.1-flash-fast
             name: DeepSeek V4.1 Flash Fast
             contextWindow: 1000000

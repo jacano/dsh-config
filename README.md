@@ -81,8 +81,10 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 | GLM-5.3 FlashX | `z-ai/glm-5.3-flashx` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
 
-The default model is `deepseek/deepseek-v4.1-flash-fast`, the row Command Code's
-catalog tags `(latest)`.
+The default model is `deepseek/deepseek-v4.1-flash-fast`. Both V4.1 rows now serve
+the same **1017** snapshot — Command Code rolled it out slug by slug and, since
+2026-10-19, tags both `(latest)`. There is no separate `…-1017` id on the wire: it
+answers 400, so the snapshot is reached through these two ids only.
 
 ## Notes
 
