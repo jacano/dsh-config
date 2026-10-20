@@ -20,7 +20,7 @@
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
     provider: command-code
-    model: deepseek/deepseek-v4.1-flash-fast
+    model: deepseek/deepseek-v4.1-flash
 
 # DeepSeek official, off. These rows carry no `name` on purpose: `llm-deepseek`
 # mounts `@deepseek-ai/dsh-llm-deepseek-api-key` in the desktop bundle and
@@ -57,13 +57,14 @@
         # declares `off:`; `minimal` and `none` are refused with HTTP 400, and
         # every model takes the same five levels, hence the alias.
         models:
-          # Both V4.1 rows, named like every other entry: brand, version, tier.
-          # Since the 2026-10-19 rollout both slugs serve the same 1017 snapshot
-          # and both carry "(latest)" in the catalog; no separate "…-1017" id is
-          # callable (400). They still differ at the wire: only the Fast lane
-          # answers a thinking-off request with 0 reasoning tokens.
-          - id: deepseek/deepseek-v4.1-flash-fast
-            name: DeepSeek V4.1 Flash Fast
+          # Both V4.1 rows, labelled with the `name` the provider's own catalog
+          # returns for each id, "(latest)" suffix and all. Since the 2026-10-19
+          # rollout both slugs serve the same 1017 snapshot and both are tagged
+          # "(latest)"; no separate "…-1017" id is callable (400). They still
+          # differ at the wire: only the Fast lane answers a thinking-off request
+          # with 0 reasoning tokens.
+          - id: deepseek/deepseek-v4.1-flash
+            name: DeepSeek V4.1 Flash (latest)
             contextWindow: 1000000
             maxTokens: 32768
             reasoningEfforts: &efforts
@@ -72,8 +73,8 @@
               high: high
               xhigh: xhigh
               max: max
-          - id: deepseek/deepseek-v4.1-flash
-            name: DeepSeek V4.1 Flash
+          - id: deepseek/deepseek-v4.1-flash-fast
+            name: DeepSeek V4.1 Flash Fast (latest)
             contextWindow: 1000000
             maxTokens: 32768
             reasoningEfforts: *efforts
