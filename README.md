@@ -64,7 +64,13 @@ replaces that row's config whole.
   no `name` and match by id.
 - Settings forms write below this file, so a preference pinned here shadows the
   form; theme and work-details are left to Settings for that reason.
-- Read at boot, never watched: restart after editing.
+- **Hot-reloaded, no restart.** The layer is watched, not read once: saving a
+  valid edit recomposes the running profile in place, so the desktop app and
+  `dsh web` pick the change up as it is written. An edit that cannot apply —
+  unparsable YAML, an entry that fails validation — is rejected and the last good
+  composition keeps running. Startup-only profiles are the exception: the shipped
+  `headless`, `acp` and SDK templates, and any manifest that sets
+  `patchReload: startup`, take the layer only at boot.
 
 Everything here is written in English.
 
