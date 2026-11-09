@@ -54,12 +54,10 @@
         # text-only model added here must declare `input: [text]`.
         defaultInput: [text, image]
         # Every model thinks by default; `minimal` and `none` are refused with
-        # HTTP 400. The five base levels are shared, hence the alias; only the
-        # DeepSeek rows also answer `off` (0 reasoning tokens measured on the
-        # Fast and Ultrafast lanes), so `off` is declared per-row and never on
-        # the shared ladder — GLM rejects it with 400.
+        # HTTP 400, and both rows here take the same five levels, hence the
+        # single alias. GLM rejects `off` with 400, so no row declares it.
         models:
-          # Three rows survive the 2026-11-09 measurement round; MODELS.md has
+          # Two rows survive the 2026-11-09 measurement round; MODELS.md has
           # the numbers behind each call. Labels are the `name` the provider's
           # own catalog returns for each id, copied verbatim.
           #
@@ -76,28 +74,11 @@
               high: high
               xhigh: xhigh
               max: max
-          # Ultrafast: its own snapshot,
-          # `deepseek/deepseek-v4.1-flash-1017-ultrafast`, on Fireworks. The
-          # premium lane — 0.5 s to first token and ~780 tok/s — and the only
-          # row whose thinking switches off. maxTokens stays at the siblings'
-          # 32768 even though the endpoint accepts far more: the answer ceiling
-          # is undocumented, and no task here needed a longer reply.
-          - id: deepseek/deepseek-v4.1-flash-ultrafast
-            name: DeepSeek V4.1 Flash Ultrafast
-            contextWindow: 1048576
-            maxTokens: 32768
-            reasoningEfforts:
-              off: off
-              low: low
-              medium: medium
-              high: high
-              xhigh: xhigh
-              max: max
           # Kept as the one non-DeepSeek row: it is the only third-party model
           # here with a published intelligence score (41.8 / coding 71.5) and a
-          # working zero-data-retention upstream. It is the slowest of the three
-          # and it does not cache prompts, so it is a second opinion, not a
-          # daily driver. It rejects `off` with 400, hence the shared alias.
+          # working zero-data-retention upstream. It is much the slower row and
+          # it does not cache prompts, so it is a second opinion, not a daily
+          # driver. It rejects `off` with 400, hence the shared alias.
           - id: z-ai/glm-5.3-flash
             name: GLM-5.3 Flash
             contextWindow: 1048576

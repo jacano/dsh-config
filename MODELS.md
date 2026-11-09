@@ -27,18 +27,21 @@ test cases each). Quality differences showed up only as token spend: on the same
 
 ## Verdict
 
-Applied to `dsh/cordis.patch.yml` on 2026-11-09: three rows kept, three removed.
+Applied to `dsh/cordis.patch.yml` on 2026-11-09: two rows kept, four removed.
 
 - **Keep Fast** — the default. Cheapest per agent turn, stable, caches, 5/6 +
   runnable code. Its only real gap is that it has no ZDR upstream.
-- **Keep Ultrafast** — the premium lane for when latency matters, not a daily
-  default at 8x the cost of Fast.
 - **Keep GLM-5.3 Flash** — deliberately, despite losing on speed and caching: it
   is the only non-DeepSeek model with a published score (41.8 / coding 71.5) and
   the only row with both a real score and a working ZDR upstream. A second
   opinion, not a daily driver.
+- **Drop Ultrafast.** The premium lane: 0.5 s TTFT, ~780 t/s, the only row that
+  accepted `off` — at $2.40/$9.60 per M, $0.0211 a turn, 8x Fast. Kept on the
+  first pass, then dropped the same day: 1.2 s from Fast is fast enough, the
+  config never needed the `off` level, and the price premium bought latency
+  alone. `off` is now declared by no row.
 - **Drop plain Flash.** Same 1017 snapshot as Fast but measurably worse: 9-47 s
-  TTFT, a `max_tokens` ceiling that changes per request, and 2.3x the cost per turn.
+  TTFT, a `max_tokens` ceiling that changes per request, and 2.1x the cost per turn.
 - **Drop GLM-5.3 FlashX.** A paid speed tier ($0.37/$1.25) still slower than
   Fast, with no published score and no ZDR upstream. Beats nothing.
 - **Drop Muse Spark Contributor.** Its headline 95% discount is cancelled by a
@@ -48,7 +51,7 @@ Applied to `dsh/cordis.patch.yml` on 2026-11-09: three rows kept, three removed.
 
 ## Caveat on short answers
 
-All three survivors think by default, and reasoning is billed against
+Both survivors think by default, and reasoning is billed against
 `max_tokens`. At `max_tokens: 200` the Fast lane spent 197 of them thinking and
 returned `"Ok 👍"` with `finish_reason: length`; the same prompt at 1500 returned
 137 reasoning tokens and a complete answer. Give the row room — this config's

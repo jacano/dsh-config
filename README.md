@@ -49,7 +49,7 @@ mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
 ```
 
 **3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
-shows one group, **Command Code**, with five models.
+shows one group, **Command Code**, with two models.
 
 ## The one file
 
@@ -75,26 +75,87 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 
 | Model | Id on the wire |
 | --- | --- |
-| DeepSeek V4.1 Flash (latest) | `deepseek/deepseek-v4.1-flash` |
 | DeepSeek V4.1 Flash Fast (latest) | `deepseek/deepseek-v4.1-flash-fast` |
 | GLM-5.3 Flash | `z-ai/glm-5.3-flash` |
-| GLM-5.3 FlashX | `z-ai/glm-5.3-flashx` |
-| Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` |
 
-The default model is `deepseek/deepseek-v4.1-flash`, the latest lane. Both V4.1
-rows now serve the same **1017** snapshot — Command Code rolled it out slug by
-slug and, since 2026-10-19, tags both `(latest)`. There is no separate `…-1017`
-id on the wire: it answers 400, so the snapshot is reached through these two ids
-only. Each label is the `name` the provider's catalog returns for that id, copied
-verbatim, parentheses included.
+The default model is `deepseek/deepseek-v4.1-flash-fast`. Each label is the `name`
+the provider's catalog returns for that id, copied verbatim, parentheses included
+— checked 2026-11-09 against `GET /provider/v1/models`.
+
+Two rows, chosen by measurement rather than by what the catalog offers.
+[MODELS.md](MODELS.md) holds the full ranking of the six candidates and the
+numbers; the short version:
+
+| | Fast | GLM-5.3 Flash |
+| --- | --- | --- |
+| Role | daily driver | second opinion |
+| $ per agent turn | **$0.0025** | $0.0143 |
+| TTFT | **1.2 s** | 1.2-3.3 s |
+| Output rate | **~150 tok/s** | ~57 tok/s |
+| Caches a 90k prompt | **yes (~99%)** | no |
+| ZDR upstream | no | **yes** |
+| Published score | — | 41.8 / coding 71.5 |
+
+The `$/turn` column assumes a 90k prompt (89k of it cached where caching works)
+and 1.5k of output. That assumption is what decides the ranking: Muse Spark 1.3
+Contributor, at $0.10/$0.20 per M, looks 20x cheaper than Fast on sticker price
+and lands 3.7x *above* it in real cost, because it caches nothing and re-pays the
+whole prefix every turn.
+
+Dropped on 2026-11-09, with the measurement that killed each:
+
+- **DeepSeek V4.1 Flash Ultrafast.** The premium lane — 0.5 s to first token and
+  ~780 tok/s on its own Fireworks snapshot — priced at $2.40/$9.60 per M, 8x Fast's
+  cost per turn. It was kept at first and dropped within hours: 1.2 s from Fast is
+  fast enough, and the only thing it did that nothing else did — accept `off` —
+  is worth less than $0.0211 a turn. Its `off` level went with it, so no row now
+  declares one.
+- **DeepSeek V4.1 Flash (plain).** Same 1017 snapshot as Fast but a worse lane:
+  9-47 s to first token, a `max_tokens` ceiling that changes between identical
+  requests (see below), and 2.1x Fast's cost per turn.
+- **GLM-5.3 FlashX.** A paid speed tier ($0.37/$1.25) that is still slower than
+  Fast, with no published score and no ZDR upstream. Beats nothing.
+- **Muse Spark 1.3 Contributor.** Headline "up to 95% off" cancelled by a missing
+  prompt cache — 0% cached on five straight passes over the same 90k prefix — plus
+  the slowest TTFT of the six and no ZDR upstream (422 `cmd_zdr_no_providers`).
+
+### What survives, and why
+
+All of the candidates passed the same capability probes identically: vision,
+JSON mode, two parallel tool calls in one message, valid tool-call arguments, a
+128k-token needle, and generated Python that actually ran (5/5 cases each). The
+differences that decided this were in the serving, not in what the models can do.
+
+**Fast** is the default because it is the cheapest thing in the lineup per real
+agent turn and quick: it caches a 90k prompt at ~99%, which is what turns a
+sticker price into $0.0025 a turn against GLM's $0.0143. Its only real gap is
+that it has no ZDR upstream. **GLM-5.3 Flash** is the odd one out and is kept
+deliberately: the only non-DeepSeek model with a published intelligence score
+(41.8 / coding 71.5) and the only row here with both a real score and a
+ZDR-capable upstream, so it is what to reach for when DeepSeek is unavailable or
+when a second opinion is worth the latency it costs.
+
+### The lanes behind the survivors
+
+Fast lives on the stable DeepSeek lane: the 1017 snapshot, a hard `max_tokens`
+ceiling of 393,216, 2.0-2.3 s to first token on a 128k prompt. Ultrafast was a
+separate Fireworks deployment (`…-1017-ultrafast`) with its own 1,048,576 ceiling
+and ~780 tok/s; the plain lane was a third deployment again — native DeepSeek —
+and the one that behaved worst: `max_tokens: 393217` was rejected once with "must
+be between 0 and 393216" and then accepted on five straight retries, and its
+`/responses` answers `resp_…` ids it cannot continue (`previous_response_id` →
+400 `PreviousResponseNotFound`). Fast rejects anything above 393,216 every time.
 
 ## Notes
 
 - **Effort.** Every entry declares the same five levels (`low`, `medium`, `high`,
   `xhigh`, `max`, sent as themselves), and the route answers 400 to `minimal` and
   `none`. The ladder is therefore declared once and aliased. The submenu comes from
-  each entry's `reasoningEfforts`; Settings → Models leaves it alone.
-- **Images.** All five read images, declared once as `defaultInput: [text, image]`.
+  each entry's `reasoningEfforts`; Settings → Models leaves it alone. No row
+  declares `off`: GLM rejects it with 400 ("Only models that can turn thinking off
+  accept it"), and the one row that did take it — Ultrafast, 0 reasoning tokens with
+  tools still working — was dropped, so the level is not offered at all.
+- **Images.** Both rows read images, declared once as `defaultInput: [text, image]`.
   A text-only model added later must declare `input: [text]`, or its images are
   silently replaced by `(image omitted: model does not support images)`.
 - **DeepSeek is off entirely**: API-key route, account route, search provider and
