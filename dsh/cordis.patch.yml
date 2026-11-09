@@ -20,7 +20,7 @@
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
     provider: command-code
-    model: deepseek/deepseek-v4.1-flash
+    model: deepseek/deepseek-v4.1-flash-fast
 
 # DeepSeek official, off. These rows carry no `name` on purpose: `llm-deepseek`
 # mounts `@deepseek-ai/dsh-llm-deepseek-api-key` in the desktop bundle and
@@ -53,18 +53,21 @@
         # A fallback, not an override: an entry's own `input` wins, so a
         # text-only model added here must declare `input: [text]`.
         defaultInput: [text, image]
-        # Every model thinks by default and no switch turns it off, so none
-        # declares `off:`; `minimal` and `none` are refused with HTTP 400, and
-        # every model takes the same five levels, hence the alias.
+        # Every model thinks by default; `minimal` and `none` are refused with
+        # HTTP 400. The five base levels are shared, hence the alias; only the
+        # DeepSeek rows also answer `off` (0 reasoning tokens measured on the
+        # Fast and Ultrafast lanes), so `off` is declared per-row and never on
+        # the shared ladder — GLM rejects it with 400.
         models:
-          # Both V4.1 rows, labelled with the `name` the provider's own catalog
-          # returns for each id, "(latest)" suffix and all. Since the 2026-10-19
-          # rollout both slugs serve the same 1017 snapshot and both are tagged
-          # "(latest)"; no separate "…-1017" id is callable (400). They still
-          # differ at the wire: only the Fast lane answers a thinking-off request
-          # with 0 reasoning tokens.
-          - id: deepseek/deepseek-v4.1-flash
-            name: DeepSeek V4.1 Flash (latest)
+          # Three rows survive the 2026-11-09 measurement round; MODELS.md has
+          # the numbers behind each call. Labels are the `name` the provider's
+          # own catalog returns for each id, copied verbatim.
+          #
+          # Fast: the 1017 snapshot on the stable lane. Cheapest per agent turn
+          # of everything measured ($0.0025) because it caches a 90k prompt at
+          # ~99%, and quick (1.2 s to first token, ~150 tok/s).
+          - id: deepseek/deepseek-v4.1-flash-fast
+            name: DeepSeek V4.1 Flash Fast (latest)
             contextWindow: 1000000
             maxTokens: 32768
             reasoningEfforts: &efforts
@@ -73,23 +76,30 @@
               high: high
               xhigh: xhigh
               max: max
-          - id: deepseek/deepseek-v4.1-flash-fast
-            name: DeepSeek V4.1 Flash Fast (latest)
-            contextWindow: 1000000
+          # Ultrafast: its own snapshot,
+          # `deepseek/deepseek-v4.1-flash-1017-ultrafast`, on Fireworks. The
+          # premium lane — 0.5 s to first token and ~780 tok/s — and the only
+          # row whose thinking switches off. maxTokens stays at the siblings'
+          # 32768 even though the endpoint accepts far more: the answer ceiling
+          # is undocumented, and no task here needed a longer reply.
+          - id: deepseek/deepseek-v4.1-flash-ultrafast
+            name: DeepSeek V4.1 Flash Ultrafast
+            contextWindow: 1048576
             maxTokens: 32768
-            reasoningEfforts: *efforts
+            reasoningEfforts:
+              off: off
+              low: low
+              medium: medium
+              high: high
+              xhigh: xhigh
+              max: max
+          # Kept as the one non-DeepSeek row: it is the only third-party model
+          # here with a published intelligence score (41.8 / coding 71.5) and a
+          # working zero-data-retention upstream. It is the slowest of the three
+          # and it does not cache prompts, so it is a second opinion, not a
+          # daily driver. It rejects `off` with 400, hence the shared alias.
           - id: z-ai/glm-5.3-flash
             name: GLM-5.3 Flash
-            contextWindow: 1048576
-            maxTokens: 131072
-            reasoningEfforts: *efforts
-          - id: z-ai/glm-5.3-flashx
-            name: GLM-5.3 FlashX
-            contextWindow: 1000000
-            maxTokens: 131072
-            reasoningEfforts: *efforts
-          - id: meta/muse-spark-1.3-contributor
-            name: Muse Spark 1.3 Contributor
             contextWindow: 1048576
             maxTokens: 131072
             reasoningEfforts: *efforts
