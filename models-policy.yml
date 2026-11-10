@@ -10,6 +10,7 @@
 # both Muse Spark Contributor and GLM-5.3 Flash fell into.
 
 version: 1
+updated: 2026-11-10
 
 criteria:
   # End-to-end output rate on a 1,600-token generation, measured here.
@@ -30,15 +31,15 @@ criteria:
 admitted:
   - id: deepseek/deepseek-v4.1-flash-fast
     route: command-code
-    output_tps: 116
-    ttft_seconds: 1.6
+    output_tps: 100-116
+    ttft_seconds: 1.7-1.9
     caches: true
     cost_per_turn_usd: 0.0025
     note: default; cheapest on a cold cache, only row on the completions route
   - id: claude-haiku-5-5
     route: command-code-anthropic
     output_tps: 146
-    ttft_seconds: 1.4
+    ttft_seconds: 1.7-1.9
     caches: true
     cost_per_turn_usd: 0.0017
     note: fastest and cheapest per turn; wins every gate but is not the default
@@ -47,9 +48,9 @@ admitted:
 # later round can re-test instead of guessing.
 excluded:
   - id: z-ai/glm-5.3-flash
-    reason: "~57 tok/s, 0 cached tokens on pass 2, $0.0143/turn (5.7x the ceiling)"
+    reason: "74 tok/s, below the 100 gate; $0.0036/turn (1.4x). It does cache (36,992 of 37,014 on pass 2), which the 2026-11-09 round had wrong"
   - id: meta/muse-spark-1.3-contributor
-    reason: "0 cached tokens on pass 2, 4.2-4.9 s TTFT, $0.0093/turn (3.7x)"
+    reason: "0 cached tokens on pass 2, so $0.0093/turn (3.7x); TTFT 2.3-2.9 s"
   - id: meta/muse-spark-1.2-contributor
     reason: "112 tok/s but no cache measurement; superseded by 1.3 in the same family"
   - id: meta/muse-spark-1.3
@@ -61,7 +62,7 @@ excluded:
   - id: meta/muse-wonder-1.0
     reason: "403 MODEL_NOT_IN_PLAN"
   - id: claude-sonnet-5-5
-    reason: "94 tok/s measured (under the gate), $0.0259/turn (10x)"
+    reason: "100 tok/s, exactly on the gate, and $0.0259/turn (10x): the price is what disqualifies it"
   - id: claude-opus-5-5
     reason: "403 MODEL_NOT_IN_PLAN"
   - id: claude-fable-5-2
@@ -71,9 +72,9 @@ excluded:
   - id: google/gemini-4-argon
     reason: "403 MODEL_NOT_IN_PLAN"
   - id: stepfun/Step-5-Preview
-    reason: "175 tok/s, but $0.0095/turn (3.8x)"
+    reason: "167 tok/s and it caches, but $0.0095/turn (3.8x) and 2.8 s cold TTFT"
   - id: nvidia/nemotron-3.5-super-vl
-    reason: "26.5 intelligence and $0.0045/turn: fails two gates"
+    reason: "382 tok/s and it caches, but $0.0045/turn (1.8x) and 26.5 intelligence"
   - id: gpt-6-luna
     reason: "103 tok/s per AA, but no cache or TTFT measured here; unverified"
   - id: moonshotai/Kimi-K3.1-Pro
@@ -96,4 +97,4 @@ excluded:
 # if Haiku 5.5 ever becomes unavailable.
 redundant:
   - id: minimax/minimax-m3.1-flash
-    reason: "passes the gates (124 tok/s, caches, $0.0024/turn) but Haiku 5.5 beats it on speed, intelligence and price"
+    reason: "passes every gate (118 tok/s, 35,072 cached, $0.0024/turn) but Haiku 5.5 beats it on speed, intelligence and price"

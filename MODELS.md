@@ -9,32 +9,38 @@ The 2026-11-09 round ranked rows by sticker price and a single cold call. That
 missed the thing that decides an agent turn: whether the prefix caches. This round
 sends the same ~20k prefix twice with `max_tokens: 16`, so pass two measures the
 cache and the elapsed time is the time to first token; output rate comes from a
-separate 1,600-token generation.
+separate 1,600-token generation. Re-measured in full on 2026-11-10, 01:20.
 
-| Model | Route | In / Out / Cache $/M | Pass-2 cache | TTFT | Output | Intel. | $/turn |
+| Model | Route | In / Out / Cache $/M | Pass-2 cache | TTFT cold/warm | Output | Intel. | $/turn |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Claude Haiku 5.5** | messages | 0.10 / 0.50 / 0.01 | **60,304 read** | **1.4 s** | **146 t/s** | **43.4** | **$0.0017** |
-| DeepSeek V4.1 Flash Fast | completions | 0.16 / 0.58 / 0.016 | 36,736 of 36,937 | 1.6 s | 116 t/s | 39.5 | $0.0025 |
-| MiniMax M3.1 Flash | completions | 0.15 / 0.60 / 0.015 | 35,310 of 35,311 | 1.9 s | 124 t/s | 42.7 | $0.0024 |
-| Muse Spark 1.3 Contributor | completions | 0.10 / 0.20 / 0.002 | **0** | 4.2-4.9 s | 164 t/s | 48.1 | $0.0093 |
-| GLM-5.3 Flash | completions | 0.15 / 0.50 / 0.03 | **0** | 1.2-3.3 s | ~57 t/s | 41.8 | $0.0143 |
-| Claude Sonnet 5.5 | messages | 2.00 / 10.00 / 0.10 | — | — | 94 t/s | 56.0 | $0.0259 |
+| **Claude Haiku 5.5** | messages | 0.10 / 0.50 / 0.01 | **60,304 read** | 1.9 / 1.7 s | **146 t/s** | **43.4** | **$0.0017** |
+| DeepSeek V4.1 Flash Fast | completions | 0.16 / 0.58 / 0.016 | 36,736 of 36,934 | **1.9 / 1.7 s** | 100-116 t/s | 39.5 | $0.0025 |
+| MiniMax M3.1 Flash | completions | 0.15 / 0.60 / 0.015 | 35,072 of 35,308 | 2.2 / 1.3 s | 118 t/s | 42.7 | $0.0024 |
+| GLM-5.3 Flash | completions | 0.15 / 0.50 / 0.03 | **36,992 of 37,014** | 2.0 / 0.7 s | 74 t/s | 41.8 | $0.0036 |
+| Step 5 Preview | completions | 1.00 / 2.70 / 0.05 | 36,864 of 36,915 | 2.8 / 1.9 s | 167 t/s | 43.7 | $0.0095 |
+| Nemotron 3.5 Super VL | completions | 0.20 / 0.50 / 0.04 | 41,984 of 41,991 | **1.5 / 0.8 s** | **382 t/s** | 26.5 | $0.0045 |
+| Muse Spark 1.3 Contributor | completions | 0.10 / 0.20 / 0.002 | **0** | 2.9 / 2.3 s | 120 t/s | 48.1 | $0.0093 |
+| Claude Sonnet 5.5 | messages | 2.00 / 10.00 / 0.10 | — | — | 100 t/s | 56.0 | $0.0259 |
 
 $/turn keeps the 2026-11-09 assumption: a 90k prompt, 89k of it cached where
 caching works, 1.5k of output.
 
-Two findings reordered everything:
+Three findings reordered everything:
 
 - **Anthropic caching is opt-in on the wire.** Without a `cache_control`
   breakpoint, Haiku's 60k prefix reads back 0 cached tokens and takes 3.2-3.5 s to
-  first token; with one it reads 60,304 back and drops to 1.44 s. pi-ai adds the
+  first token; with one it reads 60,304 back and drops to 1.7 s. pi-ai adds the
   breakpoint itself, so the harness gets the good number, but a raw API caller
   does not.
 - **A cheap sticker means nothing without a cache.** Muse Spark 1.3 Contributor is
-  the cheapest row in the catalog ($0.10/$0.20, $0.002 cache) and the second
-  fastest on a long generation (164 t/s), yet it caches nothing and re-pays the
-  whole prefix every turn: $0.0093 a turn, 3.7x Fast and 5.5x Haiku. Its TTFT is
-  also the worst of the group at 4.2-4.9 s.
+  the cheapest row in the catalog ($0.10/$0.20, $0.002 cache) and still fast on a
+  long generation (120 t/s), yet it caches nothing and re-pays the whole prefix
+  every turn: $0.0093 a turn, 3.7x Fast and 5.5x Haiku.
+- **Cache behaviour is not a stable model property.** GLM-5.3 Flash was written off
+  on 2026-11-09 as cache-less (0% over five passes); on 2026-11-10 it read 36,992
+  of 37,014 back and dropped to 0.7 s warm. It is still out, but on speed and
+  price, not on caching — which is why every row here carries the number, not a
+  verdict.
 
 ### Verdict, 2026-11-10
 
@@ -46,14 +52,14 @@ and left as the default by choice. The gates themselves live in
   a cold cache, stable across two rounds, and the only row on the
   `openai-completions` route, so an Anthropic outage leaves a working model behind.
 - **Haiku 5.5 is admitted as the measured winner**, not as the default. It wins
-  speed (146 vs 116 t/s), latency (1.4 vs 1.6 s), intelligence (43.4 vs 39.5) and
-  cost per turn ($0.0017 vs $0.0025), and it is one menu entry away.
-- **Drop GLM-5.3 Flash.** ~57 t/s and no cache: it costs 8x Haiku a turn and is
-  slower and less capable. Its ZDR upstream was its only argument, and this config
-  does not buy on ZDR.
-- **Do not re-add Spark Contributor, MiniMax, Step 5 or Sonnet.** The first has no
-  cache and a 4-5 s TTFT; the second is beaten by Haiku on every axis; the last
-  two cost 5-14x Fast a turn. All four are listed with their numbers in
+  speed (146 vs 100-116 t/s), latency (1.7 vs 1.7 s warm), intelligence (43.4 vs
+  39.5) and cost per turn ($0.0017 vs $0.0025), and it is one menu entry away.
+- **Drop GLM-5.3 Flash.** It caches, and well, but 74 t/s misses the speed gate and
+  $0.0036 a turn is 1.4x the ceiling for a row that is less capable than Haiku. Its
+  ZDR upstream was its only argument, and this config does not buy on ZDR.
+- **Do not re-add Spark Contributor, MiniMax, Step 5 or Sonnet.** The first caches
+  nothing; the second clears every gate and is held out only as redundant; Step 5
+  is 3.8x the ceiling and Sonnet 10x. All are listed with their numbers in
   [models-policy.yml](models-policy.yml), so a later round can re-test rather than
   re-argue.
 

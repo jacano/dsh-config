@@ -156,19 +156,22 @@ Dropped on 2026-11-09, with the measurement that killed each:
 
 Dropped on 2026-11-10, on the same probes re-run against a 20k prefix:
 
-- **GLM-5.3 Flash.** The second opinion stopped paying for itself: ~57 tok/s and no
-  prompt cache at all, so it re-pays the whole prefix every turn ($0.0143 against
-  $0.0025). Haiku 5.5 is faster, smarter (43.4 against 41.8) and cheaper.
-- **MiniMax M3.1 Flash.** It does cache (35,310 of 35,311) and it is priced in the
-  same band, but Haiku 5.5 beats it on every axis that matters here: 146 against
-  124 tok/s, 43.4 against 42.7, $0.0017 against $0.0024 a turn.
-- **Muse Spark 1.3 Contributor, again.** Re-measured and re-dropped: 164 tok/s on a
-  long generation, but 0 cached tokens on the second pass over the same prefix and
-  4.2-4.9 s to first token. Its sticker price is the cheapest in the catalog and
-  its real cost is still 3.7x Fast.
-- **Step 5 Preview and Sonnet 5.5.** Both clear the speed bar in the abstract, both
-  cost 5-14x Fast a turn ($0.084 and $0.0259), so neither fits the budget this
-  config is built around. Sonnet also measured 94 tok/s here, under the bar.
+- **GLM-5.3 Flash.** 74 tok/s misses the speed gate and $0.0036 a turn is 1.4x the
+  ceiling, for a row less capable than Haiku. It does cache — 36,992 of 37,014 on
+  the second pass, 0.7 s warm — which corrects the 2026-11-09 note that wrote it
+  off as cache-less. The cache was never the problem; the speed was.
+- **MiniMax M3.1 Flash.** It caches (35,072 of 35,308) and clears every gate, so it
+  is held out as redundant rather than rejected: Haiku beats it on speed (146
+  against 118 tok/s), intelligence (43.4 against 42.7) and price ($0.0017 against
+  $0.0024 a turn).
+- **Muse Spark 1.3 Contributor, again.** Re-measured and re-dropped: 120 tok/s on a
+  long generation, but 0 cached tokens on the second pass over the same prefix. Its
+  sticker price is the cheapest in the catalog and its real cost is 3.7x Fast.
+- **Step 5 Preview and Sonnet 5.5.** Step 5 is fast (167 tok/s) and caches, but
+  costs 3.8x Fast a turn; Sonnet sits exactly on the speed gate (100 tok/s) and
+  costs 10x. Neither fits the budget this config is built around.
+- **Nemotron 3.5 Super VL.** The fastest row measured (382 tok/s) and it caches and
+  starts in 1.5 s, but 26.5 intelligence at $0.0045 a turn (1.8x) is a bad trade.
 
 ### What survives, and why
 
