@@ -46,7 +46,8 @@ that justified each drop are in the `excluded:` list of
 
 ## What it still does not cover
 
-- One run per model in this phase; speed uses a median of three, fitness does not.
+- Admitted rows are medians of three rounds; a candidate is measured once, so its
+  first numbers are indicative until it is admitted.
 - Transport time to first byte lives in
   [llm-endpoint-bench](https://github.com/jacano/llm-endpoint-bench), not here.
 - Image input and structured output beyond tool calls.

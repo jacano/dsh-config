@@ -309,7 +309,9 @@ def measure(model: str) -> dict:
         start = time.perf_counter()
         call(model, "".join(CORPUS.format(i=i + 9000) for i in range(lines)) + f"\nnonce {time.time_ns()}", 16)
         points.append(time.perf_counter() - start)
-    slope = (points[2] - points[0]) / ((1400 - 120) * 40) * 1_000_000
+    # A negative slope means the 60k call came back faster than the 5k one:
+    # queue noise, not a negative cost. Clamp it, or the gate reads nonsense.
+    slope = max(0.0, (points[2] - points[0]) / ((1400 - 120) * 40) * 1_000_000)
 
     fixed = "".join(CORPUS.format(i=i + 20000) for i in range(480))
     loop_hits = 0

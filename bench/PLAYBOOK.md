@@ -80,8 +80,8 @@ provider changes something, and record the new round:
 
 ## What is still missing
 
-- Three runs per model in phase 3, so fitness can be treated like speed instead
-  of a single sample.
+- A candidate is measured once; admitted rows are re-measured in three rounds and
+  the medians are what `models.csv` keeps.
 - **Transport TTFB**: it lives in
   [llm-endpoint-bench](https://github.com/jacano/llm-endpoint-bench), not here.
 - Image input and structured output beyond tool calls.

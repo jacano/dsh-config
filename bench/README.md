@@ -82,6 +82,6 @@ serving the same model — transport, short and long calls, concurrency — use
 
 ## Still open
 
-- Phase 3 is one run per model; speed uses a median of three, fitness does not.
+- A candidate is measured once; admitted rows keep medians of three rounds.
 - Transport TTFB lives in the endpoint bench, not here.
 - Images and structured output beyond tool calls are not covered.
