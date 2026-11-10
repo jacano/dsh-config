@@ -70,6 +70,15 @@
               high: high
               xhigh: xhigh
               max: max
+          # Third row, admitted 2026-11-10: 118 tok/s, caches 35,072 of 35,308,
+          # $0.0024 a turn. Haiku beats it on every axis, but a spare row on the
+          # completions route costs nothing and survives an Anthropic outage.
+          - id: minimax/minimax-m3.1-flash
+            name: MiniMax M3.1 Flash
+            contextWindow: 1000000
+            maxTokens: 32768
+            input: [text]
+            reasoningEfforts: *efforts
       # Claude on Command Code speaks Anthropic Messages, not Chat Completions:
       # every claude-* id in GET /provider/v1/models advertises only `/messages`,
       # so it cannot ride the route above. The base URL is the API root, not

@@ -7,7 +7,7 @@ would cost more than it buys, and this has to run on a fresh checkout.
 Checks:
   1. every model row in the patch file is admitted;
   2. every admitted model is in the patch file (no drift either way);
-  3. no row is listed as excluded or redundant;
+  3. no row is listed as excluded;
   4. the default model is configured and admitted, on the right route;
   5. no model id appears twice.
 
@@ -116,7 +116,6 @@ def main() -> int:
     sections = policy_sections(policy_lines)
     admitted = sections.get("admitted", [])
     excluded = sections.get("excluded", [])
-    redundant = sections.get("redundant", [])
     routes = admitted_routes(policy_lines)
 
     problems: list[str] = []
@@ -130,8 +129,6 @@ def main() -> int:
     for model in configured:
         if model in excluded:
             problems.append(f"{model} is configured but listed as excluded")
-        elif model in redundant:
-            problems.append(f"{model} is configured but listed as redundant")
         elif model not in admitted:
             problems.append(f"{model} is configured but not admitted (add it to models-policy.yml)")
 
@@ -160,7 +157,7 @@ def main() -> int:
     print(f"OK: {len(configured)} model rows, all admitted; default is {provider}/{default_model}")
     for model in configured:
         print(f"  - {model}")
-    print(f"\nPolicy holds the line at {len(excluded)} excluded and {len(redundant)} redundant rows.")
+    print(f"\nPolicy holds the line at {len(excluded)} excluded rows.")
     return 0
 
 

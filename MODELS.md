@@ -72,11 +72,13 @@ and left as the default by choice. The gates themselves live in
 - **Drop GLM-5.3 Flash.** It caches, and well, but 74 t/s misses the speed gate and
   $0.0036 a turn is 1.4x the ceiling for a row that is less capable than Haiku. Its
   ZDR upstream was its only argument, and this config does not buy on ZDR.
-- **Do not re-add Spark Contributor, MiniMax, Step 5 or Sonnet.** The first caches
-  nothing; the second clears every gate and is held out only as redundant; Step 5
-  is 3.8x the ceiling and Sonnet 10x. All are listed with their numbers in
-  [models-policy.yml](models-policy.yml), so a later round can re-test rather than
-  re-argue.
+- **MiniMax M3.1 Flash is admitted**, by owner choice: it clears every gate (118
+  t/s, 35,072 cached, $0.0024) and Haiku beats it on all three axes, but a spare row
+  on the completions route costs nothing.
+- **Do not re-add Spark Contributor, Step 5 or Sonnet.** The first two fail on the
+  start, Step 5 is 3.8x the ceiling and Sonnet 10x. All are listed with their
+  numbers in [models-policy.yml](models-policy.yml), so a later round can re-test
+  rather than re-argue.
 
 ---
 

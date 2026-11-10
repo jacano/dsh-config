@@ -83,6 +83,7 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 | Model | Id on the wire | Route |
 | --- | --- | --- |
 | DeepSeek V4.1 Flash Fast (latest) | `deepseek/deepseek-v4.1-flash-fast` | `command-code` |
+| MiniMax M3.1 Flash | `minimax/minimax-m3.1-flash` | `command-code` |
 | Claude Haiku 5.5 | `claude-haiku-5-5` | `command-code-anthropic` |
 
 Claude does not speak Chat Completions on this provider: every `claude-*` id in
@@ -100,17 +101,17 @@ behind. Haiku 5.5 wins the measured comparison and is one menu entry away. Each
 label is the `name` the provider's catalog returns for that id, copied verbatim,
 parentheses included.
 
-Two rows, chosen by measurement rather than by what the catalog offers.
+Three rows, chosen by measurement rather than by what the catalog offers.
 [MODELS.md](MODELS.md) holds the numbers; the short version:
 
-| | Fast | Haiku 5.5 |
-| --- | --- | --- |
-| Role | default | the measured winner |
-| Output rate | 116 tok/s | **146 tok/s** |
-| TTFT, 20-60k prefix | 1.6 s | **1.4 s** |
-| Caches the prefix | yes (36,736 of 36,937) | **yes (60,304 read)** |
-| Intelligence | 39.5 | **43.4** |
-| $ per agent turn | $0.0025 | **$0.0017** |
+| | Fast | MiniMax M3.1 | Haiku 5.5 |
+| --- | --- | --- | --- |
+| Role | default | spare | the measured winner |
+| Output rate | 116 tok/s | 118 tok/s | **146 tok/s** |
+| TTFT, 20-60k prefix | 1.8 s | 1.8 s | **1.8 s** |
+| Caches the prefix | yes (36,736 of 36,937) | yes (35,072 of 35,308) | **yes (60,304 read)** |
+| Intelligence | 39.5 | 42.7 | **43.4** |
+| $ per agent turn | $0.0025 | $0.0024 | **$0.0017** |
 
 The `$/turn` column assumes a 90k prompt (89k of it cached where caching works)
 and 1.5k of output. That assumption decides the ranking: Muse Spark 1.3
@@ -159,8 +160,7 @@ Two scripts, both run before a commit:
   must name the same rows, nothing excluded may appear, and the default must be
   admitted on the route it claims. It exits 1 with the offending row.
 
-23 rows are excluded and one is kept out as redundant; every entry carries the
-measurement that killed it.
+23 rows are excluded; every entry carries the measurement that killed it.
 
 Dropped on 2026-11-09, with the measurement that killed each:
 
@@ -187,10 +187,10 @@ Dropped on 2026-11-10, on the same probes re-run against a 20k prefix:
   ceiling, for a row less capable than Haiku. It does cache — 36,992 of 37,014 on
   the second pass, 0.7 s warm — which corrects the 2026-11-09 note that wrote it
   off as cache-less. The cache was never the problem; the speed was.
-- **MiniMax M3.1 Flash.** It caches (35,072 of 35,308) and clears every gate, so it
-  is held out as redundant rather than rejected: Haiku beats it on speed (146
-  against 118 tok/s), intelligence (43.4 against 42.7) and price ($0.0017 against
-  $0.0024 a turn).
+- **MiniMax M3.1 Flash.** Admitted 2026-11-10, by owner choice: it caches (35,072
+  of 35,308), runs at 118 tok/s and costs $0.0024 a turn, so it clears every gate.
+  Haiku beats it on all three axes, and the row is kept anyway — a spare on the
+  completions route costs nothing and survives an Anthropic outage.
 - **Muse Spark 1.3 Contributor, again.** 120 tok/s and, once warm, the cheapest row
   measured: 8/8 identical requests read 35,939 cached tokens, putting it at $0.00058
   a turn. It fails on the start — 4.5 s median, up to 5.3 s — and nothing else.
