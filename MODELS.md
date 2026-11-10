@@ -5,6 +5,13 @@ Runtime numbers on this machine, same probes for every row. Prices from
 
 ## 2026-11-10 round: cache, latency and cost per turn
 
+The gates are recomputed as quantiles of two frozen populations rather than
+hand-picked numbers: [catalog-2026-11-10.csv](catalog-2026-11-10.csv) for cost and
+capability, [measurements-2026-11-10.csv](measurements-2026-11-10.csv) for speed and
+latency. `python scripts/percentile_gates.py` prints the gate values, their 95%
+bootstrap intervals and each row's percentile rank. The table below is the raw
+evidence those gates consume.
+
 The 2026-11-09 round ranked rows by sticker price and a single cold call. That
 missed the thing that decides an agent turn: whether the prefix caches. This round
 sends the same ~20k prefix twice with `max_tokens: 16`, so pass two measures the

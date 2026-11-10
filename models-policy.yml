@@ -13,43 +13,64 @@ version: 1
 updated: 2026-11-10
 
 criteria:
-  # Every gate below is measured on this machine, never read off a vendor page.
-  # A row must clear all five. Order matters: cost never admits a row on its own,
-  # and cache is the one gate that cannot be traded away.
+  # No hand-picked thresholds. Every gate is a quantile of a frozen population,
+  # and every aggregate is a median or a quantile, never a mean: n is small and
+  # one 382 tok/s row moves an average without moving a median.
+  #
+  # Recompute with: python scripts/percentile_gates.py
 
-  speed:
-    # End-to-end output rate on a 1,600-token generation.
-    min_output_tokens_per_second: 100
-    protects: "what you watch while the answer streams. 95 vs 100 is inside measurement noise; 60 is not."
+  method:
+    populations:
+      speed: "measurements-2026-11-10.csv, locally measured rows (n=12)"
+      latency: "measurements-2026-11-10.csv, locally measured rows (n=10)"
+      cost: "catalog-2026-11-10.csv, best-case cost per turn (n=97)"
+      capability: "catalog-2026-11-10.csv, scored models (n=74)"
+    aggregation: "median and quantiles, with 95% bootstrap CI over 2,000 resamples"
+    rule: "a model must clear every gate; cost alone never admits a row"
 
-  latency:
-    # Time to the first visible token on a 20-60k prefix.
-    max_ttft_seconds: 2.5
-    protects: "how long a turn takes to start. The softest gate: agentic work is delegated, so a second more start is amortized over a long run."
-    caveat: "reasoning models spend this window thinking, so the number moves with effort and is the noisiest of the five."
+  gates:
+    speed:
+      rule: ">= P25 of measured speeds"
+      value: 98.75
+      ci95: [71.5, 118.0]
+      protects: "what you watch while the answer streams"
+    latency:
+      rule: "<= P50 of measured latencies"
+      value: 1.875
+      ci95: [1.575, 3.450]
+      protects: "how long a turn takes to start"
+    cost:
+      rule: "<= P25 of the catalog's best-case cost per turn"
+      value: 0.0048
+      ci95: [0.0020, 0.0080]
+      protects: "the budget; invisible in the product"
+    capability:
+      rule: ">= P50 of the catalog's scored models"
+      value: 38.15
+      ci95: [33.7, 39.6]
+      protects: "not shipping a row that is worse than typical"
+    cache:
+      rule: "hit rate >= 0.80 over >= 8 warm requests"
+      value: 0.80
+      protects: "cost and tail latency at once; a miss re-bills the prefix"
+    access:
+      rule: "no 403 MODEL_NOT_IN_PLAN"
+      protects: "an unreachable row is a broken menu entry"
 
-  cache:
-    # A second identical request must read cached tokens back.
-    require_prefix_cache: true
-    protects: "cost and tail latency at once. A cache miss re-bills the whole prefix and re-processes it, so it fails the price gate too."
-    caveat: "not a stable property, and slow to warm: GLM-5.3 Flash read 0 cached on 2026-11-09 and 36,992 on 2026-11-10, and the Muse rows read 0 on pass 2 then 35,9xx from pass 3-4 on. A two-pass probe undercounts; use four or more."
+  # With n < 30 on speed and latency these quantiles are provisional: the P25
+  # speed gate could sit anywhere in [71.5, 118]. So a row inside a gate's CI is
+  # borderline, not rejected — GPT-6 Luna misses three gates by a hair and is the
+  # only true borderline in the 2026-11-10 round.
+  caveat: "n<30 for speed and latency; treat the quantiles as bands, not lines"
 
-  cost:
-    # Agent turn = 90k prompt (89k cached where caching works) + 1.5k output.
-    max_cost_per_turn_usd: 0.0025
-    protects: "nothing the user feels; it is the owner's budget ceiling, pinned to DeepSeek V4.1 Flash Fast."
-    note: "the only gate whose relaxation is invisible in the product — and the one the owner set hardest."
+  # The cache needed four passes to show up on the Muse rows, so a probe that
+  # stops at two reports 0 on models that do cache. Measure with >= 4.
+  cache_probe: ">= 4 identical requests before trusting a zero"
 
-  access:
-    # A row that answers 403 MODEL_NOT_IN_PLAN is unusable and cannot be admitted.
-    require_plan_access: true
-    protects: "nothing: an unreachable row is a broken menu entry."
-
-  # Measured 2026-11-10. The open trade, if the owner ever wants it: relax
-  # latency to ~3.5 s and Muse Spark 1.2 Contributor enters at $0.00058/turn,
-  # 4.2x cheaper than Fast, still caching at 113 tok/s. It is the only pending
-  # row whose whole case is a single gate.
-  open_trade: "latency 2.5 s -> 3.5 s would admit meta/muse-spark-1.2-contributor"
+  # Measured 2026-11-10. The open trade, if the owner ever wants it: the latency
+  # gate's own CI reaches 3.45 s, and at that value Muse Spark 1.2 Contributor
+  # enters at $0.00058/turn, 4.2x cheaper than Fast, still caching at 113 tok/s.
+  open_trade: "latency at the CI upper bound (3.45 s) would admit meta/muse-spark-1.2-contributor"
 
 # Rows the config is allowed to serve. Keep in sync with the patch file:
 # the checker fails if either side drifts.

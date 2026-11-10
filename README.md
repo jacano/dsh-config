@@ -120,31 +120,47 @@ which is what keeps it out.
 
 ### Model policy
 
-[models-policy.yml](models-policy.yml) is the gate every row must clear before it
-reaches the menu, and the record of what was measured and rejected. Five filters,
-all measured here, none read off a vendor page:
+[models-policy.yml](models-policy.yml) holds the gates, and they are **quantiles of
+frozen populations, not hand-picked numbers**. Two data files make that
+reproducible: [catalog-2026-11-10.csv](catalog-2026-11-10.csv) (97 priced models,
+frozen) and [measurements-2026-11-10.csv](measurements-2026-11-10.csv) (12 rows
+measured here).
 
-- **Speed ≥ 100 tok/s** end to end — what you watch while the answer streams.
-- **Latency ≤ 2.5 s** to the first visible token — how long a turn takes to start.
-  The softest of the five: agentic work is delegated, so a second more start is
-  amortized over a long run.
-- **The prefix must cache** — a second identical request has to read cached tokens
-  back. The one filter that cannot be traded: a miss re-bills the whole prefix and
-  re-processes it, so it breaks the cost gate too.
-- **≤ $0.0025 per agent turn**, the Fast ceiling. The only filter whose relaxation
-  is invisible in the product, and the one pinned hardest.
-- **Reachable on the plan** — no `403 MODEL_NOT_IN_PLAN`.
+| Gate | Rule | Value | 95% CI |
+| --- | --- | --- | --- |
+| Speed | ≥ P25 of measured rows | **98.75 tok/s** | 71.5-118.0 |
+| Latency | ≤ P50 of measured rows | **1.88 s** | 1.58-3.45 |
+| Cost | ≤ P25 of the catalog | **$0.0048/turn** | 0.0020-0.0080 |
+| Capability | ≥ P50 of scored models | **38.15** | 33.7-39.6 |
+| Cache | hit rate ≥ 80% over ≥ 8 warm requests | 0.80 | — |
+| Access | no `403 MODEL_NOT_IN_PLAN` | — | — |
+
+Aggregates are medians and quantiles, never means: one 382 tok/s row moves an
+average without moving a median. Percentiles, because "fast" and "cheap" only mean
+something against a population — 100 tok/s was a number someone picked, P25 of the
+measured set is a position in it.
+
+The honest caveat: speed and latency have n < 30, so their quantiles are provisional
+and the P25 speed gate could sit anywhere in 71.5-118. A row inside a gate's CI is
+therefore **borderline, not rejected** — GPT-6 Luna misses three gates by a hair and
+is the only borderline of the round. And cache needs four passes to trust a zero:
+the Muse rows read 0 on pass 2 and 35,9xx from pass 3.
 
 Price never admits a row on its own: the cheapest row measured, Muse Spark 1.2
-Contributor at $0.00058 a turn, is 4.2x cheaper than Fast and still out, because
-it starts in 3.3-3.6 s. That is the one open trade recorded in the policy file —
-relax latency to 3.5 s and it enters; nothing else changes.
+Contributor at $0.00058 a turn, is 4.2x cheaper than Fast and still out, because it
+starts in 3.45 s — and 3.45 s is exactly the CI's upper bound for the latency gate,
+which is why the policy records it as the one open trade.
 
-`python scripts/check_models.py` enforces it: the patch file and the policy must
-name the same rows, nothing excluded may appear, and the default must be admitted
-on the route it claims. It exits 1 with the offending row, so a model that fails a
-gate cannot slip back in through a hurried edit. 23 rows are excluded and one is
-kept out as redundant; every entry carries the measurement that killed it.
+Two scripts, both run before a commit:
+
+- `python scripts/percentile_gates.py` computes the quantiles, their CIs, and each
+  model's percentile rank and verdict.
+- `python scripts/check_models.py` enforces the config side: patch file and policy
+  must name the same rows, nothing excluded may appear, and the default must be
+  admitted on the route it claims. It exits 1 with the offending row.
+
+23 rows are excluded and one is kept out as redundant; every entry carries the
+measurement that killed it.
 
 Dropped on 2026-11-09, with the measurement that killed each:
 
