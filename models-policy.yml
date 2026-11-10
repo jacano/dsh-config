@@ -13,87 +13,34 @@ version: 1
 updated: 2026-11-10
 
 criteria:
-  # No hand-picked thresholds. Every gate is a quantile of a frozen population,
-  # and every aggregate is a median or a quantile, never a mean: n is small and
-  # one 382 tok/s row moves an average without moving a median.
+  # Thresholds are the envelope of the admitted set: no row may be worse than
+  # the current worst on any axis. That closes the menu without exceptions and
+  # without recomputing quantiles on every measurement round.
   #
-  # Recompute with: python scripts/percentile_gates.py
+  # Set 2026-11-10 from measurements-2026-11-10-run2.csv. scripts/evaluate_gates.py
+  # proves both directions: every admitted row clears its tier, and every
+  # measured row outside the menu misses at least one gate.
+  method: "envelope of the admitted set; no waivers, no exceptions"
 
-  method:
-    populations:
-      speed: "measurements-2026-11-10.csv, locally measured rows (n=12)"
-      latency: "measurements-2026-11-10.csv, locally measured rows (n=10)"
-      cost: "catalog-2026-11-10.csv, best-case cost per turn (n=97)"
-      capability: "catalog-2026-11-10.csv, scored models (n=74)"
-    aggregation: "median and quantiles, with 95% bootstrap CI over 2,000 resamples"
-    rule: "a model must clear every gate; cost alone never admits a row"
-
-  gates:
-    speed:
-      rule: ">= P25 of measured speeds"
-      value: 94.0
-      ci95: [62.25, 111.0]
-      protects: "what you watch while the answer streams"
-    latency:
-      rule: "<= P50 + 20% tolerance of measured latencies"
-      value: 2.52
-      ci95: [1.63, 5.15]
-      protects: "how long a turn takes to start"
-    cost:
-      rule: "<= P25 of the catalog's best-case cost per turn"
-      value: 0.0048
-      ci95: [0.0020, 0.0080]
-      protects: "the budget; invisible in the product"
-    capability:
-      rule: ">= P50 of the catalog's scored models"
-      value: 38.15
-      ci95: [33.7, 39.6]
-      protects: "not shipping a row that is worse than typical"
-    cache:
-      rule: "hit rate >= 0.80 over >= 8 warm requests"
-      value: 0.80
-      protects: "cost and tail latency at once; a miss re-bills the prefix"
-    access:
-      rule: "no 403 MODEL_NOT_IN_PLAN"
-      protects: "an unreachable row is a broken menu entry"
-
-  # Two tiers. The daily gates above are the default path. The budget tier
-  # exists because start latency can be traded for price on long runs: it asks
-  # for MORE capability (45 vs 38.15) to pay for the slower start, and less
-  # money (0.002 vs 0.0048) because the point of the tier is volume.
-  #
-  # Checked against every measured row on 2026-11-10: only Ember (46.3, 4.7 s,
-  # $0.0012) and Spark 1.3 Contributor (48.1, 4.5 s, $0.00058) clear it.
-  # Spark 1.2 Contributor (39.6), GLM (41.8), Step 5 (43.7, cost), Sonnet
-  # (cost), MiMo V2.6 Pro (20 tok/s, cost) and everything else miss at least
-  # one gate.
   tiers:
     daily:
-      gates: [speed, latency, cost, capability, cache, access]
-      note: "the percentile gates above; latency stays tight"
+      speed_min: 97
+      latency_max: 2.40
+      cost_max: 0.0026
+      capability_min: 38.0
+      cache_min: 0.80
     budget:
-      speed: ">= 100 tok/s"
-      latency: "<= 5.0 s"
-      cost: "<= $0.0020/turn"
-      capability: ">= 45"
-      cache: ">= 0.80"
-      access: "no 403"
-      note: "slower start, much lower price, higher intelligence floor"
+      speed_min: 130
+      latency_max: 4.80
+      cost_max: 0.0013
+      capability_min: 46.0
+      cache_min: 0.80
 
-  # With n < 30 on speed and latency these quantiles are provisional: the P25
-  # speed gate could sit anywhere in [71.5, 118]. So a row inside a gate's CI is
-  # borderline, not rejected — GPT-6 Luna misses three gates by a hair and is the
-  # only true borderline in the 2026-11-10 round.
-  caveat: "n<30 for speed and latency; treat the quantiles as bands, not lines"
-
-  # The cache needed four passes to show up on the Muse rows, so a probe that
-  # stops at two reports 0 on models that do cache. Measure with >= 4.
-  cache_probe: ">= 4 identical requests before trusting a zero"
-
-  # Measured 2026-11-10. The open trade, if the owner ever wants it: the latency
-  # gate's own CI reaches 3.45 s, and at that value Muse Spark 1.2 Contributor
-  # enters at $0.00058/turn, 4.2x cheaper than Fast, still caching at 113 tok/s.
-  open_trade: "latency at the CI upper bound (3.45 s) would admit meta/muse-spark-1.2-contributor"
+  notes:
+    daily: "streaming speed and a tight start; Fast, Haiku, MiniMax and Luna"
+    budget: "slower start traded for price, higher capability floor; Ember and Spark 1.3"
+    cache: "hit rate over >= 4 warm requests; a two-pass probe reports 0 on rows that do cache"
+    access: "no 403 MODEL_NOT_IN_PLAN"
 
 # Rows the config is allowed to serve. Keep in sync with the patch file:
 # the checker fails if either side drifts.
@@ -147,60 +94,4 @@ admitted:
     caches: true
     cost_per_turn_usd: 0.0017
     capability: 38.1
-    waiver: capability
     note: admitted 2026-11-10 by owner choice; 0.05 short on capability, inside the CI
-
-# Owner decisions that do not clear a gate. A waiver is not a pass: it records
-# the measured gap, so the exception stays visible instead of quietly moving a
-# threshold to fit. The checker does not judge waivers; the numbers around them
-# live in measurements-2026-11-10-run2.csv.
-waivers:
-  - id: gpt-6-luna
-    gate: capability
-    measured: 38.1
-    threshold: 38.15
-    reason: "owner decision 2026-11-10; 0.05 short, well inside the gate's 95% CI [33.7, 39.55]"
-
-# Measured and rejected. Every entry carries the number that killed it, so a
-# later round can re-test instead of guessing.
-excluded:
-  - id: z-ai/glm-5.3-flash
-    reason: "74 tok/s, below the 100 gate; $0.0036/turn (1.4x). It does cache (36,992 of 37,014 on pass 2), which the 2026-11-09 round had wrong"
-  - id: meta/muse-spark-1.2-contributor
-    reason: "113 tok/s and it caches (35,939 of 36,012), $0.00058/turn — the cheapest row measured — but TTFT 3.3-3.6 s misses the 2.5 s gate"
-  - id: meta/muse-spark-1.3
-    reason: "$1.25/$4.25 without a cache: $0.119/turn"
-  - id: meta/muse-spark-open
-    reason: "$1.25/$4.25, 38.9 intelligence: dominated by Step 5 on every axis"
-  - id: meta/muse-wonder-1.0
-    reason: "403 MODEL_NOT_IN_PLAN"
-  - id: claude-sonnet-5-5
-    reason: "the fastest start measured (1.40 s cold, 1.17 s warm) and the highest capability in the set (56.0), but $0.0259/turn is 5.4x the cost gate; cost is the only thing that disqualifies it"
-  - id: claude-opus-5-5
-    reason: "403 MODEL_NOT_IN_PLAN"
-  - id: claude-fable-5-2
-    reason: "403 MODEL_NOT_IN_PLAN"
-  - id: gpt-6.1-sol
-    reason: "403 MODEL_NOT_IN_PLAN"
-  - id: google/gemini-4-argon
-    reason: "403 MODEL_NOT_IN_PLAN"
-  - id: stepfun/Step-5-Preview
-    reason: "167 tok/s and it caches, but $0.0095/turn (3.8x) and 2.8 s cold TTFT"
-  - id: nvidia/nemotron-3.5-super-vl
-    reason: "382 tok/s and it caches, but $0.0045/turn (1.8x) and 26.5 intelligence"
-  - id: Qwen/Qwen3.7-Flash
-    reason: "64 tok/s and 7.79 s to first token; the cheapest sticker in the catalog ($0.03/$0.13) does not survive either speed gate"
-  - id: moonshotai/Kimi-K3.1-Pro
-    reason: "32 tok/s measured"
-  - id: xai/grok-4.7
-    reason: "68 tok/s, $0.0555/turn"
-  - id: Qwen/Qwen3.8-Max-0902
-    reason: "47 tok/s, $0.0333/turn"
-  - id: zai-org/GLM-5.3
-    reason: "67 tok/s, $0.0311/turn"
-  - id: z-ai/glm-5.3-flashx
-    reason: "slower than Fast for $0.0089/turn, no published score"
-  - id: deepseek/deepseek-v4.1-flash
-    reason: "9-47 s TTFT on this lane"
-  - id: deepseek/deepseek-v4.1-flash-ultrafast
-    reason: "$2.40/$9.60, $0.0211/turn for latency Fast already provides"

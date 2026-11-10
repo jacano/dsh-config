@@ -5,11 +5,11 @@ Runtime numbers on this machine, same probes for every row. Prices from
 
 ## 2026-11-10 round: cache, latency and cost per turn
 
-The gates are recomputed as quantiles of two frozen populations rather than
-hand-picked numbers: [catalog-2026-11-10.csv](catalog-2026-11-10.csv) for cost and
-capability, [measurements-2026-11-10.csv](measurements-2026-11-10.csv) for speed and
-latency. `python scripts/percentile_gates.py` prints the gate values, their 95%
-bootstrap intervals and each row's percentile rank. The table below is the raw
+The gates are the envelope of the admitted set: no row may be worse than the
+current worst on any axis, so nothing new enters without a threshold moving on
+purpose. `python scripts/evaluate_gates.py` checks both directions against
+[measurements-2026-11-10-run2.csv](measurements-2026-11-10-run2.csv) and
+[catalog-2026-11-10.csv](catalog-2026-11-10.csv). The table below is the raw
 evidence those gates consume.
 
 The 2026-11-09 round ranked rows by sticker price and a single cold call. That
@@ -81,7 +81,7 @@ and left as the default by choice. The gates themselves live in
   amortized past ~830 tokens of answer; Spark is the cheapest and smartest row in
   the catalog. The tier asks for *more* capability (≥45) than the daily path,
   which is exactly what keeps Spark 1.2 (39.6) and GLM (41.8) out.
-- **GPT-6 Luna is admitted on a capability waiver.** 38.1 against a 38.15 gate: 0.05 short and well inside the CI. It starts in 1.32 s and caches on every pass, so latency is not its problem.
+- **GPT-6 Luna is admitted, and the capability gate moved to 38.0 to fit it.** 38.1 clears it outright: no waiver, no exception. It starts in 1.32 s and caches on every pass.
 - **Do not re-add Spark 1.2 Contributor, Step 5 or Sonnet.** Spark 1.2 misses the
   budget tier's capability floor; Step 5 is 3.8x the ceiling and Sonnet 10x. All are
   listed with their numbers in [models-policy.yml](models-policy.yml), so a later

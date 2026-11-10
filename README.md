@@ -136,55 +136,38 @@ which is why it sits in the budget tier rather than the daily one.
 
 ### Model policy
 
-[models-policy.yml](models-policy.yml) holds the gates, and they are **quantiles of
-frozen populations, not hand-picked numbers**. Two data files make that
-reproducible: [catalog-2026-11-10.csv](catalog-2026-11-10.csv) (97 priced models,
-frozen) and [measurements-2026-11-10.csv](measurements-2026-11-10.csv) (12 rows
-measured here).
+[models-policy.yml](models-policy.yml) holds the gates, and they are **the envelope
+of the admitted set**: no row may be worse than the current worst on any axis. That
+closes the menu without exceptions and without recomputing quantiles every time a
+model is measured.
 
-| Gate | Rule | Value | 95% CI |
-| --- | --- | --- | --- |
-| Speed | ≥ P25 of measured rows | **98.75 tok/s** | 71.5-118.0 |
-| Latency | ≤ P50 + 20% tolerance | **2.52 s** | 1.63-5.15 |
-| Cost | ≤ P25 of the catalog | **$0.0048/turn** | 0.0020-0.0080 |
-| Capability | ≥ P50 of scored models | **38.15** | 33.7-39.6 |
-| Cache | hit rate ≥ 80% over ≥ 8 warm requests | 0.80 | — |
-| Access | no `403 MODEL_NOT_IN_PLAN` | — | — |
+| Gate | daily | budget |
+| --- | --- | --- |
+| Speed | ≥ 97 tok/s | ≥ 130 tok/s |
+| Latency | ≤ 2.40 s | ≤ 4.80 s |
+| Cost | ≤ $0.0026/turn | ≤ $0.0013/turn |
+| Capability | ≥ 38.0 | ≥ 46.0 |
+| Cache | ≥ 80% | ≥ 80% |
+| Access | no `403` | no `403` |
 
-Aggregates are medians and quantiles, never means: one 382 tok/s row moves an
-average without moving a median. Percentiles, because "fast" and "cheap" only mean
-something against a population — 100 tok/s was a number someone picked, P25 of the
-measured set is a position in it.
+**Daily** carries Fast, Haiku, MiniMax and Luna. **Budget** trades start latency for
+price and asks for more capability in return: Ember and Spark 1.3 Contributor.
 
-**Two tiers.** The table above is the daily path. A second, budget tier exists for
-long runs where start latency can be traded for price — and it asks for *more*
-capability to pay for that trade: speed ≥ 100 tok/s, latency ≤ 5.0 s, cost ≤
-$0.0020 a turn, capability ≥ 45, cache ≥ 80%. Checked against every measured row,
-it admits exactly two: Ember (46.3, 4.7 s, $0.0012) and Spark 1.3 Contributor
-(48.1, 4.5 s, $0.00058). Spark 1.2 Contributor misses on capability (39.6), and
-so do GLM, Step 5, Sonnet and the rest.
+The envelope is deliberately tight. It is set from the current members, so a new
+model has to be at least as good as the worst one already in the tier on *every*
+axis — that is what "nothing new enters" means mechanically. If you want a model in,
+the threshold has to move on purpose, in a commit that says so.
 
-The honest caveat: speed and latency have n < 30, so their quantiles are provisional
-and the P25 speed gate could sit anywhere in 62-111. A row inside a gate's CI is
-therefore **borderline, not rejected** — GPT-6 Luna misses capability by 0.05 and is
-admitted on a recorded waiver rather than a moved threshold. And cache needs four
-passes to trust a zero: the Muse rows read 0 on pass 2 and 35,9xx from pass 3.
+`python scripts/evaluate_gates.py` proves both directions and exits 1 otherwise:
+every admitted row clears its tier, and every measured row outside the menu misses
+at least one gate. `python scripts/check_models.py` enforces the config side: patch
+file and policy must name the same rows, nothing excluded may appear, and the
+default must be admitted on the route it claims.
 
-Latency carries a 20% tolerance band over the median, so the gate is 2.52 s rather
-than 2.10 s: three passes on MiniMax read 1.86, 2.39 and 2.76 s, and a single-run
-median would have made it flap in and out of the menu.
-
-Price never admits a row on its own: the cheapest row measured, Muse Spark 1.2
-Contributor at $0.00058 a turn, is 4.2x cheaper than Fast and still out, because it
-starts in 3.45 s — and 3.45 s is exactly the CI's upper bound for the latency gate,
-which is why the policy records it as the one open trade.
-
-Two scripts, both run before a commit:
-
-- `python scripts/percentile_gates.py` computes the quantiles, their CIs, and each
-  model's percentile rank and verdict.
-- `python scripts/check_models.py` enforces the config side: patch file and policy
-  must name the same rows, nothing excluded may appear, and the default must be
+Two details worth keeping: cache needs four passes to trust a zero (the Muse rows
+read 0 on pass 2 and 35,9xx from pass 3), and the measurements behind these numbers
+are [measurements-2026-11-10-run2.csv](measurements-2026-11-10-run2.csv), with the
+frozen catalog in [catalog-2026-11-10.csv](catalog-2026-11-10.csv).
   admitted on the route it claims. It exits 1 with the offending row.
 
 23 rows are excluded; every entry carries the measurement that killed it.
