@@ -1,7 +1,7 @@
 # bench — choosing the models
 
-One process, one table. This half decides which models belong in the menu; it
-never edits the DSH configuration.
+One process decides which models go in the menu. It never edits the DSH
+configuration; that is a separate change in [`../dsh/`](../dsh/).
 
 ```bash
 python bench/evaluate.py                  # the stored table against the gates
@@ -12,76 +12,79 @@ python bench/evaluate.py --model <id> --capability 42 --cost 0.0024   # live run
 ## The funnel
 
 ```
-catalog snapshot  ── phase 1  static    capability and price, free
-                        └─ survivors  ── phase 2  measured  speed, latency, cache
-                             └─ measured ── phase 3  fitness   prefill, cache loop,
-                                                              parallelism, errors, tools
-                                  └─ admitted
+catalog  ── phase 1  static     capability and price, no tokens spent
+              └─ survivors ── phase 2  measured   speed, latency, cache
+                   └─ measured ── phase 3  fitness   prefill, cache in a loop,
+                                                     parallelism, errors, tool calls
+                        └─ admitted, and only then written to the config
 ```
 
-The limits are in [`models-policy.yml`](models-policy.yml), not repeated here: they
-have moved every time a row entered or left, and a document that quotes them goes
-stale the next day. `python bench/evaluate.py` prints them with the live table.
+The limits live in [`models-policy.yml`](models-policy.yml); they are not copied
+here, because they move whenever a row enters or leaves. `evaluate.py` prints them
+with the table, and exits non-zero if an admitted row misses a gate, has no
+fitness data, or is not in the config.
 
-`--model` runs the phases in that order and stops at the first failure, so a model
-that cannot pass phase 1 is never called. Every threshold is the envelope of the
-admitted rows: a new model has to beat the worst admitted one on every axis, and
-nothing enters without a threshold moving on purpose.
+Phase 1 costs nothing: a row that fails capability or price is never called.
 
-`--check` (no argument) also crosses the policy against `dsh/cordis.patch.yml`, so
-the menu and the benchmark cannot drift apart.
+## The phases, and what a failure means
+
+**Measured.** Speed is the median of three 1,600-token generations; latency is
+the median of three warm passes after two priming requests; cache must read back
+on those passes. A route that does not cache re-bills the context every turn.
+
+**Fitness.** How the route behaves, not the model:
+
+- *Prefill cost* — extra time per 1k prompt tokens, `(ttft_60k - ttft_5k) / 55k`.
+  A provider that does not batch prefill makes every long context pay for it.
+- *Cache in a loop* — five identical turns, counting from the third. The first is
+  always cold, and a probe that includes it can never look healthy.
+- *Parallel retention* — four requests at once, aggregate throughput over
+  `4 × solo`. A route that folds under four makes a session crawl.
+- *Error budget* — ten short calls, counting non-200 responses.
+- *Tool calls* — one reply must carry two tools at once, right names, parseable
+  arguments. The closest thing to the real loop.
+
+Claude rows go through `/messages` with a `cache_control` breakpoint: they refuse
+`/chat/completions` and cache nothing without it.
 
 ## Files
 
 | File | What it is |
 | --- | --- |
-| [`evaluate.py`](evaluate.py) | The whole process: phases, gates, live measurement, config sync. |
-| [`models-policy.yml`](models-policy.yml) | Decisions only: the gates, which ids are admitted, and which are excluded with the number that killed them. No per-model metrics — those live in `models.csv`, so this file cannot go stale. |
-| [`models.csv`](models.csv) | The only place per-model metrics live: speed, latency, cache, prefill, loop cache, retention, errors, tools. `evaluate.py` prints them from here. |
-| [`catalog-2026-11-10.csv`](catalog-2026-11-10.csv) | Frozen snapshot of the priced catalog. Phase 1 runs on this and costs nothing. |
-| [`AGENTIC.md`](AGENTIC.md) | Why phase 3 exists and what each gate detects. |
-| [`PLAYBOOK.md`](PLAYBOOK.md) | The runbook: new model, new API, re-baselining. |
-
-## One fact, one place
-
-| Fact | Lives in |
-| --- | --- |
-| Price, catalog capability | `catalog-2026-11-10.csv` |
-| Speed, latency, cache, prefill, retention, errors, tools | `models.csv` |
-| Gates and the admitted/excluded decision | `models-policy.yml` |
-| What the menu actually serves | `dsh/cordis.patch.yml` |
-
-The policy deliberately carries no per-model numbers: an admitted row is an id and
-a role. `evaluate.py` joins the decision with the measurements, so the table it
-prints is always the latest one. It also fails if an admitted id has no row in
-`models.csv`, which is how a stale decision gets caught.
+| `evaluate.py` | The whole process: phases, gates, live measurement, config sync. |
+| `models-policy.yml` | Decisions: the gates, which ids are admitted, which are excluded and why. No per-model metrics. |
+| `models.csv` | The only place metrics live. Admitted rows are medians of three rounds; the `rounds` column says so. |
+| `catalog-2026-11-10.csv` | Frozen snapshot of the priced catalog, used by phase 1. |
 
 ## Adding a model
 
-1. **Static, free.** Get capability (Artificial Analysis or the catalog) and the
-   price per turn. If either fails, add the row to `excluded:` in the policy with
-   the number that killed it — no tokens spent.
-2. **Live run.**
+1. **Static, free.** Get capability and price per turn. If either fails, add the
+   id to `excluded:` with the number that killed it and stop.
+2. **Live.**
 
    ```bash
    python bench/evaluate.py --model <id> --capability <score> --cost <usd-per-turn>
    ```
 
-   It prints each phase and a CSV line ready for `models.csv`.
-3. **If it clears everything:** add the line to `models.csv`, add the model to
-   `admitted:` in the policy, and add it to `dsh/cordis.patch.yml`.
+   It runs the phases in order, stops at the first failure, and prints a CSV row.
+3. **If it clears everything:** append the row to `models.csv`, add the id to
+   `admitted:`, and add the model to `models:` in
+   [`../dsh/cordis.patch.yml`](../dsh/cordis.patch.yml).
 4. **Prove it:** `python bench/evaluate.py` must exit 0.
 
-Details in [PLAYBOOK.md](PLAYBOOK.md).
-
-## Route versus model
-
-This half judges whether a **model** is worth having. For comparing two gateways
-serving the same model — transport, short and long calls, concurrency — use
+A new subscription needs no new code: the URL, `api` and headers live in the DSH
+config, and the scripts only take a model id. For comparing two gateways serving
+the same model — transport, short and long calls, concurrency — use
 [jacano/llm-endpoint-bench](https://github.com/jacano/llm-endpoint-bench).
+
+## Re-baselining
+
+The gates are the envelope of the admitted rows: nothing enters without a
+threshold moving on purpose, in a commit that names the number. Re-run the funnel
+when a provider changes something, and replace the round medians in `models.csv`.
 
 ## Still open
 
-- A candidate is measured once; admitted rows keep medians of three rounds.
+- A candidate is measured once; admitted rows are re-measured in three rounds.
 - Transport TTFB lives in the endpoint bench, not here.
-- Images and structured output beyond tool calls are not covered.
+- Image input and structured output beyond tool calls.
