@@ -83,7 +83,7 @@ and left as the default by choice. The gates themselves live in
   which is exactly what keeps Spark 1.2 (39.6) and GLM (41.8) out.
 - **GPT-6 Luna is admitted, and the capability gate moved to 38.0 to fit it.** 38.1 clears it outright: no waiver, no exception. It starts in 1.32 s and caches on every pass.
 - **Do not re-add Spark 1.2 Contributor, Step 5 or Sonnet.** Spark 1.2 misses the
-  budget tier's capability floor; Step 5 is 3.8x the ceiling and Sonnet 10x. All are
+  static capability floor; Step 5 is 3.8x the ceiling and Sonnet 10x. All are
   listed with their numbers in [models-policy.yml](models-policy.yml), so a later
   round can re-test rather than re-argue.
 
