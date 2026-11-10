@@ -25,9 +25,9 @@ speed and latency on the wire, and provider fitness on the route:
 | Model | Role | tok/s | Prefill | $/turn |
 | --- | --- | ---: | ---: | ---: |
 | DeepSeek V4.1 Flash Fast | default | 113 | 19.1 ms/1k | $0.0025 |
-| Claude Haiku 5.5 | fastest, cheapest | 146 | 22.7 ms/1k | $0.0017 |
+| Claude Haiku 5.5 | fastest | 146 | 22.7 ms/1k | $0.0017 |
 | MiniMax M3.1 Flash | spare on the same route | 107 | 23.1 ms/1k | $0.0024 |
-| GPT-6 Luna | long-context reader | 89 | **1.6 ms/1k** | $0.0017 |
+| GPT-6 Luna | cheapest (tied), best prefill | 89 | **1.6 ms/1k** | $0.0017 |
 
 The numbers and the gates behind them are in [bench/](bench/); the file that
 makes them real is [`dsh/cordis.patch.yml`](dsh/cordis.patch.yml).
