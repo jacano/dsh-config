@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PATCH = ROOT / "dsh" / "cordis.patch.yml"
+PATCH = ROOT.parent / "dsh" / "cordis.patch.yml"
 POLICY = ROOT / "models-policy.yml"
 
 MODEL_ROW = re.compile(r"^(?P<indent>\s+)- id:\s*(?P<id>\S+)\s*$")

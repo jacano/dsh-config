@@ -16,6 +16,7 @@ by `evaluate_gates.py`: an admitted row without fitness data fails the run.
 | Cache from turn 3 | ≥ 80% | the route is not honouring the prefix cache; every turn re-bills |
 | Parallel retention | ≥ 0.60 | four concurrent calls collapse the throughput; subagents and tool fan-out suffer |
 | Errors in 10 calls | ≤ 1 | the route is unstable; a loop that fails one call in ten is unusable |
+| Tool calls valid | ≥ 90% | two tools in one reply, right names, parseable arguments — the closest thing to the real loop |
 
 The prefill number is a slope, not a time: `(ttft_60k - ttft_5k) / 55k tokens`.
 It separates the fixed gateway cost from the cost of reading the context, and it
@@ -33,6 +34,8 @@ Command Code and prints the gates:
 - **parallel**: four requests at once, aggregate throughput divided by
   `4 × solo` throughput.
 - **errors**: ten short calls, counting non-200 responses.
+- **tools**: one reply must carry `get_weather` and `get_time` together, with
+  parseable arguments. Two attempts; the rate is what counts.
 
 Claude rows go through `/messages` with a `cache_control` breakpoint, because
 they refuse `/chat/completions` and do not cache without it.
@@ -41,15 +44,15 @@ they refuse `/chat/completions` and do not cache without it.
 
 One run per model, same host, same hour.
 
-| Model | Prefill ms/1k | Cache from t3 | 4x retention | Errors | Verdict |
-| --- | ---: | ---: | ---: | ---: | --- |
-| DeepSeek V4.1 Flash Fast | 19.1 | 100% | 0.96 | 0/10 | **fit** |
-| Claude Haiku 5.5 | 22.7 | 100% | 0.74 | 0/10 | fit at 25 |
-| MiniMax M3.1 Flash | 23.1 | 100% | 0.84 | 0/10 | fit at 25 |
-| GPT-6 Luna | **1.6** | 100% | 1.61 | 0/10 | **fit** |
-| Muse Spark 1.2 Contributor | 60.2 | 100% | 1.29 | 0/10 | **prefill** |
-| Muse Ember | 36.3 | 67% | 0.37 | 0/10 | **prefill, cache, parallel** |
-| Muse Spark 1.3 Contributor | 115.2 | 33% | 1.18 | 0/10 | **prefill, cache** |
+| Model | Prefill ms/1k | Cache from t3 | 4x retention | Errors | Tools | Verdict |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| DeepSeek V4.1 Flash Fast | 19.1 | 100% | 0.96 | 0/10 | 2/2 | **fit** |
+| Claude Haiku 5.5 | 22.7 | 100% | 0.74 | 0/10 | 2/2 | fit at 25 |
+| MiniMax M3.1 Flash | 23.1 | 100% | 0.84 | 0/10 | 2/2 | fit at 25 |
+| GPT-6 Luna | **1.6** | 100% | 1.61 | 0/10 | 2/2 | **fit** |
+| Muse Spark 1.2 Contributor | 60.2 | 100% | 1.29 | 0/10 | — | **prefill** |
+| Muse Ember | 36.3 | 67% | 0.37 | 0/10 | — | **prefill, cache, parallel** |
+| Muse Spark 1.3 Contributor | 115.2 | 33% | 1.18 | 0/10 | — | **prefill, cache** |
 
 ## What the numbers say
 

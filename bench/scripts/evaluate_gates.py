@@ -97,6 +97,7 @@ def load_fitness():
             "cache": float(r["cache_hit"]),
             "retention": float(r["retention_4x"]),
             "errors": int(r["errors_10"]),
+            "tools": float(r["tools_valid"]) if r.get("tools_valid") else None,
         }
     return out
 
@@ -137,6 +138,10 @@ def fails_fitness(fit):
         f.append(f"retention {fit['retention']:.2f}")
     if fit["errors"] > g["errors_per_10_max"]:
         f.append(f"errors {fit['errors']}/10")
+    if fit.get("tools") is None:
+        f.append("no tool-call data")
+    elif fit["tools"] < g["tools_valid_min"]:
+        f.append(f"tools {fit['tools']:.0%}")
     return f
 
 

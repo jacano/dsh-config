@@ -81,6 +81,76 @@ def chat_messages_cached(model: str, prefix_text: str) -> int:
     return data.get("usage", {}).get("cache_read_input_tokens", 0)
 
 
+TOOLS = [
+    {"name": "get_weather", "description": "Current weather for a city",
+     "params": {"city": {"type": "string"}}},
+    {"name": "get_time", "description": "Current local time for a city",
+     "params": {"city": {"type": "string"}}},
+]
+
+TOOL_PROMPT = ("Call get_weather for Seville and get_time for Seville. "
+               "Use both tools in this single reply. Do not answer in prose.")
+
+
+def _openai_tools():
+    return [{"type": "function",
+             "function": {"name": t["name"], "description": t["description"],
+                          "parameters": {"type": "object",
+                                         "properties": {k: {"type": v["type"]} for k, v in t["params"].items()},
+                                         "required": list(t["params"])}}}
+            for t in TOOLS]
+
+
+def _anthropic_tools():
+    return [{"name": t["name"], "description": t["description"],
+             "input_schema": {"type": "object",
+                              "properties": {k: {"type": v["type"]} for k, v in t["params"].items()},
+                              "required": list(t["params"])}}
+            for t in TOOLS]
+
+
+def phase_tools(model: str, attempts: int = 2) -> dict:
+    """Two tools in one reply, valid names and parseable arguments."""
+    good = 0
+    for _ in range(attempts):
+        if model.startswith("claude-"):
+            body = {"model": model, "max_tokens": 512, "tools": _anthropic_tools(),
+                    "messages": [{"role": "user", "content": TOOL_PROMPT}]}
+            url, headers = f"{BASE}/messages", {"x-api-key": KEY, "anthropic-version": "2023-06-01"}
+        else:
+            body = {"model": model, "max_tokens": 512, "tools": _openai_tools(),
+                    "tool_choice": "auto",
+                    "messages": [{"role": "user", "content": TOOL_PROMPT}]}
+            url, headers = f"{BASE}/chat/completions", {"Authorization": f"Bearer {KEY}"}
+        headers.update({"Content-Type": "application/json", "User-Agent": "curl/8.5.0"})
+        req = urllib.request.Request(url, data=json.dumps(body).encode(), headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=240) as resp:
+                data = json.loads(resp.read().decode())
+        except Exception:
+            continue
+
+        calls = []
+        if model.startswith("claude-"):
+            calls = [(b.get("name"), b.get("input")) for b in data.get("content", [])
+                     if b.get("type") == "tool_use"]
+        else:
+            msg = data["choices"][0]["message"]
+            for c in msg.get("tool_calls") or []:
+                fn = c.get("function", {})
+                try:
+                    args = json.loads(fn.get("arguments") or "{}")
+                except json.JSONDecodeError:
+                    args = None
+                calls.append((fn.get("name"), args))
+
+        names = {n for n, _ in calls}
+        valid = (len(calls) >= 2 and names == {"get_weather", "get_time"}
+                 and all(isinstance(a, dict) and "city" in a for _, a in calls))
+        good += 1 if valid else 0
+    return {"attempts": attempts, "valid": good / attempts if attempts else 0.0}
+
+
 def prefix(lines: int, salt: str = "") -> str:
     return "".join(FILLER.format(i=i) for i in range(lines)) + salt
 
@@ -168,6 +238,7 @@ def phase_errors(model: str, calls: int = 10) -> dict:
 
 
 GATES = {
+    "tools_valid": (">=", 0.9),
     "prefill_ms_per_1k": ("<=", 20),
     "hit_rate_from_turn3": (">=", 0.8),
     "retention": (">=", 0.6),
@@ -202,6 +273,11 @@ def measure(model: str) -> int:
           f"[{verdict('retention', conc['retention'])}]")
     problems += conc["retention"] < 0.6
 
+    tools = phase_tools(model)
+    print(f"tools     {tools['valid']:.0%} of {tools['attempts']} replies carried both calls "
+          f"[{verdict('tools_valid', tools['valid'])}]")
+    problems += tools["valid"] < 0.9
+
     err = phase_errors(model)
     print(f"errors    {err['failures']}/{err['calls']} failed "
           f"[{verdict('failures', err['failures'])}]")
@@ -213,6 +289,11 @@ def measure(model: str) -> int:
 
 def main() -> int:
     args = sys.argv[1:]
+    if args and args[0] == "--tools":
+        for m in args[1:]:
+            r = phase_tools(m)
+            print(f"{m}: tools_valid={r['valid']:.2f} ({r['attempts']} attempts)")
+        return 0
     if not args:
         raise SystemExit("usage: provider_fitness.py <model-id> | --all")
     models = args
