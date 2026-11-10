@@ -115,7 +115,7 @@ excluded:
   - id: meta/muse-wonder-1.0
     reason: "403 MODEL_NOT_IN_PLAN"
   - id: claude-sonnet-5-5
-    reason: "100 tok/s, exactly on the gate, and $0.0259/turn (10x): the price is what disqualifies it"
+    reason: "the fastest start measured (1.40 s cold, 1.17 s warm) and the highest capability in the set (56.0), but $0.0259/turn is 5.4x the cost gate; cost is the only thing that disqualifies it"
   - id: claude-opus-5-5
     reason: "403 MODEL_NOT_IN_PLAN"
   - id: claude-fable-5-2
@@ -131,7 +131,7 @@ excluded:
   - id: gpt-6-luna
     reason: "95 tok/s, just under the gate; it caches and costs $0.0017/turn, so speed is the only thing keeping it out"
   - id: Qwen/Qwen3.7-Flash
-    reason: "64 tok/s; the cheapest sticker in the catalog ($0.03/$0.13) does not survive the speed gate"
+    reason: "64 tok/s and 7.79 s to first token; the cheapest sticker in the catalog ($0.03/$0.13) does not survive either speed gate"
   - id: moonshotai/Kimi-K3.1-Pro
     reason: "32 tok/s measured"
   - id: xai/grok-4.7

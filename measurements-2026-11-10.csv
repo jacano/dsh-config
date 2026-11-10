@@ -1,13 +1,13 @@
-slug,catalog_slug,name,speed_tps,ttft_s,cache_hit,runs,intel_override,intel_source,notes
-deepseek/deepseek-v4.1-flash-fast,deepseek-v4-1-flash-fast,DeepSeek V4.1 Flash Fast,108,1.8,0.995,4,39.5,catalog,unscored in the catalog; same 1017 snapshot as V4.1 Flash
-claude-haiku-5-5,claude-haiku-5-5,Claude Haiku 5.5,146,1.8,1.000,4,,,needs cache_control; pi-ai sends it
-minimax/minimax-m3.1-flash,minimax-m3-1-flash,MiniMax M3.1 Flash,118,1.75,0.993,2,,,passes every gate; dominated by Haiku
-z-ai/glm-5.3-flash,glm-5-3-flash,GLM-5.3 Flash,74,1.35,0.999,2,,,caches well; generation too slow
-stepfun/Step-5-Preview,step-5-preview,Step 5 Preview,167,2.35,0.999,2,,,fast; cost is the issue
-nvidia/nemotron-3.5-super-vl,nemotron-3-5-super-vl,Nemotron 3.5 Super VL,382,1.15,1.000,2,,,fastest; weakest capability
-meta/muse-spark-1.3-contributor,muse-spark-1-3-contributor,Muse Spark 1.3 Contributor,120,4.5,1.000,8,,,cache warms on pass 3; slow start; no catalog score
-meta/muse-spark-1.2-contributor,muse-spark-1-2-contributor,Muse Spark 1.2 Contributor,113,3.45,0.998,2,,,cheapest row measured; no catalog score
-meta/muse-ember,muse-ember,Muse Ember,299,4.7,0.875,8,,,cache 7/8 once warm; start dominates; no catalog score
-gpt-6-luna,gpt-6-luna,GPT-6 Luna,95,1.95,1.000,2,,,caches; just under the speed band
-Qwen/Qwen3.7-Flash,qwen3-7-flash,Qwen 3.7 Flash,64,,,1,,,speed only; cheapest sticker
-claude-sonnet-5-5,claude-sonnet-5-5,Claude Sonnet 5.5,100,,,1,,,speed only; capability ceiling
+slug,catalog_slug,name,speed_tps,ttft_s,cache_hit,runs,intel_override,intel_aa,intel_source,notes
+deepseek/deepseek-v4.1-flash-fast,deepseek-v4-1-flash-fast,DeepSeek V4.1 Flash Fast,108,1.8,0.995,4,39.5,32.6,catalog,unscored in catalog; same 1017 snapshot as V4.1 Flash
+claude-haiku-5-5,claude-haiku-5-5,Claude Haiku 5.5,146,1.8,1.000,4,,36.5,catalog,needs cache_control; pi-ai sends it
+minimax/minimax-m3.1-flash,minimax-m3-1-flash,MiniMax M3.1 Flash,118,1.75,0.993,2,,29.1,catalog,
+z-ai/glm-5.3-flash,glm-5-3-flash,GLM-5.3 Flash,74,1.35,0.999,2,,27.8,catalog,caches well; generation too slow
+stepfun/Step-5-Preview,step-5-preview,Step 5 Preview,167,2.35,0.999,2,,28.5,catalog,fast; cost is the issue
+nvidia/nemotron-3.5-super-vl,nemotron-3-5-super-vl,Nemotron 3.5 Super VL,382,1.15,1.000,2,,13.6,catalog,fastest; weakest capability
+meta/muse-spark-1.3-contributor,muse-spark-1-3-contributor,Muse Spark 1.3 Contributor,120,4.5,1.000,8,48.1,,base-model,same weights as Spark 1.3; cache warms on pass 3
+meta/muse-spark-1.2-contributor,muse-spark-1-2-contributor,Muse Spark 1.2 Contributor,113,3.45,0.998,2,39.6,,base-model,same weights as Spark 1.2; cheapest row measured
+meta/muse-ember,muse-ember,Muse Ember,299,4.7,0.875,8,46.3,36.0,aa-calibrated,AA 36.0 + median offset 10.2 from nine jointly scored rows; estimate, not a measurement
+gpt-6-luna,gpt-6-luna,GPT-6 Luna,95,1.95,1.000,2,,27.9,catalog,just under the speed band
+Qwen/Qwen3.7-Flash,qwen3-7-flash,Qwen 3.7 Flash,64,7.79,1.000,3,,,,no AA or catalog score; very slow start
+claude-sonnet-5-5,claude-sonnet-5-5,Claude Sonnet 5.5,100,1.40,1.000,3,,54.5,catalog,fastest start measured; cost is the issue
