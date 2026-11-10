@@ -49,7 +49,8 @@ mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
 ```
 
 **3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
-shows one group, **Command Code**, with two models.
+shows two groups, **Command Code** and **Command Code (anthropic-messages)**, one
+model each.
 
 ## The one file
 
@@ -79,28 +80,33 @@ Everything here is written in English.
 Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`, key
 `COMMANDCODE_API_KEY`:
 
-| Model | Id on the wire |
-| --- | --- |
-| DeepSeek V4.1 Flash Fast (latest) | `deepseek/deepseek-v4.1-flash-fast` |
-| GLM-5.3 Flash | `z-ai/glm-5.3-flash` |
+| Model | Id on the wire | Route |
+| --- | --- | --- |
+| DeepSeek V4.1 Flash Fast (latest) | `deepseek/deepseek-v4.1-flash-fast` | `command-code` |
+| Claude Haiku 5.5 | `claude-haiku-5-5` | `command-code-anthropic` |
 
-The default model is `deepseek/deepseek-v4.1-flash-fast`. Each label is the `name`
-the provider's catalog returns for that id, copied verbatim, parentheses included
-— checked 2026-11-09 against `GET /provider/v1/models`.
+Claude does not speak Chat Completions on this provider: every `claude-*` id in
+`GET /provider/v1/models` advertises only `/messages`, so it rides a second route
+— `api: anthropic-messages`, base URL the API root
+(`https://api.commandcode.ai/provider`, no `/v1`, because pi-ai appends
+`/v1/messages`) — with `compat.forceAdaptiveThinking: true`, because Claude 5.5
+answers 400 to `thinking.type.enabled` and wants adaptive thinking plus
+`output_config.effort`.
+
+The default model is `claude-haiku-5-5`. Each label is the `name` the provider's
+catalog returns for that id, copied verbatim, parentheses included.
 
 Two rows, chosen by measurement rather than by what the catalog offers.
-[MODELS.md](MODELS.md) holds the full ranking of the six candidates and the
-numbers; the short version:
+[MODELS.md](MODELS.md) holds the numbers; the short version:
 
-| | Fast | GLM-5.3 Flash |
+| | Haiku 5.5 | Fast |
 | --- | --- | --- |
-| Role | daily driver | second opinion |
-| $ per agent turn | **$0.0025** | $0.0143 |
-| TTFT | **1.2 s** | 1.2-3.3 s |
-| Output rate | **~150 tok/s** | ~57 tok/s |
-| Caches a 90k prompt | **yes (~99%)** | no |
-| ZDR upstream | no | **yes** |
-| Published score | — | 41.8 / coding 71.5 |
+| Role | daily driver | fallback |
+| Output rate | **146 tok/s** | 116 tok/s |
+| TTFT, 20-60k prefix | **1.4 s** | 1.6 s |
+| Caches the prefix | **yes (60,304 read)** | yes (36,736 of 36,937) |
+| Intelligence | **43.4** | 39.5 |
+| $ per agent turn | **$0.0017** | $0.0025 |
 
 The `$/turn` column assumes a 90k prompt (89k of it cached where caching works)
 and 1.5k of output. That assumption is what decides the ranking: Muse Spark 1.3
@@ -125,6 +131,22 @@ Dropped on 2026-11-09, with the measurement that killed each:
   prompt cache — 0% cached on five straight passes over the same 90k prefix — plus
   the slowest TTFT of the six and no ZDR upstream (422 `cmd_zdr_no_providers`).
 
+Dropped on 2026-11-10, on the same probes re-run against a 20k prefix:
+
+- **GLM-5.3 Flash.** The second opinion stopped paying for itself: ~57 tok/s and no
+  prompt cache at all, so it re-pays the whole prefix every turn ($0.0143 against
+  $0.0025). Haiku 5.5 is faster, smarter (43.4 against 41.8) and cheaper.
+- **MiniMax M3.1 Flash.** It does cache (35,310 of 35,311) and it is priced in the
+  same band, but Haiku 5.5 beats it on every axis that matters here: 146 against
+  124 tok/s, 43.4 against 42.7, $0.0017 against $0.0024 a turn.
+- **Muse Spark 1.3 Contributor, again.** Re-measured and re-dropped: 164 tok/s on a
+  long generation, but 0 cached tokens on the second pass over the same prefix and
+  4.2-4.9 s to first token. Its sticker price is the cheapest in the catalog and
+  its real cost is still 3.7x Fast.
+- **Step 5 Preview and Sonnet 5.5.** Both clear the speed bar in the abstract, both
+  cost 5-14x Fast a turn ($0.084 and $0.0259), so neither fits the budget this
+  config is built around. Sonnet also measured 94 tok/s here, under the bar.
+
 ### What survives, and why
 
 All of the candidates passed the same capability probes identically: vision,
@@ -132,14 +154,17 @@ JSON mode, two parallel tool calls in one message, valid tool-call arguments, a
 128k-token needle, and generated Python that actually ran (5/5 cases each). The
 differences that decided this were in the serving, not in what the models can do.
 
-**Fast** is the default because it is the cheapest thing in the lineup per real
-agent turn and quick: it caches a 90k prompt at ~99%, which is what turns a
-sticker price into $0.0025 a turn against GLM's $0.0143. Its only real gap is
-that it has no ZDR upstream. **GLM-5.3 Flash** is the odd one out and is kept
-deliberately: the only non-DeepSeek model with a published intelligence score
-(41.8 / coding 71.5) and the only row here with both a real score and a
-ZDR-capable upstream, so it is what to reach for when DeepSeek is unavailable or
-when a second opinion is worth the latency it costs.
+**Haiku 5.5** is the default because it wins all three numbers at once: 146 tok/s
+against Fast's 116, 43.4 intelligence against 39.5, and $0.0017 a turn against
+$0.0025, because its cached prefix bills at $0.01/M where Fast's bills at
+$0.016/M. It needed a second route to speak at all, and a `cache_control`
+breakpoint to cache: without one, the same 60k prompt reads back 0 cached tokens
+and costs 3.2-3.5 s to first token instead of 1.4 s.
+
+**Fast** stays as the fallback. It was stable across two rounds of measurement, it
+is the cheapest row on a cold cache, and it is the only row on the
+`openai-completions` route — if the Anthropic route breaks, this one still
+answers.
 
 ### The lanes behind the survivors
 
@@ -158,9 +183,13 @@ be between 0 and 393216" and then accepted on five straight retries, and its
   `xhigh`, `max`, sent as themselves), and the route answers 400 to `minimal` and
   `none`. The ladder is therefore declared once and aliased. The submenu comes from
   each entry's `reasoningEfforts`; Settings → Models leaves it alone. No row
-  declares `off`: GLM rejects it with 400 ("Only models that can turn thinking off
-  accept it"), and the one row that did take it — Ultrafast, 0 reasoning tokens with
+  declares `off`: the one row that did take it — Ultrafast, 0 reasoning tokens with
   tools still working — was dropped, so the level is not offered at all.
+- **Cache.** The prefix cache is not automatic on the Anthropic route: without a
+  `cache_control` breakpoint the same 60k prompt reads back 0 cached tokens and
+  costs 3.2-3.5 s to first token. pi-ai marks the last message itself, so the row
+  needs no setting; the numbers in [MODELS.md](MODELS.md) were measured with that
+  breakpoint in place.
 - **Images.** Both rows read images, declared once as `defaultInput: [text, image]`.
   A text-only model added later must declare `input: [text]`, or its images are
   silently replaced by `(image omitted: model does not support images)`.
