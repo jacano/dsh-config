@@ -12,15 +12,16 @@ python bench/evaluate.py --model <id> --capability 42 --cost 0.0024   # live run
 ## The funnel
 
 ```
-catalog snapshot (97 priced rows)
-  └─ phase 1  static     capability >= 38.0, cost <= $0.0026/turn, plan access
-       └─ 9 rows worth measuring — the rest never cost a token
-            └─ phase 2  measured   speed >= 88 tok/s, latency <= 4.8 s, cache works
-                 └─ phase 3  fitness   prefill <= 25 ms/1k, cache >= 80% in a loop,
-                                       retention >= 0.60, errors <= 1/10,
-                                       tool calls valid >= 90%
-                      └─ 4 rows admitted
+catalog snapshot  ── phase 1  static    capability and price, free
+                        └─ survivors  ── phase 2  measured  speed, latency, cache
+                             └─ measured ── phase 3  fitness   prefill, cache loop,
+                                                              parallelism, errors, tools
+                                  └─ admitted
 ```
+
+The limits are in [`models-policy.yml`](models-policy.yml), not repeated here: they
+have moved every time a row entered or left, and a document that quotes them goes
+stale the next day. `python bench/evaluate.py` prints them with the live table.
 
 `--model` runs the phases in that order and stops at the first failure, so a model
 that cannot pass phase 1 is never called. Every threshold is the envelope of the
@@ -37,9 +38,8 @@ the menu and the benchmark cannot drift apart.
 | [`evaluate.py`](evaluate.py) | The whole process: phases, gates, live measurement, config sync. |
 | [`models-policy.yml`](models-policy.yml) | Decisions only: the gates, which ids are admitted, and which are excluded with the number that killed them. No per-model metrics — those live in `models.csv`, so this file cannot go stale. |
 | [`models.csv`](models.csv) | The only place per-model metrics live: speed, latency, cache, prefill, loop cache, retention, errors, tools. `evaluate.py` prints them from here. |
-| [`catalog-2026-11-10.csv`](catalog-2026-11-10.csv) | Frozen snapshot of the 97 priced models. Phase 1 runs on this and costs nothing. |
+| [`catalog-2026-11-10.csv`](catalog-2026-11-10.csv) | Frozen snapshot of the priced catalog. Phase 1 runs on this and costs nothing. |
 | [`AGENTIC.md`](AGENTIC.md) | Why phase 3 exists and what each gate detects. |
-| [`MODELS.md`](MODELS.md) | Per-call ranking and the history of what was dropped. |
 | [`PLAYBOOK.md`](PLAYBOOK.md) | The runbook: new model, new API, re-baselining. |
 
 ## One fact, one place

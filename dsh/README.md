@@ -1,7 +1,7 @@
 # dsh — the DSH configuration
 
 This half of the repo is only the configuration: what makes DeepSeek Harness
-speak to Command Code, and which four models appear in the menu. It carries no
+speak to Command Code, and which models appear in the menu. It carries no
 benchmark, no measurements and no history — that is [`../bench/`](../bench/).
 
 ## Install
@@ -44,8 +44,8 @@ mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
 ```
 
 **3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
-shows two groups, **Command Code** and **Command Code (anthropic-messages)**, one
-model each.
+shows two groups: **Command Code**, on the OpenAI-compatible route, and
+**Command Code (anthropic-messages)** for the Claude rows.
 
 ## The one file
 
@@ -75,12 +75,10 @@ Everything here is written in English.
 Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`, key
 `COMMANDCODE_API_KEY`:
 
-| Model | Id on the wire | Route |
-| --- | --- | --- |
-| DeepSeek V4.1 Flash Fast (latest) | `deepseek/deepseek-v4.1-flash-fast` | `command-code` |
-| MiniMax M3.1 Flash | `minimax/minimax-m3.1-flash` | `command-code` |
-| GPT-6 Luna | `gpt-6-luna` | `command-code` |
-| Claude Haiku 5.5 | `claude-haiku-5-5` | `command-code-anthropic` |
+The rows are the `models:` list in [`cordis.patch.yml`](cordis.patch.yml). This
+file does not repeat them: a second copy of the menu drifts from the first, and
+`python bench/evaluate.py` prints the list with its current numbers whenever you
+want to see it.
 
 Claude does not speak Chat Completions on this provider: every `claude-*` id in
 `GET /provider/v1/models` advertises only `/messages`, so it rides a second route
@@ -91,45 +89,15 @@ answers 400 to `thinking.type.enabled` and wants adaptive thinking plus
 `output_config.effort`.
 
 The default model is `deepseek/deepseek-v4.1-flash-fast`: the owner's pick, and the
-safe one — cheapest on a cold cache, stable across two measurement rounds, and the
-only row on the completions route, so an Anthropic outage leaves a working model
-behind. Haiku 5.5 wins the measured comparison and is one menu entry away. Each
-label is the `name` the provider's catalog returns for that id, copied verbatim,
+safe one — cheapest on a cold cache, stable across measurement rounds, and on the
+completions route, so an Anthropic outage leaves a working model behind. Each label
+is the `name` the provider's catalog returns for that id, copied verbatim,
 parentheses included.
 
-Four rows, one mechanism in three phases: static, measured, provider fitness.
-[MODELS.md](../bench/MODELS.md) holds the numbers; the short version:
-
-| | Fast | MiniMax M3.1 | Haiku 5.5 | Luna |
-| --- | --- | --- | --- | --- |
-| Role | default | spare | the measured winner | the long-context one |
-| Output rate | 113 tok/s | 107 tok/s | **146 tok/s** | 89 tok/s |
-| TTFT, warm | 1.6 s | 1.9 s | **1.4 s** | 1.3 s |
-| Prefill | 19.1 ms/1k | 23.1 ms/1k | 22.7 ms/1k | **1.6 ms/1k** |
-| Caches the prefix | yes | yes | yes | yes |
-| Intelligence | 39.5 | 42.7 | **43.4** | 38.1 |
-| $ per agent turn | $0.0025 | $0.0024 | **$0.0017** | $0.0017 |
-
-The `$/turn` column assumes a 90k prompt (89k of it cached where caching works)
-and 1.5k of output. Luna is the interesting one: at 89 tok/s it is the slowest
-row here, but its 1.6 ms/1k prefill makes it the cheapest way to read a long
-context in the whole set, which in an agent loop matters more than the write
-speed. The Muse rows that looked cheaper on sticker price were dropped for the
-opposite reason — see [AGENTIC.md](../bench/AGENTIC.md).
-
-### Choosing the models
-
-Which rows are here, and why, is decided by a benchmark that lives in
-[../bench/](../bench/). This file only records the result: four models, with
-[`models-policy.yml`](../bench/models-policy.yml) as the source of truth for
-what is admitted.
-
-The short version: a model has to clear capability and price from the catalog
-(free), then speed, latency and cache on the wire, then provider fitness — how
-fast it reads a long prefix, whether it caches in a loop, whether it holds under
-four parallel calls, and whether its tool calls are valid. Models that look cheap
-and fail the last phase are out however good the sticker is; the full table is in
-[AGENTIC.md](../bench/AGENTIC.md).
+Which rows are here and why is decided in [../bench/](../bench/). This file records
+only the result, never the metrics: the numbers live in
+[`models.csv`](../bench/models.csv) and the menu in
+[`cordis.patch.yml`](cordis.patch.yml). `python bench/evaluate.py` prints both.
 
 ## Notes
 
@@ -142,9 +110,9 @@ and fail the last phase are out however good the sticker is; the full table is i
 - **Cache.** The prefix cache is not automatic on the Anthropic route: without a
   `cache_control` breakpoint the same 60k prompt reads back 0 cached tokens and
   costs 3.2-3.5 s to first token. pi-ai marks the last message itself, so the row
-  needs no setting; the numbers in [MODELS.md](../bench/MODELS.md) were measured with that
+  needs no setting; the numbers in [models.csv](../bench/models.csv) were measured with that
   breakpoint in place.
-- **Images.** Both rows read images, declared once as `defaultInput: [text, image]`.
+- **Images.** Every row reads images, declared once as `defaultInput: [text, image]`.
   A text-only model added later must declare `input: [text]`, or its images are
   silently replaced by `(image omitted: model does not support images)`.
 - **DeepSeek is off entirely**: API-key route, account route, search provider and

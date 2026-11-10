@@ -210,7 +210,7 @@ def check() -> int:
     for extra in configured - ADMITTED:
         problems.append(f"{extra} is configured but not admitted")
     if not problems:
-        print("\nOK: four rows clear all three phases, and the menu matches the policy")
+        print(f"\nOK: {len(ADMITTED)} rows clear all three phases, and the menu matches the policy")
     else:
         print("\nFAIL:")
         for p in problems:

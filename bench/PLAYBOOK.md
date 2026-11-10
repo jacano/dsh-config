@@ -6,14 +6,15 @@ takes three commands, not an afternoon. This is the runbook.
 ## The funnel in one picture
 
 ```
-catalog (97 rows today)
-  └─ phase 1  static    capability >= 38.0, cost <= $0.0026/turn, plan access
-       └─ 9 rows worth measuring
-            └─ phase 2  measured   speed >= 88 tok/s, latency <= 4.8 s, cache works
-                 └─ phase 3  fitness   prefill <= 25 ms/1k, cache >= 80%,
-                                       retention >= 0.60, errors <= 1/10
-                      └─ 4 rows admitted
+catalog  ── phase 1  static     capability and price, no tokens spent
+              └─ survivors ── phase 2  measured   speed, latency, cache
+                   └─ measured ── phase 3  fitness   prefill, cache loop,
+                                                     parallelism, errors, tools
+                        └─ admitted, and only then written to the config
 ```
+
+The numbers behind each phase are in
+[`models-policy.yml`](models-policy.yml); they are not copied here.
 
 Phase 1 costs no tokens: if capability or price disqualifies a model, it is never
 called. Only the survivors are worth measuring.
@@ -34,9 +35,10 @@ called. Only the survivors are worth measuring.
 
    It runs static, then measured, then fitness, and prints a CSV row ready for
    `models.csv`.
-4. **If it clears every gate**, add it in three places: `admitted:` in the
-   policy, the `models:` list in `dsh/cordis.patch.yml`, and the tables in the
-   README.
+4. **If it clears every gate**, add it in exactly three places, in this order:
+   the CSV line from the run into `models.csv`, the id into `admitted:` in the
+   policy, and the row into `models:` in `dsh/cordis.patch.yml`. No README
+   tables to update: they no longer carry numbers.
 5. **Prove it.**
 
    ```bash
@@ -54,9 +56,9 @@ called. Only the survivors are worth measuring.
    `/v1`; OpenAI-style ones need `api: openai-completions` and the versioned
    path. Check which endpoints a model advertises before choosing.
 3. Store the key in `~/.dsh/.credentials.yaml`; never in this repo.
-4. Run the same three measurements. `measure_model.py` and
-   `provider_fitness.py` take any model id, so a new gateway needs no new code,
-   only the right URL and header — which live in the config, not the scripts.
+4. Run the same funnel: `python bench/evaluate.py --model <id> --capability X
+   --cost Y` takes any model id, so a new gateway needs no new code, only the
+   right URL and header — which live in the config, not the script.
 5. If the gateway needs a different header or auth scheme, pass it through the
    config's `headers:` and `apiKeyEnv`, not by editing the scripts.
 
@@ -78,8 +80,8 @@ provider changes something, and record the new round:
 
 ## What is still missing
 
-- **Tool-call validity**: valid JSON, schema adherence, parallel calls. The
-  closest thing to the real agent loop and not measured yet.
-- **Transport TTFB** (`llm-endpoint-bench` has it; this repo does not).
 - Three runs per model in phase 3, so fitness can be treated like speed instead
   of a single sample.
+- **Transport TTFB**: it lives in
+  [llm-endpoint-bench](https://github.com/jacano/llm-endpoint-bench), not here.
+- Image input and structured output beyond tool calls.
