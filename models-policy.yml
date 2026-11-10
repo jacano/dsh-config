@@ -1,0 +1,99 @@
+# Model policy — what may enter dsh/cordis.patch.yml
+#
+# Written 2026-11-10. The model menu is a curated list, not a catalog window:
+# a row is admitted only while it clears every gate below, measured on this
+# machine rather than taken from a vendor page. `scripts/check_models.py`
+# enforces the list; run it before every commit.
+#
+# Why these gates: a cheap sticker price means nothing if the prefix does not
+# cache, because an agent turn re-reads its context every time. That is the trap
+# both Muse Spark Contributor and GLM-5.3 Flash fell into.
+
+version: 1
+
+criteria:
+  # End-to-end output rate on a 1,600-token generation, measured here.
+  min_output_tokens_per_second: 100
+  # Time to first token on a 20-60k prefix, measured here.
+  max_ttft_seconds: 2.5
+  # A second identical request must read cached tokens back.
+  require_prefix_cache: true
+  # Agent turn = 90k prompt (89k cached where caching works) + 1.5k output.
+  # The ceiling is DeepSeek V4.1 Flash Fast, the row the owner set as the
+  # reference: nothing may cost meaningfully more than it.
+  max_cost_per_turn_usd: 0.0025
+  # A row that answers 403 MODEL_NOT_IN_PLAN is unusable and cannot be admitted.
+  require_plan_access: true
+
+# Rows the config is allowed to serve. Keep in sync with the patch file:
+# the checker fails if either side drifts.
+admitted:
+  - id: deepseek/deepseek-v4.1-flash-fast
+    route: command-code
+    output_tps: 116
+    ttft_seconds: 1.6
+    caches: true
+    cost_per_turn_usd: 0.0025
+    note: default; cheapest on a cold cache, only row on the completions route
+  - id: claude-haiku-5-5
+    route: command-code-anthropic
+    output_tps: 146
+    ttft_seconds: 1.4
+    caches: true
+    cost_per_turn_usd: 0.0017
+    note: fastest and cheapest per turn; wins every gate but is not the default
+
+# Measured and rejected. Every entry carries the number that killed it, so a
+# later round can re-test instead of guessing.
+excluded:
+  - id: z-ai/glm-5.3-flash
+    reason: "~57 tok/s, 0 cached tokens on pass 2, $0.0143/turn (5.7x the ceiling)"
+  - id: meta/muse-spark-1.3-contributor
+    reason: "0 cached tokens on pass 2, 4.2-4.9 s TTFT, $0.0093/turn (3.7x)"
+  - id: meta/muse-spark-1.2-contributor
+    reason: "112 tok/s but no cache measurement; superseded by 1.3 in the same family"
+  - id: meta/muse-spark-1.3
+    reason: "$1.25/$4.25 without a cache: $0.119/turn"
+  - id: meta/muse-spark-open
+    reason: "$1.25/$4.25, 38.9 intelligence: dominated by Step 5 on every axis"
+  - id: meta/muse-ember
+    reason: "no measured output rate or TTFT; nothing is admitted unverified"
+  - id: meta/muse-wonder-1.0
+    reason: "403 MODEL_NOT_IN_PLAN"
+  - id: claude-sonnet-5-5
+    reason: "94 tok/s measured (under the gate), $0.0259/turn (10x)"
+  - id: claude-opus-5-5
+    reason: "403 MODEL_NOT_IN_PLAN"
+  - id: claude-fable-5-2
+    reason: "403 MODEL_NOT_IN_PLAN"
+  - id: gpt-6.1-sol
+    reason: "403 MODEL_NOT_IN_PLAN"
+  - id: google/gemini-4-argon
+    reason: "403 MODEL_NOT_IN_PLAN"
+  - id: stepfun/Step-5-Preview
+    reason: "175 tok/s, but $0.0095/turn (3.8x)"
+  - id: nvidia/nemotron-3.5-super-vl
+    reason: "26.5 intelligence and $0.0045/turn: fails two gates"
+  - id: gpt-6-luna
+    reason: "103 tok/s per AA, but no cache or TTFT measured here; unverified"
+  - id: moonshotai/Kimi-K3.1-Pro
+    reason: "32 tok/s measured"
+  - id: xai/grok-4.7
+    reason: "68 tok/s, $0.0555/turn"
+  - id: Qwen/Qwen3.8-Max-0902
+    reason: "47 tok/s, $0.0333/turn"
+  - id: zai-org/GLM-5.3
+    reason: "67 tok/s, $0.0311/turn"
+  - id: z-ai/glm-5.3-flashx
+    reason: "slower than Fast for $0.0089/turn, no published score"
+  - id: deepseek/deepseek-v4.1-flash
+    reason: "9-47 s TTFT on this lane"
+  - id: deepseek/deepseek-v4.1-flash-ultrafast
+    reason: "$2.40/$9.60, $0.0211/turn for latency Fast already provides"
+
+# Clears every gate but earns nothing: kept out to avoid a third route and a
+# row that only duplicates a better one. Re-admit by moving it to `admitted`
+# if Haiku 5.5 ever becomes unavailable.
+redundant:
+  - id: minimax/minimax-m3.1-flash
+    reason: "passes the gates (124 tok/s, caches, $0.0024/turn) but Haiku 5.5 beats it on speed, intelligence and price"

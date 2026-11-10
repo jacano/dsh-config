@@ -38,21 +38,24 @@ Two findings reordered everything:
 
 ### Verdict, 2026-11-10
 
-Applied to `dsh/cordis.patch.yml`: Haiku 5.5 in, GLM-5.3 Flash out, Fast kept as
-the fallback.
+Applied to `dsh/cordis.patch.yml`: Haiku 5.5 in, GLM-5.3 Flash out, Fast kept —
+and left as the default by choice. The gates themselves live in
+[models-policy.yml](models-policy.yml) and `scripts/check_models.py` enforces them.
 
-- **Keep Haiku 5.5 as the default.** It wins speed (146 vs 116 t/s), latency
-  (1.4 vs 1.6 s), intelligence (43.4 vs 39.5) and cost per turn ($0.0017 vs
-  $0.0025) against the row it replaces. It is the only row that does all four.
-- **Keep Fast as the fallback.** Cheapest on a cold cache, stable across two
-  rounds, and the only row on the `openai-completions` route, so an Anthropic
-  outage leaves a working model behind.
+- **Fast stays the default.** It is the owner's pick and the safe one: cheapest on
+  a cold cache, stable across two rounds, and the only row on the
+  `openai-completions` route, so an Anthropic outage leaves a working model behind.
+- **Haiku 5.5 is admitted as the measured winner**, not as the default. It wins
+  speed (146 vs 116 t/s), latency (1.4 vs 1.6 s), intelligence (43.4 vs 39.5) and
+  cost per turn ($0.0017 vs $0.0025), and it is one menu entry away.
 - **Drop GLM-5.3 Flash.** ~57 t/s and no cache: it costs 8x Haiku a turn and is
   slower and less capable. Its ZDR upstream was its only argument, and this config
   does not buy on ZDR.
 - **Do not re-add Spark Contributor, MiniMax, Step 5 or Sonnet.** The first has no
   cache and a 4-5 s TTFT; the second is beaten by Haiku on every axis; the last
-  two cost 5-14x Fast a turn.
+  two cost 5-14x Fast a turn. All four are listed with their numbers in
+  [models-policy.yml](models-policy.yml), so a later round can re-test rather than
+  re-argue.
 
 ---
 
