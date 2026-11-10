@@ -136,8 +136,9 @@ def main():
         if m["id"] in admitted:
             continue
         passing = [t for t, g in tiers.items() if not check(m, g)]
-        print(f"  {'WOULD ENTER ' + passing[0] if passing else 'blocked':12s} {m['name'][:30]:30s} "
-              f"{', '.join(check(m, tiers['daily'])) or 'clears daily'}")
+        detail = " | ".join(f"{t}: {', '.join(check(m, g)) or 'clears'}" for t, g in tiers.items())
+        verdict = "WOULD ENTER " + passing[0] if passing else "blocked"
+        print(f"  {verdict:12s} {m['name'][:30]:30s} {detail}")
         if passing:
             problems.append(f"{m['id']} is not admitted but clears the {passing[0]} tier")
 
