@@ -35,12 +35,26 @@ the menu and the benchmark cannot drift apart.
 | File | What it is |
 | --- | --- |
 | [`evaluate.py`](evaluate.py) | The whole process: phases, gates, live measurement, config sync. |
-| [`models-policy.yml`](models-policy.yml) | The gates, the admitted rows, and every excluded row with the number that killed it. Source of truth. |
-| [`models.csv`](models.csv) | One row per measured model: speed, latency, cache, prefill, loop cache, retention, errors, tools. |
+| [`models-policy.yml`](models-policy.yml) | Decisions only: the gates, which ids are admitted, and which are excluded with the number that killed them. No per-model metrics — those live in `models.csv`, so this file cannot go stale. |
+| [`models.csv`](models.csv) | The only place per-model metrics live: speed, latency, cache, prefill, loop cache, retention, errors, tools. `evaluate.py` prints them from here. |
 | [`catalog-2026-11-10.csv`](catalog-2026-11-10.csv) | Frozen snapshot of the 97 priced models. Phase 1 runs on this and costs nothing. |
 | [`AGENTIC.md`](AGENTIC.md) | Why phase 3 exists and what each gate detects. |
 | [`MODELS.md`](MODELS.md) | Per-call ranking and the history of what was dropped. |
 | [`PLAYBOOK.md`](PLAYBOOK.md) | The runbook: new model, new API, re-baselining. |
+
+## One fact, one place
+
+| Fact | Lives in |
+| --- | --- |
+| Price, catalog capability | `catalog-2026-11-10.csv` |
+| Speed, latency, cache, prefill, retention, errors, tools | `models.csv` |
+| Gates and the admitted/excluded decision | `models-policy.yml` |
+| What the menu actually serves | `dsh/cordis.patch.yml` |
+
+The policy deliberately carries no per-model numbers: an admitted row is an id and
+a role. `evaluate.py` joins the decision with the measurements, so the table it
+prints is always the latest one. It also fails if an admitted id has no row in
+`models.csv`, which is how a stale decision gets caught.
 
 ## Adding a model
 

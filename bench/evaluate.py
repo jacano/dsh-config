@@ -190,12 +190,19 @@ def check() -> int:
         admitted = m["id"] in ADMITTED
         verdict = "PASS" if not f2 and not f3 else "FAIL"
         if admitted:
-            print(f"  {verdict:4s} {m['name'][:32]:32s} {', '.join(f2 + f3)}")
+            shown = (f"{m['speed']:.0f} t/s  {m['ttft']:.2f} s  "
+                     f"{m['prefill']:.1f} ms/1k  ${cost:.4f}") if all(
+                         m[k] is not None for k in ("speed", "ttft", "prefill")) else ""
+            print(f"  {verdict:4s} {m['name'][:30]:30s} {shown:46s} {', '.join(f2 + f3)}")
             if f2 or f3:
                 problems.append(f"{m['name']} is admitted but misses: {', '.join(f2 + f3)}")
         elif not f2 and not f3:
             print(f"  ENTER {m['name'][:32]:32s} clears every gate but is not admitted")
             problems.append(f"{m['name']} clears every gate but is not admitted")
+
+    for admitted_id in ADMITTED:
+        if admitted_id not in models:
+            problems.append(f"{admitted_id} is admitted but has no row in models.csv")
 
     configured = config_ids()
     for missing in ADMITTED - configured:

@@ -62,42 +62,22 @@ criteria:
     cache: "hit rate over >= 4 warm requests; a two-pass probe reports 0 on rows that do cache"
     access: "no 403 MODEL_NOT_IN_PLAN"
 
-# Rows the config is allowed to serve. Keep in sync with the patch file:
-# the checker fails if either side drifts.
+# Decisions only. Every number lives in models.csv (measured) or
+# catalog-2026-11-10.csv (priced), so this file cannot go stale: it says which
+# ids are in and why, never how fast they were last Tuesday.
 admitted:
   - id: deepseek/deepseek-v4.1-flash-fast
-    route: command-code
-    output_tps: 100-116
-    ttft_seconds: 1.7-1.9
-    caches: true
-    cost_per_turn_usd: 0.0025
     note: default; cheapest on a cold cache, only row on the completions route
   - id: claude-haiku-5-5
-    route: command-code-anthropic
-    output_tps: 146
-    ttft_seconds: 1.7-1.9
-    caches: true
-    cost_per_turn_usd: 0.0017
-    note: fastest and cheapest per turn; wins every gate but is not the default
+    note: fastest row in the set
   - id: minimax/minimax-m3.1-flash
-    route: command-code
-    output_tps: 111
-    ttft_seconds: 2.39
-    caches: true
-    cost_per_turn_usd: 0.0024
-    note: admitted 2026-11-10 by owner choice; clears the 2.52 s tolerance band on the three-pass median
-  # Budget tier: admitted 2026-11-10 by owner choice to trade start latency for
-  # price. See the `tiers` block above for the gates they clear.
+    note: spare on the completions route, survives an Anthropic outage
   - id: gpt-6-luna
-    route: command-code
-    output_tps: 98
-    ttft_seconds: 1.32
-    caches: true
-    cost_per_turn_usd: 0.0017
-    capability: 38.1
-    note: admitted 2026-11-10 by owner choice; 0.05 short on capability, inside the CI
+    note: cheapest (tied) and the best prefill measured
 
-# Every row measured and rejected, with the number that killed it.
+# Measured and rejected. The numbers here are as of the drop date and stay put
+# on purpose: they are the reason, not the current state. Live numbers for any
+# of these models are in models.csv when they were measured.
 excluded:
   - id: meta/muse-ember
     reason: "provider fitness: 36.3 ms/1k prefill, 67% cache, 0.37 retention under 4x. The route, not the model"
