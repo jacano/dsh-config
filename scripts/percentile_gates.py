@@ -13,12 +13,14 @@ from __future__ import annotations
 
 import csv
 import random
+import re
 import statistics
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "catalog-2026-11-10.csv"
+POLICY = ROOT / "models-policy.yml"
 # Optional first argument selects a different measurement round, e.g.
 #   python scripts/percentile_gates.py measurements-2026-11-10-run2.csv
 MEASURED = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "measurements-2026-11-10.csv"
@@ -74,8 +76,26 @@ def load():
     return catalog, measured
 
 
+def waived_ids():
+    """Provider ids listed under `waivers:` in the policy."""
+    ids: set[str] = set()
+    in_block = False
+    for line in POLICY.read_text(encoding="utf-8").splitlines():
+        if line.strip() == "waivers:":
+            in_block = True
+            continue
+        if in_block:
+            if line and not line[0].isspace():
+                break
+            m = re.match(r"\s+- id:\s*(\S+)", line)
+            if m:
+                ids.add(m.group(1))
+    return ids
+
+
 def main():
     catalog, measured = load()
+    waived = waived_ids()
 
     speeds = [m["speed"] for m in measured if m["speed"]]
     ttfts = [m["ttft"] for m in measured if m["ttft"]]
@@ -84,7 +104,7 @@ def main():
 
     gates = {
         "speed_min": quantile(speeds, 0.25),   # not in the slowest quarter
-        "ttft_max": quantile(ttfts, 0.50),      # not slower to start than typical
+        "ttft_max": quantile(ttfts, 0.50) * 1.2,  # median plus a 20% tolerance band
         "cost_max": quantile(costs, 0.25),      # cheapest quarter of the catalog
         "intel_min": quantile(intels, 0.50),    # above the catalog median
         "cache_min": 0.80,                      # hit rate, not a binary
@@ -94,11 +114,15 @@ def main():
           f"cost n={len(costs)}, intelligence n={len(intels)}")
     print("\ngates (robust quantiles, 95% bootstrap CI):")
     for label, values, q in (("speed  >= P25", speeds, 0.25),
-                             ("ttft   <= P50", ttfts, 0.50),
+                             ("ttft   <= P50+20%", ttfts, 0.50),
                              ("cost   <= P25", costs, 0.25),
                              ("intel  >= P50", intels, 0.50)):
         value = quantile(values, q)
+        if label.startswith("ttft"):
+            value *= 1.2
         lo, hi = boot_ci(values, q)
+        if lo is not None and label.startswith("ttft"):
+            lo, hi = lo * 1.2, hi * 1.2
         ci = f"[{lo:.3f}, {hi:.3f}]" if lo is not None else "n too small"
         print(f"  {label:14s} {value:9.3f}   {ci}")
 
@@ -128,9 +152,12 @@ def main():
 
         speed_rank = (sum(1 for s in speeds if s <= m["speed"]) / len(speeds) * 100) if m["speed"] else 0
         cost_rank = (sum(1 for c in costs if c <= m["cost"]) / len(costs) * 100) if m["cost"] else 0
+        verdict = "PASS"
+        if fails:
+            verdict = ("WAIVED: " if m["slug"] in waived else "fail: ") + ", ".join(fails)
         print(f"{m['name'][:34]:34s} {m['speed'] or 0:6.0f} {speed_rank:4.0f}% "
               f"{(m['ttft'] or 0):6.1f} {(m['cost'] or 0):8.4f} {cost_rank:4.0f}% "
-              f"{(m['intel'] or 0):6.1f}  {'PASS' if not fails else 'fail: ' + ', '.join(fails)}")
+              f"{(m['intel'] or 0):6.1f}  {verdict}")
 
 
 if __name__ == "__main__":

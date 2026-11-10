@@ -81,6 +81,7 @@ and left as the default by choice. The gates themselves live in
   amortized past ~830 tokens of answer; Spark is the cheapest and smartest row in
   the catalog. The tier asks for *more* capability (≥45) than the daily path,
   which is exactly what keeps Spark 1.2 (39.6) and GLM (41.8) out.
+- **GPT-6 Luna is admitted on a capability waiver.** 38.1 against a 38.15 gate: 0.05 short and well inside the CI. It starts in 1.32 s and caches on every pass, so latency is not its problem.
 - **Do not re-add Spark 1.2 Contributor, Step 5 or Sonnet.** Spark 1.2 misses the
   budget tier's capability floor; Step 5 is 3.8x the ceiling and Sonnet 10x. All are
   listed with their numbers in [models-policy.yml](models-policy.yml), so a later

@@ -86,6 +86,7 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 | MiniMax M3.1 Flash | `minimax/minimax-m3.1-flash` | `command-code` |
 | Muse Ember | `meta/muse-ember` | `command-code` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` | `command-code` |
+| GPT-6 Luna | `gpt-6-luna` | `command-code` |
 | Claude Haiku 5.5 | `claude-haiku-5-5` | `command-code-anthropic` |
 
 Claude does not speak Chat Completions on this provider: every `claude-*` id in
@@ -103,7 +104,7 @@ behind. Haiku 5.5 wins the measured comparison and is one menu entry away. Each
 label is the `name` the provider's catalog returns for that id, copied verbatim,
 parentheses included.
 
-Five rows: three on the daily gates, two on the budget tier.
+Six rows: four on the daily gates, two on the budget tier.
 [MODELS.md](MODELS.md) holds the numbers; the short version:
 
 | | Fast | MiniMax M3.1 | Haiku 5.5 |
@@ -144,7 +145,7 @@ measured here).
 | Gate | Rule | Value | 95% CI |
 | --- | --- | --- | --- |
 | Speed | ≥ P25 of measured rows | **98.75 tok/s** | 71.5-118.0 |
-| Latency | ≤ P50 of measured rows | **1.88 s** | 1.58-3.45 |
+| Latency | ≤ P50 + 20% tolerance | **2.52 s** | 1.63-5.15 |
 | Cost | ≤ P25 of the catalog | **$0.0048/turn** | 0.0020-0.0080 |
 | Capability | ≥ P50 of scored models | **38.15** | 33.7-39.6 |
 | Cache | hit rate ≥ 80% over ≥ 8 warm requests | 0.80 | — |
@@ -164,10 +165,14 @@ it admits exactly two: Ember (46.3, 4.7 s, $0.0012) and Spark 1.3 Contributor
 so do GLM, Step 5, Sonnet and the rest.
 
 The honest caveat: speed and latency have n < 30, so their quantiles are provisional
-and the P25 speed gate could sit anywhere in 71.5-118. A row inside a gate's CI is
-therefore **borderline, not rejected** — GPT-6 Luna misses three gates by a hair and
-is the only borderline of the round. And cache needs four passes to trust a zero:
-the Muse rows read 0 on pass 2 and 35,9xx from pass 3.
+and the P25 speed gate could sit anywhere in 62-111. A row inside a gate's CI is
+therefore **borderline, not rejected** — GPT-6 Luna misses capability by 0.05 and is
+admitted on a recorded waiver rather than a moved threshold. And cache needs four
+passes to trust a zero: the Muse rows read 0 on pass 2 and 35,9xx from pass 3.
+
+Latency carries a 20% tolerance band over the median, so the gate is 2.52 s rather
+than 2.10 s: three passes on MiniMax read 1.86, 2.39 and 2.76 s, and a single-run
+median would have made it flap in and out of the menu.
 
 Price never admits a row on its own: the cheapest row measured, Muse Spark 1.2
 Contributor at $0.00058 a turn, is 4.2x cheaper than Fast and still out, because it

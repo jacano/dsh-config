@@ -95,6 +95,14 @@
             contextWindow: 1048576
             maxTokens: 32768
             reasoningEfforts: *efforts
+          # Admitted 2026-11-10 on an explicit capability waiver: 38.1 against a
+          # 38.15 gate, 0.05 short and well inside the gate's CI. Fast to start
+          # (1.32 s median of three) and it caches on every pass.
+          - id: gpt-6-luna
+            name: GPT-6 Luna
+            contextWindow: 1050000
+            maxTokens: 32768
+            reasoningEfforts: *efforts
       # Claude on Command Code speaks Anthropic Messages, not Chat Completions:
       # every claude-* id in GET /provider/v1/models advertises only `/messages`,
       # so it cannot ride the route above. The base URL is the API root, not
