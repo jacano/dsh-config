@@ -113,10 +113,10 @@ Two rows, chosen by measurement rather than by what the catalog offers.
 | $ per agent turn | $0.0025 | **$0.0017** |
 
 The `$/turn` column assumes a 90k prompt (89k of it cached where caching works)
-and 1.5k of output. That assumption is what decides the ranking: Muse Spark 1.3
+and 1.5k of output. That assumption decides the ranking: Muse Spark 1.3
 Contributor, at $0.10/$0.20 per M, looks 20x cheaper than Fast on sticker price
-and lands 3.7x *above* it in real cost, because it caches nothing and re-pays the
-whole prefix every turn.
+and lands 4.2x *below* it once its cache warms — but it takes 4.5 s to start,
+which is what keeps it out.
 
 ### Model policy
 
@@ -162,6 +162,8 @@ Dropped on 2026-11-09, with the measurement that killed each:
 - **Muse Spark 1.3 Contributor.** Headline "up to 95% off" cancelled by a missing
   prompt cache — 0% cached on five straight passes over the same 90k prefix — plus
   the slowest TTFT of the six and no ZDR upstream (422 `cmd_zdr_no_providers`).
+  *(Superseded 2026-11-10: it does cache once warm, 8/8 over eight requests. The
+  missing cache was a measurement artefact; the slow start was real.)*
 
 Dropped on 2026-11-10, on the same probes re-run against a 20k prefix:
 
@@ -173,9 +175,13 @@ Dropped on 2026-11-10, on the same probes re-run against a 20k prefix:
   is held out as redundant rather than rejected: Haiku beats it on speed (146
   against 118 tok/s), intelligence (43.4 against 42.7) and price ($0.0017 against
   $0.0024 a turn).
-- **Muse Spark 1.3 Contributor, again.** Re-measured and re-dropped: 120 tok/s on a
-  long generation, but 0 cached tokens on the second pass over the same prefix. Its
-  sticker price is the cheapest in the catalog and its real cost is 3.7x Fast.
+- **Muse Spark 1.3 Contributor, again.** 120 tok/s and, once warm, the cheapest row
+  measured: 8/8 identical requests read 35,939 cached tokens, putting it at $0.00058
+  a turn. It fails on the start — 4.5 s median, up to 5.3 s — and nothing else.
+- **Muse Ember.** 299 tok/s, the fastest generation measured, and it caches once
+  warm (7/8, 35,942 tokens) for $0.0012 a turn. Its 3.6-6.5 s start is the whole
+  problem, and a cache hit barely moves it: a control with unique prefixes was
+  3.8 s median, so the window is thinking, not reading the prefix.
 - **Step 5 Preview and Sonnet 5.5.** Step 5 is fast (167 tok/s) and caches, but
   costs 3.8x Fast a turn; Sonnet sits exactly on the speed gate (100 tok/s) and
   costs 10x. Neither fits the budget this config is built around.
