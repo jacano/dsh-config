@@ -24,8 +24,8 @@ does not depend on which prompt size you happen to test.
 
 ## How it is measured
 
-`python scripts/provider_fitness.py <model-id>` runs four phases against
-Command Code and prints the gates:
+`python bench/evaluate.py --model <id> --capability <score> --cost <per-turn>`
+runs the whole funnel; the fitness phases are:
 
 - **prefill**: three unique prompts at ~5k, ~20k and ~60k tokens, so the cache
   cannot hide the cost.

@@ -2,7 +2,7 @@
 #
 # Written 2026-11-10. The model menu is a curated list, not a catalog window:
 # a row is admitted only while it clears every gate below, measured on this
-# machine rather than taken from a vendor page. `scripts/check_models.py`
+# machine rather than taken from a vendor page. `bench/evaluate.py`
 # enforces the list; run it before every commit.
 #
 # Why these gates: a cheap sticker price means nothing if the prefix does not
@@ -17,7 +17,7 @@ criteria:
   # the current worst on any axis. That closes the menu without exceptions and
   # without recomputing quantiles on every measurement round.
   #
-  # Set 2026-11-10 from measurements-2026-11-10-run2.csv. scripts/evaluate_gates.py
+  # Set 2026-11-10 from models.csv. `bench/evaluate.py`
   # proves both directions: every admitted row clears its tier, and every
   # measured row outside the menu misses at least one gate.
   method: "envelope of the admitted set; no waivers, no exceptions"
@@ -41,7 +41,7 @@ criteria:
       cache_min: 0.80
 
   # Third phase: does the route serve the model well enough for a loop?
-  # Measured by scripts/provider_fitness.py, recorded in fitness-2026-11-10.csv
+  # Measured by `bench/evaluate.py` and recorded in models.csv
   # and enforced by evaluate_gates.py. One run per model for now; re-run it
   # when a provider changes something.
     fitness:

@@ -1,8 +1,0 @@
-slug,catalog_slug,name,prefill_ms_per_1k,cache_hit,retention_4x,errors_10,tools_valid
-deepseek/deepseek-v4.1-flash-fast,deepseek-v4-1-flash-fast,DeepSeek V4.1 Flash Fast,19.1,1.00,0.96,0,1.00
-claude-haiku-5-5,claude-haiku-5-5,Claude Haiku 5.5,22.7,1.00,0.74,0,1.00
-minimax/minimax-m3.1-flash,minimax-m3-1-flash,MiniMax M3.1 Flash,23.1,1.00,0.84,0,1.00
-gpt-6-luna,gpt-6-luna,GPT-6 Luna,1.6,1.00,1.61,0,1.00
-meta/muse-ember,muse-ember,Muse Ember,36.3,0.67,0.37,0,
-meta/muse-spark-1.3-contributor,muse-spark-1-3-contributor,Muse Spark 1.3 Contributor,115.2,0.33,1.18,0,
-meta/muse-spark-1.2-contributor,muse-spark-1-2-contributor,Muse Spark 1.2 Contributor,60.2,1.00,1.29,0,

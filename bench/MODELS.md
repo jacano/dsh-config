@@ -7,7 +7,7 @@ Runtime numbers on this machine, same probes for every row. Prices from
 
 The gates are the envelope of the admitted set: no row may be worse than the
 current worst on any axis, so nothing new enters without a threshold moving on
-purpose. `python scripts/evaluate_gates.py` checks both directions against
+purpose. `python bench/evaluate.py` checks both directions against
 [measurements-2026-11-10-run2.csv](measurements-2026-11-10-run2.csv) and
 [catalog-2026-11-10.csv](catalog-2026-11-10.csv). The table below is the raw
 evidence those gates consume.
@@ -61,7 +61,7 @@ Three findings reordered everything:
 
 Applied to `dsh/cordis.patch.yml`: Haiku 5.5 in, GLM-5.3 Flash out, Fast kept —
 and left as the default by choice. The gates themselves live in
-[models-policy.yml](models-policy.yml) and `scripts/check_models.py` enforces them.
+[models-policy.yml](models-policy.yml) and `bench/evaluate.py` enforces them.
 
 - **Fast stays the default.** It is the owner's pick and the safe one: cheapest on
   a cold cache, stable across two rounds, and the only row on the

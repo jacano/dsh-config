@@ -29,23 +29,22 @@ called. Only the survivors are worth measuring.
 3. **Measure phase 2 and 3.**
 
    ```bash
-   python scripts/measure_model.py <model-id>
-   python scripts/provider_fitness.py <model-id>
+   python bench/evaluate.py --model <model-id> --capability <score> --cost <usd-per-turn>
    ```
 
-   Each prints the numbers and whether they clear the gates.
+   It runs static, then measured, then fitness, and prints a CSV row ready for
+   `models.csv`.
 4. **If it clears every gate**, add it in three places: `admitted:` in the
    policy, the `models:` list in `dsh/cordis.patch.yml`, and the tables in the
    README.
 5. **Prove it.**
 
    ```bash
-   python scripts/evaluate_gates.py
-   python scripts/check_models.py
+   python bench/evaluate.py
    ```
 
-   Both must exit 0. `evaluate_gates.py` also fails if an admitted row has no
-   fitness data, so a row cannot enter half-measured.
+   It must exit 0. It fails if an admitted row misses a gate, has no fitness
+   data, or is not in `dsh/cordis.patch.yml`.
 
 ## A new subscription or API
 
@@ -74,8 +73,8 @@ number that moved and why. Re-run the full funnel monthly, or whenever a
 provider changes something, and record the new round:
 
 - `catalog-YYYY-MM-DD.csv` — a frozen snapshot of prices and scores.
-- `measurements-YYYY-MM-DD-runN.csv` — phase 2, one row per model.
-- `fitness-YYYY-MM-DD.csv` — phase 3, one row per model.
+- `models.csv` — one row per model with every phase's numbers.
+- `models-policy.yml` — the gates and the admitted list.
 
 ## What is still missing
 
