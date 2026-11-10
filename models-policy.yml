@@ -40,6 +40,15 @@ criteria:
       latency_max: 4.80
       cache_min: 0.80
 
+  # Third phase, advisory: does the route serve the model well enough for a
+  # loop? Measured by scripts/provider_fitness.py and recorded in AGENTIC.md.
+  # Not enforced by evaluate_gates.py yet: one run per model is not enough.
+  fitness:
+    prefill_ms_per_1k_max: 25
+    cache_hit_min: 0.80
+    retention_4x_min: 0.60
+    errors_per_10_max: 1
+
   protocol:
     speed: "median of three 1,600-token generations"
     latency: "median of three warm passes, after two priming requests"
