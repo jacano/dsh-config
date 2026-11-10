@@ -21,6 +21,10 @@ separate 1,600-token generation. Re-measured in full on 2026-11-10, 01:20.
 | Nemotron 3.5 Super VL | completions | 0.20 / 0.50 / 0.04 | 41,984 of 41,991 | **1.5 / 0.8 s** | **382 t/s** | 26.5 | $0.0045 |
 | Muse Spark 1.3 Contributor | completions | 0.10 / 0.20 / 0.002 | **0** | 2.9 / 2.3 s | 120 t/s | 48.1 | $0.0093 |
 | Claude Sonnet 5.5 | messages | 2.00 / 10.00 / 0.10 | — | — | 100 t/s | 56.0 | $0.0259 |
+| GPT-6 Luna | completions | 0.10 / 0.50 / 0.01 | 35,109 of 35,112 | 1.7 / 2.2 s | 95 t/s | 38.1 | $0.0017 |
+| Muse Spark 1.2 Contributor | completions | 0.10 / 0.20 / 0.002 | 35,939 of 36,012 | 3.6 / 3.3 s | 113 t/s | 39.6 | **$0.00058** |
+| Muse Ember | completions | 0.10 / 0.50 / 0.004 | **0** | 3.4 / 5.8 s | **299 t/s** | 36.0 (AA) | $0.0098 |
+| Qwen 3.7 Flash | completions | 0.03 / 0.13 / 0.006 | — | — | 64 t/s | — | ~$0.0008 |
 
 $/turn keeps the 2026-11-09 assumption: a 90k prompt, 89k of it cached where
 caching works, 1.5k of output.
@@ -41,6 +45,10 @@ Three findings reordered everything:
   of 37,014 back and dropped to 0.7 s warm. It is still out, but on speed and
   price, not on caching — which is why every row here carries the number, not a
   verdict.
+- **The cheapest row is not the one that wins.** Muse Spark 1.2 Contributor caches
+  and lands at $0.00058 a turn — 4.2x cheaper than Fast — but starts in 3.3-3.6 s,
+  over the 2.5 s gate. Qwen 3.7 Flash is cheaper still on sticker and only manages
+  64 t/s. Cost alone never admits a row.
 
 ### Verdict, 2026-11-10
 

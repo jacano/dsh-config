@@ -134,7 +134,7 @@ reaches the menu, and the record of what was measured and rejected:
 `python scripts/check_models.py` enforces it: the patch file and the policy must
 name the same rows, nothing excluded may appear, and the default must be admitted
 on the route it claims. It exits 1 with the offending row, so a model that fails a
-gate cannot slip back in through a hurried edit. 22 rows are excluded and one is
+gate cannot slip back in through a hurried edit. 23 rows are excluded and one is
 kept out as redundant; every entry carries the measurement that killed it.
 
 Dropped on 2026-11-09, with the measurement that killed each:
