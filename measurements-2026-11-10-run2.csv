@@ -1,0 +1,13 @@
+slug,catalog_slug,name,speed_tps,ttft_s,cache_hit,runs,intel_override,intel_aa,intel_source,notes
+deepseek/deepseek-v4.1-flash-fast,deepseek-v4-1-flash-fast,DeepSeek V4.1 Flash Fast,107,1.32,1.000,2,39.5,32.6,catalog,run 2 of 2026-11-10
+claude-haiku-5-5,claude-haiku-5-5,Claude Haiku 5.5,156,1.74,1.000,2,,36.5,catalog,run 2; needs cache_control
+minimax/minimax-m3.1-flash,minimax-m3-1-flash,MiniMax M3.1 Flash,111,2.52,1.000,2,,29.1,catalog,run 2; start moved from 1.75 to 2.52 s
+z-ai/glm-5.3-flash,glm-5-3-flash,GLM-5.3 Flash,57,1.85,1.000,2,,27.8,catalog,run 2; 74 -> 57 tok/s
+stepfun/Step-5-Preview,step-5-preview,Step 5 Preview,167,2.35,0.999,2,,28.5,catalog,not re-measured in run 2
+nvidia/nemotron-3.5-super-vl,nemotron-3-5-super-vl,Nemotron 3.5 Super VL,382,1.15,1.000,2,,13.6,catalog,not re-measured in run 2
+meta/muse-spark-1.3-contributor,muse-spark-1-3-contributor,Muse Spark 1.3 Contributor,134,4.20,1.000,2,48.1,,base-model,run 2; 120 -> 134 tok/s
+meta/muse-spark-1.2-contributor,muse-spark-1-2-contributor,Muse Spark 1.2 Contributor,82,4.39,0.000,2,39.6,,base-model,run 2; 113 -> 82 tok/s and the cache missed both passes
+meta/muse-ember,muse-ember,Muse Ember,365,4.73,1.000,2,46.3,36.0,aa-calibrated,run 2; 299 -> 365 tok/s
+gpt-6-luna,gpt-6-luna,GPT-6 Luna,98,1.28,1.000,2,,27.9,catalog,run 2; start moved from 1.95 to 1.28 s
+Qwen/Qwen3.7-Flash,qwen3-7-flash,Qwen 3.7 Flash,64,7.79,1.000,3,,,,not re-measured in run 2
+claude-sonnet-5-5,claude-sonnet-5-5,Claude Sonnet 5.5,100,1.40,1.000,3,,54.5,catalog,not re-measured in run 2

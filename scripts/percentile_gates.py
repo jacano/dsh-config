@@ -14,11 +14,14 @@ from __future__ import annotations
 import csv
 import random
 import statistics
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "catalog-2026-11-10.csv"
-MEASURED = ROOT / "measurements-2026-11-10.csv"
+# Optional first argument selects a different measurement round, e.g.
+#   python scripts/percentile_gates.py measurements-2026-11-10-run2.csv
+MEASURED = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "measurements-2026-11-10.csv"
 
 BOOT = 2000
 random.seed(7)  # reproducible CIs
