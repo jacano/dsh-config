@@ -22,18 +22,22 @@ criteria:
   # measured row outside the menu misses at least one gate.
   method: "envelope of the admitted set; no waivers, no exceptions"
 
-  tiers:
-    daily:
-      speed_min: 97
-      latency_max: 2.40
-      cost_max: 0.0026
+  # One mechanism for every row, in two phases.
+  #
+  # Phase 1 is static: capability, price and plan access come from the catalog,
+  # so a row that fails here is never measured and never costs a token.
+  # Phase 2 is measured: speed, latency and cache are the only properties that
+  # need the API, so only the survivors of phase 1 are worth a request.
+  #
+  # Both phases are the envelope of the six admitted rows: nothing new enters
+  # without a threshold moving on purpose.
+  phases:
+    static:
       capability_min: 38.0
-      cache_min: 0.80
-    budget:
-      speed_min: 130
+      cost_max: 0.0026
+    measured:
+      speed_min: 97
       latency_max: 4.80
-      cost_max: 0.0013
-      capability_min: 46.0
       cache_min: 0.80
 
   notes:
@@ -70,7 +74,6 @@ admitted:
   # price. See the `tiers` block above for the gates they clear.
   - id: meta/muse-ember
     route: command-code
-    tier: budget
     output_tps: 299
     ttft_seconds: 4.7
     caches: true
@@ -79,7 +82,6 @@ admitted:
     note: fastest generator measured; the 4.7 s start is amortized past ~830 tokens of answer
   - id: meta/muse-spark-1.3-contributor
     route: command-code
-    tier: budget
     output_tps: 134
     ttft_seconds: 4.2
     caches: true
@@ -88,7 +90,6 @@ admitted:
     note: cheapest and smartest row in the catalog; pays for it in start latency
   - id: gpt-6-luna
     route: command-code
-    tier: daily
     output_tps: 98
     ttft_seconds: 1.32
     caches: true

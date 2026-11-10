@@ -104,7 +104,7 @@ behind. Haiku 5.5 wins the measured comparison and is one menu entry away. Each
 label is the `name` the provider's catalog returns for that id, copied verbatim,
 parentheses included.
 
-Six rows: four on the daily gates, two on the budget tier.
+Six rows, one mechanism: a static prefilter first, measurement second.
 [MODELS.md](MODELS.md) holds the numbers; the short version:
 
 | | Fast | MiniMax M3.1 | Haiku 5.5 |
@@ -116,8 +116,7 @@ Six rows: four on the daily gates, two on the budget tier.
 | Intelligence | 39.5 | 42.7 | **43.4** |
 | $ per agent turn | $0.0025 | $0.0024 | **$0.0017** |
 
-Budget tier — slower to start, far cheaper, and asked to be smarter to earn the
-latency it costs:
+The other two trade start latency for price and earn it back in capability:
 
 | | Muse Ember | Spark 1.3 Contributor |
 | --- | --- | --- |
@@ -132,45 +131,44 @@ The `$/turn` column assumes a 90k prompt (89k of it cached where caching works)
 and 1.5k of output. That assumption decides the ranking: Muse Spark 1.3
 Contributor, at $0.10/$0.20 per M, looks 20x cheaper than Fast on sticker price
 and lands 4.2x *below* it once its cache warms — at the price of a 4.5 s start,
-which is why it sits in the budget tier rather than the daily one.
+which is why its start latency, not its price, is what the gates had to allow for.
 
 ### Model policy
 
-[models-policy.yml](models-policy.yml) holds the gates, and they are **the envelope
-of the admitted set**: no row may be worse than the current worst on any axis. That
-closes the menu without exceptions and without recomputing quantiles every time a
-model is measured.
+One mechanism for every row, in two phases. Phase 1 is static: capability, price
+and plan access come from the catalog, so a row that fails here is never measured
+and never costs a token. Phase 2 is measured: speed, latency and cache are the
+only properties that need the API, so only the survivors are worth a request.
 
-| Gate | daily | budget |
+| Phase | Gate | Value |
 | --- | --- | --- |
-| Speed | ≥ 97 tok/s | ≥ 130 tok/s |
-| Latency | ≤ 2.40 s | ≤ 4.80 s |
-| Cost | ≤ $0.0026/turn | ≤ $0.0013/turn |
-| Capability | ≥ 38.0 | ≥ 46.0 |
-| Cache | ≥ 80% | ≥ 80% |
-| Access | no `403` | no `403` |
+| static | Capability | ≥ 38.0 |
+| static | Cost | ≤ $0.0026/turn |
+| static | Access | no `403` |
+| measured | Speed | ≥ 97 tok/s |
+| measured | Latency | ≤ 4.80 s |
+| measured | Cache | ≥ 80% |
 
-**Daily** carries Fast, Haiku, MiniMax and Luna. **Budget** trades start latency for
-price and asks for more capability in return: Ember and Spark 1.3 Contributor.
+The funnel today: **97 catalog rows → 9 worth measuring → 6 admitted.** Two of the
+nine are still unmeasured (MiMo V2.6 Pro and plain DeepSeek V4.1 Flash) and one,
+Spark 1.2 Contributor, is measured and rejected on speed.
 
-The envelope is deliberately tight. It is set from the current members, so a new
-model has to be at least as good as the worst one already in the tier on *every*
-axis — that is what "nothing new enters" means mechanically. If you want a model in,
-the threshold has to move on purpose, in a commit that says so.
+Every threshold is the envelope of the six admitted rows: no row may be worse than
+the current worst on any axis. That is what "nothing new enters" means
+mechanically — a new model has to beat the worst member on every gate, and if you
+want one in, the threshold has to move on purpose in a commit that says so.
 
-`python scripts/evaluate_gates.py` proves both directions and exits 1 otherwise:
-every admitted row clears its tier, and every measured row outside the menu misses
-at least one gate. `python scripts/check_models.py` enforces the config side: patch
-file and policy must name the same rows, nothing excluded may appear, and the
-default must be admitted on the route it claims.
+`python scripts/evaluate_gates.py` runs both phases and exits 1 otherwise: every
+admitted row clears them, and no measured row outside the menu does. It also
+prints the pending rows, so the cost of measuring a candidate is always visible.
+`python scripts/check_models.py` enforces the config side: patch file and policy
+must name the same rows, nothing excluded may appear, and the default must be
+admitted on the route it claims.
 
 Two details worth keeping: cache needs four passes to trust a zero (the Muse rows
-read 0 on pass 2 and 35,9xx from pass 3), and the measurements behind these numbers
-are [measurements-2026-11-10-run2.csv](measurements-2026-11-10-run2.csv), with the
+read 0 on pass 2 and 35,9xx from pass 3), and the numbers behind the gates are
+[measurements-2026-11-10-run2.csv](measurements-2026-11-10-run2.csv), with the
 frozen catalog in [catalog-2026-11-10.csv](catalog-2026-11-10.csv).
-  admitted on the route it claims. It exits 1 with the offending row.
-
-23 rows are excluded; every entry carries the measurement that killed it.
 
 Dropped on 2026-11-09, with the measurement that killed each:
 
@@ -201,8 +199,8 @@ Dropped on 2026-11-10, on the same probes re-run against a 20k prefix:
   of 35,308), runs at 118 tok/s and costs $0.0024 a turn, so it clears every gate.
   Haiku beats it on all three axes, and the row is kept anyway — a spare on the
   completions route costs nothing and survives an Anthropic outage.
-- **Muse Spark 1.3 Contributor and Muse Ember.** Admitted 2026-11-10 on the budget
-  tier, by owner choice: they trade the start for price. Spark reads 35,939 cached
+- **Muse Spark 1.3 Contributor and Muse Ember.** Admitted 2026-11-10, by owner
+  choice: they trade the start for price. Spark reads 35,939 cached
   tokens (8/8) for $0.00058 a turn at 120 tok/s; Ember reads 35,942 (7/8) for
   $0.0012 and generates at 299 tok/s, the fastest measured. Ember's window is
   thinking, not reading the prefix — a control with unique prefixes was 3.8 s

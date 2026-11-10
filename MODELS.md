@@ -75,11 +75,11 @@ and left as the default by choice. The gates themselves live in
 - **MiniMax M3.1 Flash is admitted**, by owner choice: it clears every gate (118
   t/s, 35,072 cached, $0.0024) and Haiku beats it on all three axes, but a spare row
   on the completions route costs nothing.
-- **Ember and Spark 1.3 Contributor are admitted on the budget tier.** They trade
+- **Ember and Spark 1.3 Contributor are admitted with a slower start.** They trade
   the start for price: 4.7 s and 4.5 s to first token, but $0.0012 and $0.00058 a
   turn with 46.3 and 48.1 capability. Ember generates at 299 t/s, so its start is
   amortized past ~830 tokens of answer; Spark is the cheapest and smartest row in
-  the catalog. The tier asks for *more* capability (≥45) than the daily path,
+  the catalog. They clear the measured gates (speed, latency, cache) and the static ones,
   which is exactly what keeps Spark 1.2 (39.6) and GLM (41.8) out.
 - **GPT-6 Luna is admitted, and the capability gate moved to 38.0 to fit it.** 38.1 clears it outright: no waiver, no exception. It starts in 1.32 s and caches on every pass.
 - **Do not re-add Spark 1.2 Contributor, Step 5 or Sonnet.** Spark 1.2 misses the
