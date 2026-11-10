@@ -121,15 +121,24 @@ whole prefix every turn.
 ### Model policy
 
 [models-policy.yml](models-policy.yml) is the gate every row must clear before it
-reaches the menu, and the record of what was measured and rejected:
+reaches the menu, and the record of what was measured and rejected. Five filters,
+all measured here, none read off a vendor page:
 
-- **≥ 100 tok/s** end to end, measured here.
-- **TTFT ≤ 2.5 s** on a 20-60k prefix.
+- **Speed ≥ 100 tok/s** end to end — what you watch while the answer streams.
+- **Latency ≤ 2.5 s** to the first visible token — how long a turn takes to start.
+  The softest of the five: agentic work is delegated, so a second more start is
+  amortized over a long run.
 - **The prefix must cache** — a second identical request has to read cached tokens
-  back.
-- **≤ $0.0025 per agent turn**, the Fast ceiling. Nothing meaningfully more
-  expensive than the reference row gets in, however good it looks.
+  back. The one filter that cannot be traded: a miss re-bills the whole prefix and
+  re-processes it, so it breaks the cost gate too.
+- **≤ $0.0025 per agent turn**, the Fast ceiling. The only filter whose relaxation
+  is invisible in the product, and the one pinned hardest.
 - **Reachable on the plan** — no `403 MODEL_NOT_IN_PLAN`.
+
+Price never admits a row on its own: the cheapest row measured, Muse Spark 1.2
+Contributor at $0.00058 a turn, is 4.2x cheaper than Fast and still out, because
+it starts in 3.3-3.6 s. That is the one open trade recorded in the policy file —
+relax latency to 3.5 s and it enters; nothing else changes.
 
 `python scripts/check_models.py` enforces it: the patch file and the policy must
 name the same rows, nothing excluded may appear, and the default must be admitted

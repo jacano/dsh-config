@@ -13,18 +13,43 @@ version: 1
 updated: 2026-11-10
 
 criteria:
-  # End-to-end output rate on a 1,600-token generation, measured here.
-  min_output_tokens_per_second: 100
-  # Time to first token on a 20-60k prefix, measured here.
-  max_ttft_seconds: 2.5
-  # A second identical request must read cached tokens back.
-  require_prefix_cache: true
-  # Agent turn = 90k prompt (89k cached where caching works) + 1.5k output.
-  # The ceiling is DeepSeek V4.1 Flash Fast, the row the owner set as the
-  # reference: nothing may cost meaningfully more than it.
-  max_cost_per_turn_usd: 0.0025
-  # A row that answers 403 MODEL_NOT_IN_PLAN is unusable and cannot be admitted.
-  require_plan_access: true
+  # Every gate below is measured on this machine, never read off a vendor page.
+  # A row must clear all five. Order matters: cost never admits a row on its own,
+  # and cache is the one gate that cannot be traded away.
+
+  speed:
+    # End-to-end output rate on a 1,600-token generation.
+    min_output_tokens_per_second: 100
+    protects: "what you watch while the answer streams. 95 vs 100 is inside measurement noise; 60 is not."
+
+  latency:
+    # Time to the first visible token on a 20-60k prefix.
+    max_ttft_seconds: 2.5
+    protects: "how long a turn takes to start. The softest gate: agentic work is delegated, so a second more start is amortized over a long run."
+    caveat: "reasoning models spend this window thinking, so the number moves with effort and is the noisiest of the five."
+
+  cache:
+    # A second identical request must read cached tokens back.
+    require_prefix_cache: true
+    protects: "cost and tail latency at once. A cache miss re-bills the whole prefix and re-processes it, so it fails the price gate too."
+    caveat: "not a stable property: GLM-5.3 Flash read 0 cached on 2026-11-09 and 36,992 on 2026-11-10."
+
+  cost:
+    # Agent turn = 90k prompt (89k cached where caching works) + 1.5k output.
+    max_cost_per_turn_usd: 0.0025
+    protects: "nothing the user feels; it is the owner's budget ceiling, pinned to DeepSeek V4.1 Flash Fast."
+    note: "the only gate whose relaxation is invisible in the product — and the one the owner set hardest."
+
+  access:
+    # A row that answers 403 MODEL_NOT_IN_PLAN is unusable and cannot be admitted.
+    require_plan_access: true
+    protects: "nothing: an unreachable row is a broken menu entry."
+
+  # Measured 2026-11-10. The open trade, if the owner ever wants it: relax
+  # latency to ~3.5 s and Muse Spark 1.2 Contributor enters at $0.00058/turn,
+  # 4.2x cheaper than Fast, still caching at 113 tok/s. It is the only pending
+  # row whose whole case is a single gate.
+  open_trade: "latency 2.5 s -> 3.5 s would admit meta/muse-spark-1.2-contributor"
 
 # Rows the config is allowed to serve. Keep in sync with the patch file:
 # the checker fails if either side drifts.
