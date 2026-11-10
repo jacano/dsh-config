@@ -75,10 +75,16 @@ and left as the default by choice. The gates themselves live in
 - **MiniMax M3.1 Flash is admitted**, by owner choice: it clears every gate (118
   t/s, 35,072 cached, $0.0024) and Haiku beats it on all three axes, but a spare row
   on the completions route costs nothing.
-- **Do not re-add Spark Contributor, Step 5 or Sonnet.** The first two fail on the
-  start, Step 5 is 3.8x the ceiling and Sonnet 10x. All are listed with their
-  numbers in [models-policy.yml](models-policy.yml), so a later round can re-test
-  rather than re-argue.
+- **Ember and Spark 1.3 Contributor are admitted on the budget tier.** They trade
+  the start for price: 4.7 s and 4.5 s to first token, but $0.0012 and $0.00058 a
+  turn with 46.3 and 48.1 capability. Ember generates at 299 t/s, so its start is
+  amortized past ~830 tokens of answer; Spark is the cheapest and smartest row in
+  the catalog. The tier asks for *more* capability (≥45) than the daily path,
+  which is exactly what keeps Spark 1.2 (39.6) and GLM (41.8) out.
+- **Do not re-add Spark 1.2 Contributor, Step 5 or Sonnet.** Spark 1.2 misses the
+  budget tier's capability floor; Step 5 is 3.8x the ceiling and Sonnet 10x. All are
+  listed with their numbers in [models-policy.yml](models-policy.yml), so a later
+  round can re-test rather than re-argue.
 
 ---
 

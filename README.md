@@ -84,6 +84,8 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 | --- | --- | --- |
 | DeepSeek V4.1 Flash Fast (latest) | `deepseek/deepseek-v4.1-flash-fast` | `command-code` |
 | MiniMax M3.1 Flash | `minimax/minimax-m3.1-flash` | `command-code` |
+| Muse Ember | `meta/muse-ember` | `command-code` |
+| Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` | `command-code` |
 | Claude Haiku 5.5 | `claude-haiku-5-5` | `command-code-anthropic` |
 
 Claude does not speak Chat Completions on this provider: every `claude-*` id in
@@ -101,7 +103,7 @@ behind. Haiku 5.5 wins the measured comparison and is one menu entry away. Each
 label is the `name` the provider's catalog returns for that id, copied verbatim,
 parentheses included.
 
-Three rows, chosen by measurement rather than by what the catalog offers.
+Five rows: three on the daily gates, two on the budget tier.
 [MODELS.md](MODELS.md) holds the numbers; the short version:
 
 | | Fast | MiniMax M3.1 | Haiku 5.5 |
@@ -113,11 +115,23 @@ Three rows, chosen by measurement rather than by what the catalog offers.
 | Intelligence | 39.5 | 42.7 | **43.4** |
 | $ per agent turn | $0.0025 | $0.0024 | **$0.0017** |
 
+Budget tier — slower to start, far cheaper, and asked to be smarter to earn the
+latency it costs:
+
+| | Muse Ember | Spark 1.3 Contributor |
+| --- | --- | --- |
+| Output rate | **299 tok/s** | 120 tok/s |
+| TTFT | 4.7 s | 4.5 s |
+| Intelligence | 46.3* | **48.1** |
+| $ per agent turn | $0.0012 | **$0.00058** |
+
+\* AA's 36.0 mapped onto the catalog scale; an estimate, not a measurement.
+
 The `$/turn` column assumes a 90k prompt (89k of it cached where caching works)
 and 1.5k of output. That assumption decides the ranking: Muse Spark 1.3
 Contributor, at $0.10/$0.20 per M, looks 20x cheaper than Fast on sticker price
-and lands 4.2x *below* it once its cache warms — but it takes 4.5 s to start,
-which is what keeps it out.
+and lands 4.2x *below* it once its cache warms — at the price of a 4.5 s start,
+which is why it sits in the budget tier rather than the daily one.
 
 ### Model policy
 
@@ -140,6 +154,14 @@ Aggregates are medians and quantiles, never means: one 382 tok/s row moves an
 average without moving a median. Percentiles, because "fast" and "cheap" only mean
 something against a population — 100 tok/s was a number someone picked, P25 of the
 measured set is a position in it.
+
+**Two tiers.** The table above is the daily path. A second, budget tier exists for
+long runs where start latency can be traded for price — and it asks for *more*
+capability to pay for that trade: speed ≥ 100 tok/s, latency ≤ 5.0 s, cost ≤
+$0.0020 a turn, capability ≥ 45, cache ≥ 80%. Checked against every measured row,
+it admits exactly two: Ember (46.3, 4.7 s, $0.0012) and Spark 1.3 Contributor
+(48.1, 4.5 s, $0.00058). Spark 1.2 Contributor misses on capability (39.6), and
+so do GLM, Step 5, Sonnet and the rest.
 
 The honest caveat: speed and latency have n < 30, so their quantiles are provisional
 and the P25 speed gate could sit anywhere in 71.5-118. A row inside a gate's CI is
@@ -191,16 +213,16 @@ Dropped on 2026-11-10, on the same probes re-run against a 20k prefix:
   of 35,308), runs at 118 tok/s and costs $0.0024 a turn, so it clears every gate.
   Haiku beats it on all three axes, and the row is kept anyway — a spare on the
   completions route costs nothing and survives an Anthropic outage.
-- **Muse Spark 1.3 Contributor, again.** 120 tok/s and, once warm, the cheapest row
-  measured: 8/8 identical requests read 35,939 cached tokens, putting it at $0.00058
-  a turn. It fails on the start — 4.5 s median, up to 5.3 s — and nothing else.
-- **Muse Ember.** 299 tok/s, the fastest generation measured, and it caches once
-  warm (7/8, 35,942 tokens) for $0.0012 a turn. Its 3.6-6.5 s start is the whole
-  problem, and a cache hit barely moves it: a control with unique prefixes was
-  3.8 s median, so the window is thinking, not reading the prefix.
+- **Muse Spark 1.3 Contributor and Muse Ember.** Admitted 2026-11-10 on the budget
+  tier, by owner choice: they trade the start for price. Spark reads 35,939 cached
+  tokens (8/8) for $0.00058 a turn at 120 tok/s; Ember reads 35,942 (7/8) for
+  $0.0012 and generates at 299 tok/s, the fastest measured. Ember's window is
+  thinking, not reading the prefix — a control with unique prefixes was 3.8 s
+  median — so a cache hit barely moves it.
 - **Step 5 Preview and Sonnet 5.5.** Step 5 is fast (167 tok/s) and caches, but
-  costs 3.8x Fast a turn; Sonnet sits exactly on the speed gate (100 tok/s) and
-  costs 10x. Neither fits the budget this config is built around.
+  costs 3.8x Fast a turn; Sonnet has the fastest start measured (1.40 s) and the
+  highest capability (56.0), and costs 10x. Neither fits the budget this config is
+  built around.
 - **Nemotron 3.5 Super VL.** The fastest row measured (382 tok/s) and it caches and
   starts in 1.5 s, but 26.5 intelligence at $0.0045 a turn (1.8x) is a bad trade.
 
