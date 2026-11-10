@@ -100,3 +100,11 @@ excluded:
   - { id: xiaomi/mimo-v2.6-pro, reason: "26 tok/s, 8.4 s start" }
   - { id: deepseek/deepseek-v4.1-flash, reason: "9-47 s start on this lane" }
   - { id: deepseek/deepseek-v4.1-flash-ultrafast, reason: "$0.0211/turn" }
+
+# Routes the config may serve without being menu candidates. They did not clear
+# the funnel and are not claimed to: they are convenience rows, measured and
+# kept visible so the exception is on the record rather than in a comment.
+utility:
+  - id: deepseek/deepseek-v4.1-flash-eco
+    provider: opengateway
+    reason: "121 tok/s, cache and tools work, 9.4x cheaper per turn on the promo; fails prefill (49.2 ms/1k) and warm latency (2.5 s). Promo-dependent."

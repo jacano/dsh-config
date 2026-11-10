@@ -36,3 +36,12 @@
         compat: { forceAdaptiveThinking: true }
         models:
           - { id: claude-haiku-5-5, name: Claude Haiku 5.5, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+      opengateway:
+        displayName: OpenGateway (eco)
+        api: openai-completions
+        baseURL: https://apis.opengateway.ai/v1
+        apiKeyEnv: OPENGATEWAY_API_KEY
+        defaultContextWindow: 1000000
+        defaultInput: [text, image]
+        models:
+          - { id: deepseek/deepseek-v4.1-flash-eco, name: DeepSeek V4.1 Flash Eco, contextWindow: 1000000, maxTokens: 32768 }

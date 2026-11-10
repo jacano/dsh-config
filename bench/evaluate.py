@@ -58,6 +58,7 @@ TOOL_PROMPT = ("Call get_weather for Seville and get_time for Seville. "
 def load_policy():
     gates: dict[str, dict[str, float]] = {}
     admitted: set[str] = set()
+    utility: set[str] = set()
     phase = None
     section = None
     for line in POLICY.read_text(encoding="utf-8").splitlines():
@@ -75,10 +76,15 @@ def load_policy():
         if line.startswith("excluded:"):
             section = "excluded"
             continue
+        if line.startswith("utility:"):
+            section = "utility"
+            continue
         m = re.match(r"^  - id:\s*(\S+)", line)
         if m and section == "admitted":
             admitted.add(m.group(1))
-    return gates, admitted
+        elif m and section == "utility":
+            utility.add(m.group(1))
+    return gates, admitted, utility
 
 
 def load_catalog():
@@ -208,7 +214,7 @@ def check() -> int:
     configured = config_ids()
     for missing in ADMITTED - configured:
         problems.append(f"{missing} is in the policy but not in dsh/cordis.patch.yml")
-    for extra in configured - ADMITTED:
+    for extra in configured - ADMITTED - UTILITY:
         problems.append(f"{extra} is configured but not admitted")
     if not problems:
         print(f"\nOK: {len(ADMITTED)} rows clear all three phases, and the menu matches the policy")
@@ -407,8 +413,8 @@ def live(model: str, capability: float, cost: float) -> int:
 # --------------------------------------------------------------------------- main
 
 def main() -> int:
-    global GATES, ADMITTED
-    GATES, ADMITTED = load_policy()
+    global GATES, ADMITTED, UTILITY
+    GATES, ADMITTED, UTILITY = load_policy()
 
     args = sys.argv[1:]
     if not args:
@@ -429,6 +435,7 @@ def main() -> int:
 
 
 ADMITTED: set[str] = set()
+UTILITY: set[str] = set()
 
 if __name__ == "__main__":
     sys.exit(main())
