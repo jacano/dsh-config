@@ -40,6 +40,11 @@ criteria:
       latency_max: 4.80
       cache_min: 0.80
 
+  protocol:
+    speed: "median of three 1,600-token generations"
+    latency: "median of three warm passes, after two priming requests"
+    cache: "works if any warm pass reads cached tokens; a 3-pass hit rate is noise, not signal"
+
   notes:
     daily: "streaming speed and a tight start; Fast, Haiku, MiniMax and Luna"
     budget: "slower start traded for price, higher capability floor; Ember and Spark 1.3"
