@@ -158,9 +158,10 @@ GATES: dict[str, dict[str, float]] = {}
 # --------------------------------------------------------------------------- config sync
 
 def config_ids():
+    """Model ids in the patch file, in either block or flow style."""
     text = CONFIG.read_text(encoding="utf-8")
     block = text.split("models:", 1)[1]
-    return set(re.findall(r"^\s+- id:\s*(\S+)", block, re.M))
+    return set(re.findall(r"^\s+- (?:\{\s*)?id:\s*([^,\s}]+)", block, re.M))
 
 
 # --------------------------------------------------------------------------- check mode

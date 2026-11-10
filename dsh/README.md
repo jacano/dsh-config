@@ -50,7 +50,8 @@ shows two groups: **Command Code**, on the OpenAI-compatible route, and
 ## The one file
 
 `dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`. Every profile reads it and it
-outranks the profile's own layer, so one file covers both flavours. It is a YAML
+outranks the profile's own layer, so one file covers both flavours. The file carries no comments and one line per model on purpose: it is
+configuration, and everything that needs explaining is in this README. It is a YAML
 array of loader patch entries: `id` names the row, `name` the plugin, `config`
 replaces that row's config whole.
 

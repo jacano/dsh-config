@@ -1,31 +1,17 @@
 - id: ui-settings-general
   name: "@deepseek-ai/dsh-client-ui-settings-general"
-  config:
-    welcomeNoticeVersion: 2026-08-13.1
+  config: { welcomeNoticeVersion: 2026-08-13.1 }
 - id: permission
   name: "@deepseek-ai/dsh-permission-presets"
   config:
     presets:
-      read-only:
-        sandbox: read-only
-        approval: ask
-      workspace-write:
-        sandbox: workspace-write
-        approval: ask
-      danger-full-access:
-        sandbox: danger-full-access
-        approval: never
+      read-only: { sandbox: read-only, approval: ask }
+      workspace-write: { sandbox: workspace-write, approval: ask }
+      danger-full-access: { sandbox: danger-full-access, approval: never }
     defaultPreset: danger-full-access
 - id: agent-default-model
   name: "@deepseek-ai/dsh-agent-default-model"
-  config:
-    provider: command-code
-    model: deepseek/deepseek-v4.1-flash-fast
-
-# DeepSeek official, off. These rows carry no `name` on purpose: `llm-deepseek`
-# mounts `@deepseek-ai/dsh-llm-deepseek-api-key` in the desktop bundle and
-# `@deepseek-ai/dsh-llm-deepseek` in the npm install, and a patch whose `name`
-# does not match its row is skipped with a warning, not applied.
+  config: { provider: command-code, model: deepseek/deepseek-v4.1-flash-fast }
 - id: llm-deepseek
   disabled: true
 - id: llm-deepseek-account
@@ -34,12 +20,8 @@
   disabled: true
 - id: deepseek-llm-api-extensions
   disabled: true
-# `deepseek-account`, `account-controller` and `ui-settings-account` stay on: they
-# are the account page, not the provider. `tool-web` cannot reach the copy an
-# agent preset composes, so the search-provider disable above is the real switch.
 - id: tool-web
-  config:
-    search: false
+  config: { search: false }
 - id: llm-pi-ai
   name: "@deepseek-ai/dsh-llm-pi-ai"
   config:
@@ -50,52 +32,11 @@
         baseURL: https://api.commandcode.ai/provider/v1
         apiKeyEnv: COMMANDCODE_API_KEY
         defaultContextWindow: 1000000
-        # A fallback, not an override: an entry's own `input` wins, so a
-        # text-only model added here must declare `input: [text]`.
         defaultInput: [text, image]
-        # Every model thinks by default; `minimal` and `none` are refused with
-        # HTTP 400, and every row here takes the same five levels, hence the
-        # single alias. No row declares `off`; see MODELS.md.
         models:
-          # The 1017 snapshot on the stable lane, kept as the fallback: it
-          # caches a 90k prompt at ~99% (36,736 of 36,937 tokens read back on
-          # the second pass, 2026-11-10) and answers in 1.6 s to first token.
-          - id: deepseek/deepseek-v4.1-flash-fast
-            name: DeepSeek V4.1 Flash Fast (latest)
-            contextWindow: 1000000
-            maxTokens: 32768
-            reasoningEfforts: &efforts
-              low: low
-              medium: medium
-              high: high
-              xhigh: xhigh
-              max: max
-          # Third row, admitted 2026-11-10: 118 tok/s, caches 35,072 of 35,308,
-          # $0.0024 a turn. Haiku beats it on every axis, but a spare row on the
-          # completions route costs nothing and survives an Anthropic outage.
-          # It reads images: a 1x1 red pixel came back described, so it inherits
-          # the route's `defaultInput: [text, image]`. It survived the provider
-          # fitness phase: 23.1 ms/1k prefill, 100% cache, 0.84 retention.
-          - id: minimax/minimax-m3.1-flash
-            name: MiniMax M3.1 Flash
-            contextWindow: 1000000
-            maxTokens: 32768
-            reasoningEfforts: *efforts
-          - id: gpt-6-luna
-            name: GPT-6 Luna
-            contextWindow: 1050000
-            maxTokens: 32768
-            reasoningEfforts: *efforts
-      # Claude on Command Code speaks Anthropic Messages, not Chat Completions:
-      # every claude-* id in GET /provider/v1/models advertises only `/messages`,
-      # so it cannot ride the route above. The base URL is the API root, not
-      # /v1, because pi-ai appends `/v1/messages`; discovery normalizes either.
-      # Claude 5.5 rejects `thinking.type.enabled` and wants adaptive thinking
-      # plus `output_config.effort`, which is what forceAdaptiveThinking selects.
-      # The prefix cache is not automatic on this API: without a cache_control
-      # breakpoint the same 60k prompt reads back 0 cached tokens and takes
-      # 3.2-3.5 s to first token. pi-ai marks the last message itself, so the
-      # breakpoint arrives without a per-model setting.
+          - { id: deepseek/deepseek-v4.1-flash-fast, name: DeepSeek V4.1 Flash Fast (latest), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
+          - { id: minimax/minimax-m3.1-flash, name: MiniMax M3.1 Flash, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+          - { id: gpt-6-luna, name: GPT-6 Luna, contextWindow: 1050000, maxTokens: 32768, reasoningEfforts: *efforts }
       command-code-anthropic:
         displayName: Command Code (anthropic-messages)
         api: anthropic-messages
@@ -103,18 +44,9 @@
         apiKeyEnv: COMMANDCODE_API_KEY
         defaultContextWindow: 1000000
         defaultMaxTokens: 32768
-        compat:
-          forceAdaptiveThinking: true
+        compat: { forceAdaptiveThinking: true }
         models:
-          # The default. 146 tok/s measured against 116 for Fast, 43.4
-          # intelligence against 39.5, and $0.0017 a turn against $0.0025 once
-          # the prefix caches (60,304 tokens read back, 1.4 s to first token).
-          - id: claude-haiku-5-5
-            name: Claude Haiku 5.5
-            contextWindow: 1000000
-            maxTokens: 32768
-            reasoningEfforts: *efforts
+          - { id: claude-haiku-5-5, name: Claude Haiku 5.5, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
 - id: ui-settings-account
   name: "@deepseek-ai/dsh-client-ui-settings-account"
-  config:
-    step: done
+  config: { step: done }
