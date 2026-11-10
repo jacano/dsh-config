@@ -86,6 +86,7 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 | MiniMax M3.1 Flash | `minimax/minimax-m3.1-flash` | `command-code` |
 | Muse Ember | `meta/muse-ember` | `command-code` |
 | Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` | `command-code` |
+| Muse Spark 1.2 Contributor | `meta/muse-spark-1.2-contributor` | `command-code` |
 | GPT-6 Luna | `gpt-6-luna` | `command-code` |
 | Claude Haiku 5.5 | `claude-haiku-5-5` | `command-code-anthropic` |
 
@@ -104,7 +105,7 @@ behind. Haiku 5.5 wins the measured comparison and is one menu entry away. Each
 label is the `name` the provider's catalog returns for that id, copied verbatim,
 parentheses included.
 
-Six rows, one mechanism: a static prefilter first, measurement second.
+Seven rows, one mechanism: a static prefilter first, measurement second.
 [MODELS.md](MODELS.md) holds the numbers; the short version:
 
 | | Fast | MiniMax M3.1 | Haiku 5.5 |
