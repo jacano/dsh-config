@@ -40,14 +40,15 @@ criteria:
       latency_max: 4.80
       cache_min: 0.80
 
-  # Third phase, advisory: does the route serve the model well enough for a
-  # loop? Measured by scripts/provider_fitness.py and recorded in AGENTIC.md.
-  # Not enforced by evaluate_gates.py yet: one run per model is not enough.
-  fitness:
-    prefill_ms_per_1k_max: 25
-    cache_hit_min: 0.80
-    retention_4x_min: 0.60
-    errors_per_10_max: 1
+  # Third phase: does the route serve the model well enough for a loop?
+  # Measured by scripts/provider_fitness.py, recorded in fitness-2026-11-10.csv
+  # and enforced by evaluate_gates.py. One run per model for now; re-run it
+  # when a provider changes something.
+    fitness:
+      prefill_ms_per_1k_max: 25
+      cache_hit_min: 0.80
+      retention_4x_min: 0.60
+      errors_per_10_max: 1
 
   protocol:
     speed: "median of three 1,600-token generations"
@@ -86,30 +87,6 @@ admitted:
     note: admitted 2026-11-10 by owner choice; clears the 2.52 s tolerance band on the three-pass median
   # Budget tier: admitted 2026-11-10 by owner choice to trade start latency for
   # price. See the `tiers` block above for the gates they clear.
-  - id: meta/muse-ember
-    route: command-code
-    output_tps: 299
-    ttft_seconds: 4.7
-    caches: true
-    cost_per_turn_usd: 0.0012
-    capability: 46.3
-    note: fastest generator measured; the 4.7 s start is amortized past ~830 tokens of answer
-  - id: meta/muse-spark-1.3-contributor
-    route: command-code
-    output_tps: 134
-    ttft_seconds: 4.2
-    caches: true
-    cost_per_turn_usd: 0.00058
-    capability: 48.1
-    note: cheapest and smartest row in the catalog; pays for it in start latency
-  - id: meta/muse-spark-1.2-contributor
-    route: command-code
-    output_tps: 95
-    ttft_seconds: 3.20
-    caches: true
-    cost_per_turn_usd: 0.00058
-    capability: 39.6
-    note: admitted 2026-11-10 by owner choice; 95 tok/s, cheapest row in the menu, starts in 3.2 s
   - id: gpt-6-luna
     route: command-code
     output_tps: 98
@@ -121,6 +98,12 @@ admitted:
 
 # Every row measured and rejected, with the number that killed it.
 excluded:
+  - id: meta/muse-ember
+    reason: "provider fitness: 36.3 ms/1k prefill, 67% cache, 0.37 retention under 4x. The route, not the model"
+  - id: meta/muse-spark-1.3-contributor
+    reason: "provider fitness: 115.2 ms/1k prefill and 33% cache. Reads 60k in 6.8 s where Luna takes 1.6"
+  - id: meta/muse-spark-1.2-contributor
+    reason: "provider fitness: 60.2 ms/1k prefill. Cheapest sticker, worst prefill in the set"
   - id: z-ai/glm-5.3-flash
     reason: "74 tok/s, below the 100 gate; $0.0036/turn (1.4x). It does cache (36,992 of 37,014 on pass 2), which the 2026-11-09 round had wrong"
   - id: meta/muse-spark-1.3

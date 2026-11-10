@@ -5,9 +5,8 @@ provider serves the model well enough to survive a loop of twenty calls. Two
 models with identical tok/s can differ 5x in how long they take to read a 60k
 prefix, and that difference is invisible in the headline numbers.
 
-This file records the third phase and the numbers behind it. It is **advisory**:
-`evaluate_gates.py` does not enforce it yet, because the sample is one run per
-model.
+This file records the third phase and the numbers behind it. It is **enforced**
+by `evaluate_gates.py`: an admitted row without fitness data fails the run.
 
 ## The gates
 
@@ -64,9 +63,9 @@ Luna is the surprise: 1.6 ms/1k makes it the cheapest route to read a long
 context in the whole set, which is worth more in an agent loop than its 89 tok/s
 suggests.
 
-## Applying it
+## Applied
 
-If these gates were enforced today, the menu would be DeepSeek, Haiku, MiniMax
-and Luna — four rows, all on providers that prefill, cache and hold under load.
-Ember and both Spark Contributors would leave, whatever their sticker price says,
-because the service behind them is what makes a session feel slow.
+The menu is DeepSeek, Haiku, MiniMax and Luna — four rows, all on providers that
+prefill, cache and hold under load. Ember and both Spark Contributors were dropped
+on 2026-11-10, whatever their sticker price said, because the service behind them
+is what makes a session feel slow.

@@ -84,9 +84,6 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 | --- | --- | --- |
 | DeepSeek V4.1 Flash Fast (latest) | `deepseek/deepseek-v4.1-flash-fast` | `command-code` |
 | MiniMax M3.1 Flash | `minimax/minimax-m3.1-flash` | `command-code` |
-| Muse Ember | `meta/muse-ember` | `command-code` |
-| Muse Spark 1.3 Contributor | `meta/muse-spark-1.3-contributor` | `command-code` |
-| Muse Spark 1.2 Contributor | `meta/muse-spark-1.2-contributor` | `command-code` |
 | GPT-6 Luna | `gpt-6-luna` | `command-code` |
 | Claude Haiku 5.5 | `claude-haiku-5-5` | `command-code-anthropic` |
 
@@ -105,34 +102,25 @@ behind. Haiku 5.5 wins the measured comparison and is one menu entry away. Each
 label is the `name` the provider's catalog returns for that id, copied verbatim,
 parentheses included.
 
-Seven rows, one mechanism: a static prefilter first, measurement second.
+Four rows, one mechanism in three phases: static, measured, provider fitness.
 [MODELS.md](MODELS.md) holds the numbers; the short version:
 
-| | Fast | MiniMax M3.1 | Haiku 5.5 |
-| --- | --- | --- | --- |
-| Role | default | spare | the measured winner |
-| Output rate | 116 tok/s | 118 tok/s | **146 tok/s** |
-| TTFT, 20-60k prefix | 1.8 s | 1.8 s | **1.8 s** |
-| Caches the prefix | yes (36,736 of 36,937) | yes (35,072 of 35,308) | **yes (60,304 read)** |
-| Intelligence | 39.5 | 42.7 | **43.4** |
-| $ per agent turn | $0.0025 | $0.0024 | **$0.0017** |
-
-The other two trade start latency for price and earn it back in capability:
-
-| | Muse Ember | Spark 1.3 Contributor |
-| --- | --- | --- |
-| Output rate | **299 tok/s** | 120 tok/s |
-| TTFT | 4.7 s | 4.5 s |
-| Intelligence | 46.3* | **48.1** |
-| $ per agent turn | $0.0012 | **$0.00058** |
-
-\* AA's 36.0 mapped onto the catalog scale; an estimate, not a measurement.
+| | Fast | MiniMax M3.1 | Haiku 5.5 | Luna |
+| --- | --- | --- | --- | --- |
+| Role | default | spare | the measured winner | the long-context one |
+| Output rate | 113 tok/s | 107 tok/s | **146 tok/s** | 89 tok/s |
+| TTFT, warm | 1.6 s | 1.9 s | **1.4 s** | 1.3 s |
+| Prefill | 19.1 ms/1k | 23.1 ms/1k | 22.7 ms/1k | **1.6 ms/1k** |
+| Caches the prefix | yes | yes | yes | yes |
+| Intelligence | 39.5 | 42.7 | **43.4** | 38.1 |
+| $ per agent turn | $0.0025 | $0.0024 | **$0.0017** | $0.0017 |
 
 The `$/turn` column assumes a 90k prompt (89k of it cached where caching works)
-and 1.5k of output. That assumption decides the ranking: Muse Spark 1.3
-Contributor, at $0.10/$0.20 per M, looks 20x cheaper than Fast on sticker price
-and lands 4.2x *below* it once its cache warms — at the price of a 4.5 s start,
-which is why its start latency, not its price, is what the gates had to allow for.
+and 1.5k of output. Luna is the interesting one: at 89 tok/s it is the slowest
+row here, but its 1.6 ms/1k prefill makes it the cheapest way to read a long
+context in the whole set, which in an agent loop matters more than the write
+speed. The Muse rows that looked cheaper on sticker price were dropped for the
+opposite reason — see [AGENTIC.md](AGENTIC.md).
 
 ### Model policy
 
@@ -200,12 +188,11 @@ Dropped on 2026-11-10, on the same probes re-run against a 20k prefix:
   of 35,308), runs at 118 tok/s and costs $0.0024 a turn, so it clears every gate.
   Haiku beats it on all three axes, and the row is kept anyway — a spare on the
   completions route costs nothing and survives an Anthropic outage.
-- **Muse Spark 1.3 Contributor and Muse Ember.** Admitted 2026-11-10, by owner
-  choice: they trade the start for price. Spark reads 35,939 cached
-  tokens (8/8) for $0.00058 a turn at 120 tok/s; Ember reads 35,942 (7/8) for
-  $0.0012 and generates at 299 tok/s, the fastest measured. Ember's window is
-  thinking, not reading the prefix — a control with unique prefixes was 3.8 s
-  median — so a cache hit barely moves it.
+- **Muse Ember, Spark 1.3 and Spark 1.2 Contributor.** Admitted on price, dropped
+  the same day on provider fitness: 36, 115 and 60 ms/1k prefill against a 25 ms
+  limit, Ember's cache holds two turns in three and its throughput falls to 37%
+  under four parallel calls. The service behind them is what makes a session feel
+  slow, whatever the sticker says.
 - **Step 5 Preview and Sonnet 5.5.** Step 5 is fast (167 tok/s) and caches, but
   costs 3.8x Fast a turn; Sonnet has the fastest start measured (1.40 s) and the
   highest capability (56.0), and costs 10x. Neither fits the budget this config is
