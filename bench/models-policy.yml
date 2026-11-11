@@ -1,36 +1,33 @@
 # Model policy — what may enter dsh/cordis.patch.yml
 #
-# Written 2026-11-10. The model menu is a curated list, not a catalog window:
-# a row is admitted only while it clears every gate below, measured on this
-# machine rather than taken from a vendor page. `bench/evaluate.py`
-# enforces the list; run it before every commit.
+# The menu is a curated list, not a catalog window: a row is admitted only while
+# it clears every gate below. `bench/evaluate.py` enforces the list; run it before
+# every commit.
 #
-# Why these gates: a cheap sticker price means nothing if the route reads the
-# prefix slowly or does not cache it, because an agent turn re-reads its context
-# every time. That is what removed the Muse rows on 2026-11-10.
+# Two folds. The first costs nothing and lives in `bench/shortlist.py`: it prices
+# every model a provider sells, applies that plan's discount or credit
+# multiplier, and keeps the rows that are cheap enough, reason, and call tools.
+# The second is `bench/evaluate.py`: it measures the survivors, and that is the
+# only part that spends tokens.
+#
+# Nothing here trusts the shop. Capability comes from Artificial Analysis
+# (`capability.json`), identity and tool support from models.dev
+# (`models.dev.json`), and prices from each provider's own published catalogue.
+# A provider grading its own product is not evidence.
 
 version: 1
 updated: 2026-11-11
 
 criteria:
-  # Thresholds are the envelope of the admitted set: no row may be worse than
-  # the current worst on any axis. That closes the menu without exceptions and
-  # without recomputing quantiles on every measurement round.
+  # Thresholds are the envelope of the admitted set: no row may be worse than the
+  # current worst on any axis, so nothing enters without a threshold moving on
+  # purpose, in a commit that names the number.
   #
-  # Set 2026-11-10 from models.csv. `bench/evaluate.py`
-  # proves both directions: every admitted row clears its tier, and every
-  # measured row outside the menu misses at least one gate.
+  # The capability floor was re-based on 2026-11-11 when the source changed: AA
+  # scores DeepSeek V4.1 Flash at 30.1 where the catalog claimed 39.5, and the old
+  # 38 was measuring an index that no longer exists.
   method: "envelope of the admitted set; no waivers, no exceptions"
 
-  # One mechanism for every row, in two phases.
-  #
-  # Phase 1 is static: capability, price and plan access come from the catalog,
-  # so a row that fails here is never measured and never costs a token.
-  # Phase 2 is measured: speed, latency and cache are the only properties that
-  # need the API, so only the survivors of phase 1 are worth a request.
-  #
-  # Both phases are the envelope of the admitted rows: nothing new enters
-  # without a threshold moving on purpose.
   phases:
     static:
       # Two sources, two questions, no overlap.
