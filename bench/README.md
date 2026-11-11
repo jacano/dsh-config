@@ -1,30 +1,37 @@
 # bench — choosing the models
 
-One process decides which models go in the menu. It never edits the DSH
-configuration; that is a separate change in [`../dsh/`](../dsh/).
+Two folds, and only the second one costs money.
 
 ```bash
-python bench/evaluate.py                  # the stored table against the gates
-python bench/evaluate.py --static         # phase 1 only, over the catalog, free
-python bench/evaluate.py --model <id> --capability 42 --cost 0.0024   # live run
+python bench/shortlist.py            # fold 1: what is worth calling at all, free
+python bench/shortlist.py --write    # same, and save shortlist-<today>.csv
+python bench/evaluate.py             # fold 2: the stored table against the gates
+python bench/evaluate.py --model <id> --capability 42 --cost 0.0024   # a live run
 ```
 
 ## The funnel
 
 ```
-catalog  ── phase 1  static     capability and price, no tokens spent
-              └─ survivors ── phase 2  measured   speed, latency, cache
-                   └─ measured ── phase 3  fitness   prefill, cache in a loop,
-                                                     parallelism, errors, tool calls
-                        └─ admitted, and only then written to the config
+providers.json + catalog  ── fold 1  shortlist   capability and price per plan,
+                                                  with each provider's discount or
+                                                  credit multiplier. No tokens.
+        └─ IN rows ── fold 2  evaluate  phase 2  measured   speed, latency, cache
+                                        phase 3  fitness   prefill, cache in a loop,
+                                                           parallelism, errors, tools
+              └─ admitted, and only then written to the config
 ```
 
 The limits live in [`models-policy.yml`](models-policy.yml); they are not copied
-here, because they move whenever a row enters or leaves. `evaluate.py` prints them
-with the table, and exits non-zero if an admitted row misses a gate, has no
-fitness data, or is not in the config.
+here, because they move whenever a row enters or leaves. Both folds read them
+from there, so a gate moves in one place and both change.
 
-Phase 1 costs nothing: a row that fails capability or price is never called.
+Fold 1 costs nothing and belongs to the provider, not the model: the same
+DeepSeek costs $0,0013 a turn on Command Code, $0,0007 on OpenDesign and $0,0003
+on an OpenGateway promotion, because each plan applies its own discount or credit
+multiplier. [`providers.json`](providers.json) is where that lives.
+
+`evaluate.py` exits non-zero if an admitted row misses a gate, has no fitness
+data, or is not in the config.
 
 ## The phases, and what a failure means
 
@@ -51,16 +58,21 @@ Claude rows go through `/messages` with a `cache_control` breakpoint: they refus
 
 | File | What it is |
 | --- | --- |
-| `evaluate.py` | The whole process: phases, gates, live measurement, config sync. |
+| `shortlist.py` | Fold 1. Reads `providers.json` and the catalog, applies the static gates, prints what is worth calling. |
+| `providers.json` | The providers, their plans and each model's discount or credit multiplier. One block per provider; no code to add one. |
+| `shortlist-<date>.csv` | A dated snapshot of fold 1, one row per provider × model. |
+| `evaluate.py` | Fold 2: phases, gates, live measurement, config sync. |
 | `models-policy.yml` | Decisions: the gates, which ids are admitted, which are excluded and why. No per-model metrics. |
 | `models.csv` | The only place metrics live. Admitted rows are medians of three rounds; the `rounds` column says so. |
 | `catalog-2026-11-10.csv` | Frozen snapshot of the priced catalog, used by phase 1. |
 
 ## Adding a model
 
-1. **Static, free.** Get capability and price per turn. If either fails, add the
-   id to `excluded:` with the number that killed it and stop.
-2. **Live.**
+1. **Static, free.** Add the provider block to `providers.json` if it is new, and
+   the model with its `catalog` slug or its own `list_turn_usd` and `capability`.
+   Run `python bench/shortlist.py`: if the row says `out`, add the id to
+   `excluded:` with the number that killed it and stop.
+2. **Live, only for the rows fold 1 marks `IN`.**
 
    ```bash
    python bench/evaluate.py --model <id> --capability <score> --cost <usd-per-turn>

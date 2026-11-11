@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
-"""One process for the whole model policy: statistics first, dynamics second.
+"""Second fold: the test battery. What actually costs tokens.
 
     python bench/evaluate.py                 # check the stored table against the gates
-    python bench/evaluate.py --static        # phase 1 only, over the catalog, free
     python bench/evaluate.py --model <id> --capability 42 --cost 0.0024
-                                             # live run: static, then measured, then fitness
+                                             # live run: measured, then fitness
 
-Phase 1 static    capability and price from the catalog. A row that fails here is
-                  never called: no tokens spent.
-Phase 2 measured  speed, warm latency, cache: the per-call numbers.
+The first fold is bench/shortlist.py: it reads the providers and the catalog and
+says which rows are worth calling at all. This file assumes that has happened
+and spends the requests.
+
+Phase 1 static    capability and price, repeated here so a live run cannot skip
+                  it: a row that fails costs nothing to reject.
+Phase 2 measured  speed, warm latency, cache, and the latency an agent turn
+                  really feels at 60k of context.
 Phase 3 fitness   prefill slope, cache in a loop, parallel retention, errors and
-                  tool-call validity: whether the route is good enough for an agent.
+                  tool-call validity: whether the route is good enough for a loop.
 
 Every threshold is the envelope of the admitted rows, so a new model has to beat
 the worst admitted one on every axis to get in.
 
-Stdlib only. The `--check` mode never calls the API.
+Stdlib only. Without arguments it never calls the API.
 """
 
 from __future__ import annotations
@@ -259,21 +263,6 @@ def check() -> int:
     return 1 if problems else 0
 
 
-# --------------------------------------------------------------------------- static mode
-
-def static_only() -> int:
-    catalog = load_catalog()
-    overrides = {m["catalog"]: m["override"] for m in load_models().values() if m["override"] is not None}
-    for slug, row in catalog.items():
-        if row["capability"] is None and slug in overrides:
-            row["capability"] = overrides[slug]
-    ok = [(s, r) for s, r in catalog.items() if not fails_static(r["capability"], r["cost"], GATES["static"])]
-    print(f"{len(catalog)} catalog rows, {len(ok)} clear phase 1:")
-    for slug, r in sorted(ok, key=lambda x: -(x[1]["capability"] or 0)):
-        print(f"  {r['name'][:44]:44s} capability {r['capability']:.1f}  ${r['cost']:.4f}/turn")
-    return 0
-
-
 # --------------------------------------------------------------------------- live mode
 
 def api_key() -> str:
@@ -453,8 +442,6 @@ def main() -> int:
     args = sys.argv[1:]
     if not args:
         return check()
-    if args[0] == "--static":
-        return static_only()
     if args[0] == "--model":
         model = args[1]
         capability = cost = None
@@ -465,7 +452,7 @@ def main() -> int:
         if capability is None or cost is None:
             raise SystemExit("--model needs --capability and --cost (the static phase)")
         return live(model, capability, cost)
-    raise SystemExit("usage: evaluate.py | --static | --model <id> --capability X --cost Y")
+    raise SystemExit("usage: evaluate.py | --model <id> --capability X --cost Y   (the free first fold is bench/shortlist.py)")
 
 
 ADMITTED: set[str] = set()
