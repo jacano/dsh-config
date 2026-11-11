@@ -39,6 +39,7 @@ REPO = BENCH.parent
 POLICY = BENCH / "models-policy.yml"
 CATALOG = BENCH / "catalog-2026-11-10.csv"
 MODELS = BENCH / "models.csv"
+CAPABILITY = BENCH / "capability.json"
 CONFIG = REPO / "dsh" / "cordis.patch.yml"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 BASE = "https://api.commandcode.ai/provider/v1"
@@ -94,6 +95,37 @@ def load_catalog():
             "cost": float(r["best_turn"]) if r.get("best_turn") else None,
         }
     return rows
+
+
+AA_LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync")
+
+
+def load_capability() -> dict:
+    """Artificial Analysis ratings, keyed so a lane finds the model it serves."""
+    if not CAPABILITY.exists():
+        return {}
+    return json.loads(CAPABILITY.read_text(encoding="utf-8"))["models"]
+
+
+def aa_of(ratings: dict, model_id: str, catalog_slug: str):
+    """(capability, is_reasoning) for a model, or (None, None) if AA has no row."""
+    def norm(s: str) -> str:
+        return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+
+    probes = []
+    for raw in (catalog_slug, model_id.split("/")[-1], model_id):
+        if not raw:
+            continue
+        probes.append(norm(raw))
+        base = raw
+        for lane in AA_LANES:
+            base = base.replace(f"-{lane}", "")
+        probes.append(norm(base))
+    for probe in probes:
+        if probe in ratings:
+            rec = ratings[probe]
+            return rec.get("intelligence"), rec.get("is_reasoning")
+    return None, None
 
 
 def load_models():
@@ -214,9 +246,14 @@ def check() -> int:
     print("phase 2 - measured:       " + "  ".join(f"{k}={v}" for k, v in GATES["measured"].items()))
     print("phase 3 - fitness:        " + "  ".join(f"{k}={v}" for k, v in GATES["fitness"].items()))
 
+    RATINGS = load_capability()
     for m in models.values():
         row = catalog.get(m["catalog"], {})
-        capability = m["override"] if m["override"] is not None else row.get("capability")
+        # AA first: the catalog's own number is the vendor's claim, and the two
+        # scales do not agree. The override stays as the last resort.
+        capability, _ = aa_of(RATINGS, m["id"], m["catalog"])
+        if capability is None:
+            capability = m["override"] if m["override"] is not None else row.get("capability")
         cost = row.get("cost")
         f2 = fails_measured(m, capability, cost, GATES["measured"])
         f3 = fails_fitness(m, GATES["fitness"])
