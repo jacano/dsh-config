@@ -42,9 +42,9 @@
         defaultContextWindow: 1000000
         defaultInput: [text, image]
         models:
-          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 32768 }
+          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash, contextWindow: 1000000, maxTokens: 32768 }
       opengateway:
-        displayName: OpenGateway (eco)
+        displayName: OpenGateway
         api: openai-completions
         baseURL: https://apis.opengateway.ai/v1
         apiKeyEnv: OPENGATEWAY_API_KEY
