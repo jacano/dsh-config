@@ -8,7 +8,7 @@
       "billing": "monthly",
       "fee_usd": 10.0,
       "credits_usd": 100.0,
-      "note": "every row of catalog-2026-11-10.csv; list prices are off-peak (17 h/day), weekdays 01-04 and 06-10 UTC double",
+      "note": "every row of catalog-2026-11-10.csv; list prices are off-peak (17 h/day), weekdays 01-04 and 06-10 UTC double; DeepSeek rows carry no cache-write charge, Claude and Luna charge $0.125/M",
       "models": "catalog",
       "credits_row": [
         10,
@@ -16,7 +16,11 @@
         110,
         150,
         300
-      ]
+      ],
+      "cache_write_usd_per_m": {
+        "claude-haiku-5-5": 0.125,
+        "gpt-6-luna": 0.125
+      }
     },
     "open-design": {
       "plan": "Go",

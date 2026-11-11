@@ -150,6 +150,7 @@ def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> li
         cat = catalog.get(m.get("catalog") or "", {})
         fact = fact_of(table, m["id"], m.get("catalog") or "")
         score = score_of(scores_table, m["id"], m.get("catalog") or "")
+        bare = m["id"].split("/")[-1]
         listed = m["list_turn_usd"] if "list_turn_usd" in m else cat.get("cost")
         factor = float(m.get("factor", 1.0))
         out.append({
@@ -158,6 +159,7 @@ def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> li
             "list_turn_usd": listed,
             "factor": factor,
             "effective_turn_usd": listed * factor if listed is not None else None,
+            "cache_write_usd_per_m": (plan.get("cache_write_usd_per_m") or {}).get(bare),
             "reasoning": fact.get("reasoning"),
             "tool_call": fact.get("tool_call"),
             "context": fact.get("context"),
@@ -182,6 +184,17 @@ def dev_turn(cost: dict | None) -> float | None:
     except (TypeError, ValueError):
         return None
     return (89_000 * cached + 1_000 * fresh + 1_500 * out) / 1_000_000
+
+
+CTX = 60_000          # the context a turn is priced at
+
+
+def cold_call(row: dict) -> float | None:
+    """The first call of a session also writes the prefix, and that is not free."""
+    write = row.get("cache_write_usd_per_m")
+    if not write or row["effective_turn_usd"] is None:
+        return None
+    return row["effective_turn_usd"] + CTX * write / 1_000_000 * row["factor"]
 
 
 def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, str]:
@@ -231,13 +244,16 @@ def main() -> int:
             row["provider"] = pname        # before the gates: an exclusion is per lane
             bucket, why = classify(row, cost_max, cap_min, judged)
             row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
-                       plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why)
+                       plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why,
+                       cold_call_usd=cold_call(row))
             buckets[bucket].append(row)
             rows.append(row)
 
         for row in sorted(buckets["battery"], key=lambda r: r["effective_turn_usd"]):
+            cold = cold_call(row)
+            extra = f"  (1.a llamada ${cold:.4f})" if cold else ""
             print(f"  run   {LABEL[row['provider']]:13s} {row['model'][:30]:30s} "
-                  f"x{row['factor']:<4.2f} AA {row['aa']:5.1f}  ${row['effective_turn_usd']:.4f}")
+                  f"x{row['factor']:<4.2f} AA {row['aa']:5.1f}  ${row['effective_turn_usd']:.4f}{extra}")
         for row in sorted(buckets["human"], key=lambda r: r["effective_turn_usd"]):
             aa = "-" if row["aa"] is None else f"{row['aa']:.1f}"
             print(f"  ????  {LABEL[row['provider']]:13s} {row['model'][:30]:30s} "

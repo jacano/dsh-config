@@ -5,3 +5,4 @@ minimax/minimax-m3.1-flash,minimax-m3-1-flash,MiniMax M3.1 Flash,125,1.76,1.000,
 gpt-6-luna,gpt-6-luna,GPT-6 Luna,97,1.97,1.000,2.6,1.00,0.82,0,1.00,,3
 opendesign/deepseek-v4.1-flash,,DeepSeek V4.1 Flash (OpenDesign),105,2.45,1.000,35.6,1.00,0.76,0,1.00,30.1,1
 opendesign/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco (OpenDesign),59,2.37,1.000,76.6,1.00,0.94,0,1.00,30.1,1
+opengateway/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco (OpenGateway),121,2.50,1.000,49.2,1.00,0.98,0,1.00,30.1,1
