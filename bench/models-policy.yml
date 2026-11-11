@@ -107,6 +107,10 @@ excluded:
   - { id: xiaomi/mimo-v2.6-pro, reason: "26 tok/s, 8.4 s start" }
   - { id: deepseek/deepseek-v4.1-flash, reason: "9-47 s start on this lane" }
   - { id: deepseek/deepseek-v4.1-flash-ultrafast, reason: "$0.0211/turn" }
+  - { id: Qwen/Qwen3.8-Flash, reason: "HTTP 524 during the measured phase; no capability on record either" }
+  - { id: Qwen/Qwen3.8-Omni-Flash, reason: "no capability anywhere: absent from the catalog and from the AA snapshot. Unmeasured, so unranked" }
+  - { id: jev, reason: "no capability anywhere, and the row is a decision model, not a coding one" }
+  - { id: jev-1-14-0, reason: "same model as jev, same gap: no capability, unmeasured" }
 
 # The owner's call, and the only way into the config without passing the gates.
 # A row lands here because someone decided it is worth serving anyway, never
