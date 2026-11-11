@@ -107,6 +107,8 @@ excluded:
   - { id: moonshotai/Kimi-K3.1-Pro, provider: command-code, reason: "measured: 32 tok/s" }
   - { id: xiaomi/mimo-v2.6-pro, provider: command-code, reason: "measured: 26 tok/s, 8.4 s to start" }
   - { id: deepseek/deepseek-v4.1-flash, provider: command-code, reason: "measured on this lane: 9-47 s to start" }
+  - { id: deepseek-v4.1-flash, provider: open-design, reason: "measured 2026-11-11: 35.6 ms/1k prefill, 4.59 s to first token at 60k, 18.9 s per turn" }
+  - { id: deepseek-v4.1-flash-eco, provider: open-design, reason: "measured 2026-11-11: 76.6 ms/1k prefill, 59 tok/s, 32.4 s per turn at 60k" }
   - { id: Qwen/Qwen3.8-Flash, provider: command-code, reason: "measured: HTTP 524, the route does not answer" }
 
   # Access, not preference: the plan refuses the call.

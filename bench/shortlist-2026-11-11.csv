@@ -96,8 +96,8 @@ kimi-k2-5,Kimi K2.5,0.014,1.0,0.014,True,True,262144,True,,Kimi-K2.5,,0.014,comm
 minimax-m2-5,MiniMax M2.5,0.00477,1.0,0.00477,True,True,200000,True,,MiniMaxAI/MiniMax-M2.5,,0.00477,command-code,GOAT,10.0,100.0,out,cost 0.0048 > 0.0026
 claude-haiku-4-5,Claude Haiku 4.5,0.0174,1.0,0.0174,True,True,200000,True,,anthropic/claude-haiku-4.5,,0.0184092,command-code,GOAT,10.0,100.0,out,cost 0.0174 > 0.0026
 claude-sonnet-4-6,Claude Sonnet 4.6,0.0522,1.0,0.0522,True,True,1000000,False,,claude-sonnet-4-6,,0.0522,command-code,GOAT,10.0,100.0,out,cost 0.0522 > 0.0026
-deepseek/deepseek-v4.1-flash,DeepSeek V4.1 Flash,0.002634,0.5,0.001317,True,True,1000000,False,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4.1-flash,30.078569475636,0.002634,open-design,Go,10.0,220.0,battery,
-deepseek/deepseek-v4.1-flash-eco,DeepSeek V4.1 Flash,0.002634,0.27,0.0007111800000000001,True,True,1000000,False,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4.1-flash,30.078569475636,0.002634,open-design,Go,10.0,220.0,battery,
+deepseek/deepseek-v4.1-flash,DeepSeek V4.1 Flash,0.002634,0.5,0.001317,True,True,1000000,False,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4.1-flash,30.078569475636,0.002634,open-design,Go,10.0,220.0,out,excluded in the policy
+deepseek/deepseek-v4.1-flash-eco,DeepSeek V4.1 Flash,0.002634,0.27,0.0007111800000000001,True,True,1000000,False,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4.1-flash,30.078569475636,0.002634,open-design,Go,10.0,220.0,out,excluded in the policy
 minimax/minimax-m3.1-flash,MiniMax M3.1 Flash,0.002385,1.0,0.002385,True,True,1048576,False,,minimax-m3-1-flash,29.0595214290458,0.00178875,open-design,Go,10.0,220.0,out,capability 29.1 < 30.0
 xiaomi/mimo-v2.6-pro,MiMo-V2.6-Pro,0.00206,1.0,0.00206,True,True,1048576,False,,mimo-v2.6-pro,29.8897833093321,0.0,open-design,Go,10.0,220.0,out,capability 29.9 < 30.0
 xiaomi/mimo-v2.6-flash,MiMo-V2.6-Flash,0.000809,1.0,0.000809,True,True,1048576,False,,mimo-v2.6-flash,26.7276981444568,0.0,open-design,Go,10.0,220.0,out,capability 26.7 < 30.0

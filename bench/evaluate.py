@@ -42,7 +42,14 @@ MODELS = BENCH / "models.csv"
 CAPABILITY = BENCH / "capability.json"
 CONFIG = REPO / "dsh" / "cordis.patch.yml"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
-BASE = "https://api.commandcode.ai/provider/v1"
+# The battery has to run wherever the model is sold: the same model on another
+# gateway is another route, with its own speed and its own failures.
+PROVIDERS = {
+    "command-code": ("https://api.commandcode.ai/provider/v1", "COMMANDCODE_API_KEY"),
+    "opendesign": ("https://amr-link.open-design.ai/v1", "OPENDESIGN_API_KEY"),
+}
+BASE = PROVIDERS["command-code"][0]
+KEY_ENV = PROVIDERS["command-code"][1]
 
 CORPUS = ("Line {i} of the reference corpus: the quick brown fox jumps over the lazy dog "
           "while the engineer reviews patch number {i} and notes that the cache behaviour "
@@ -292,9 +299,9 @@ def check() -> int:
 # --------------------------------------------------------------------------- live mode
 
 def api_key() -> str:
-    m = re.search(r'COMMANDCODE_API_KEY:\s*"([^"]+)"', CREDS.read_text(encoding="utf-8"))
+    m = re.search(KEY_ENV + r':\s*"([^"]+)"', CREDS.read_text(encoding="utf-8"))
     if not m:
-        raise SystemExit("no COMMANDCODE_API_KEY in ~/.dsh/.credentials.yaml")
+        raise SystemExit(f"no {KEY_ENV} in ~/.dsh/.credentials.yaml")
     return m.group(1)
 
 
@@ -468,6 +475,17 @@ def main() -> int:
     args = sys.argv[1:]
     if not args:
         return check()
+    if "--provider" in args:
+        global BASE, KEY_ENV
+        at = args.index("--provider")
+        name = args[at + 1]
+        if name not in PROVIDERS:
+            raise SystemExit(f"unknown provider {name}; known: {', '.join(PROVIDERS)}")
+        BASE, KEY_ENV = PROVIDERS[name]
+        del args[at:at + 2]          # the rest of the flags keep their positions
+        if not args:
+            return check()
+
     if args[0] == "--model":
         model = args[1]
         capability = cost = None
