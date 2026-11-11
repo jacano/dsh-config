@@ -103,6 +103,7 @@ excluded:
   - { id: meta/muse-spark-1.3-contributor, provider: command-code, reason: "measured: 115.2 ms/1k prefill, 33% cache" }
   - { id: meta/muse-spark-1.2-contributor, provider: command-code, reason: "measured: 60.2 ms/1k prefill" }
   - { id: z-ai/glm-5.3-flash, provider: command-code, reason: "measured: 74 tok/s, below the 95 gate" }
+  - { id: glm-5.3-flash, provider: open-design, reason: "owner, 2026-11-11: slow on this lane too; it is the same model on another route" }
   - { id: minimax/minimax-m3.1-flash, provider: command-code, reason: "measured: 2.77 s to first token at 60k, over the 2.70 gate" }
   - { id: gpt-6-luna, provider: command-code, reason: "measured: best prefill (2.6 ms/1k) undone by 97 tok/s, 17.6 s per turn at 60k" }
   - { id: Qwen/Qwen3.7-Flash, provider: command-code, reason: "measured: 64 tok/s, 7.79 s to start" }

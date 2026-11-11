@@ -103,7 +103,7 @@ xiaomi/mimo-v2.6-pro,MiMo-V2.6-Pro,0.00206,1.0,0.00206,True,True,1048576,False,,
 xiaomi/mimo-v2.6-flash,MiMo-V2.6-Flash,0.000809,1.0,0.000809,True,True,1048576,False,,mimo-v2.6-flash,26.7276981444568,0.0,open-design,Go,10.0,220.0,out,capability 26.7 < 30.0
 deepseek/deepseek-v4-pro,DeepSeek V4 Pro,0.011176,1.0,0.011176,True,True,1048576,False,deepseek/deepseek-v4-pro-0813,deepseek/deepseek-v4-pro,,0.011176,open-design,Go,10.0,220.0,out,cost 0.0112 > 0.0026
 deepseek/deepseek-v4-flash,DeepSeek V4 Flash,0.003666,1.0,0.003666,True,True,1000000,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash,,0.001317,open-design,Go,10.0,220.0,out,excluded in the policy
-glm-5.3-flash,GLM-5.3-Flash,0.001785,1.0,0.001785,True,True,1000000,True,,z-ai/glm-5.3-flash,,0.00357,open-design,Go,10.0,220.0,human,no AA score: capability unknown
+glm-5.3-flash,GLM-5.3-Flash,0.001785,1.0,0.001785,True,True,1000000,True,,z-ai/glm-5.3-flash,,0.00357,open-design,Go,10.0,220.0,out,excluded in the policy
 glm-5.3-flash-x,GLM-5.3-FlashX,0.00892,2.0,0.01784,True,True,1000000,False,zhipuai/glm-5.3-flash,z-ai/glm-5.3-flashx,,0.00892,open-design,Go,10.0,220.0,out,cost 0.0178 > 0.0026
 claude-haiku-5-5,Claude Haiku 5.5,0.00174,4.0,0.00696,True,True,1000000,False,,claude-haiku-5-5,36.4845435880142,0.00174,open-design,Go,10.0,220.0,out,cost 0.0070 > 0.0026
 gpt-6-luna,GPT-6 Luna,0.00174,4.0,0.00696,True,True,1050000,False,,gpt-6-luna,27.8552004938153,0.00174,open-design,Go,10.0,220.0,out,cost 0.0070 > 0.0026
