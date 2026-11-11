@@ -101,14 +101,12 @@ AA_LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync")
 
 
 def load_capability() -> dict:
-    """Artificial Analysis ratings, keyed so a lane finds the model it serves."""
     if not CAPABILITY.exists():
         return {}
     return json.loads(CAPABILITY.read_text(encoding="utf-8"))["models"]
 
 
 def aa_of(ratings: dict, model_id: str, catalog_slug: str):
-    """(capability, is_reasoning) for a model, or (None, None) if AA has no row."""
     def norm(s: str) -> str:
         return re.sub(r"[^a-z0-9]", "", (s or "").lower())
 
@@ -249,8 +247,8 @@ def check() -> int:
     RATINGS = load_capability()
     for m in models.values():
         row = catalog.get(m["catalog"], {})
-        # AA first: the catalog's own number is the vendor's claim, and the two
-        # scales do not agree. The override stays as the last resort.
+        # AA first: it is the only comparable scale. The measured override is the
+        # bridge for a row AA has not scored.
         capability, _ = aa_of(RATINGS, m["id"], m["catalog"])
         if capability is None:
             capability = m["override"] if m["override"] is not None else row.get("capability")

@@ -33,22 +33,22 @@ criteria:
   # without a threshold moving on purpose.
   phases:
     static:
-      # Capability comes from Artificial Analysis (bench/capability.json), never
-      # from the provider: a sales page grades its own product. The floor is on
-      # AA's scale, re-based 2026-11-11 to the envelope of the admitted rows —
-      # AA scores DeepSeek Flash at 30.1 and the catalog used to claim 39.5 for
-      # the same model, so the old 38 was measuring a different index. The floor
-      # sits just below that score: the row the menu runs on is the bottom of
-      # the envelope, and everything else has to reach it.
+      # Two sources, two questions, no overlap.
       #
-      # A floor, never a ceiling: a more capable row is welcome, it only has to
-      # keep the price, the speed and the cache.
+      # Artificial Analysis answers "how good is it": one index, one scale, and a
+      # row it has not scored is not assumed good. The floor sits just under the
+      # row the menu runs on, which is what an envelope means.
+      #
+      # models.dev answers "what is it": whether it reasons, whether it calls
+      # tools, its context and window, its canonical id across providers, and
+      # what a token costs. It carries no score and is not asked for one.
+      #
+      # The provider is asked for neither: a shop grades its own product.
       capability_min: 30.0
       cost_max: 0.0026
-      # Coding work needs a model that thinks before it writes. AA sets the flag;
-      # where it is missing or disputed, `bench/capability.py --probe <id>` asks
-      # the model and looks for reasoning tokens in the response.
       require_reasoning: true
+      require_tool_call: true
+
     measured:
       speed_min: 95
       latency_max: 2.20
