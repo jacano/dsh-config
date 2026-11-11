@@ -10,7 +10,7 @@
 # every time. That is what removed the Muse rows on 2026-11-10.
 
 version: 1
-updated: 2026-11-10
+updated: 2026-11-11
 
 criteria:
   # Thresholds are the envelope of the admitted set: no row may be worse than
@@ -39,6 +39,11 @@ criteria:
       speed_min: 95
       latency_max: 2.20
       cache_min: 0.80
+      # A short warm prompt flatters every route, and the ranking flips once the
+      # prefix is long: what a person feels on a phone is the first token after
+      # 60k of context, and the whole turn when the answer is 1,500 tokens.
+      latency_60k_max: 2.70
+      turn_60k_max: 15.5
 
   # Third phase: does the route serve the model well enough for a loop?
   # Measured by `bench/evaluate.py` and recorded in models.csv
@@ -67,11 +72,7 @@ admitted:
   - id: deepseek/deepseek-v4.1-flash-fast
     note: default; cheapest on a cold cache, only row on the completions route
   - id: claude-haiku-5-5
-    note: fastest row in the set
-  - id: minimax/minimax-m3.1-flash
-    note: spare on the completions route, survives an Anthropic outage
-  - id: gpt-6-luna
-    note: cheapest (tied) and the best prefill measured
+    note: fastest writer measured; keeps the Anthropic route alive
 
 # Measured and rejected. The numbers here are as of the drop date and stay put
 # on purpose: they are the reason, not the current state. Live numbers for any
@@ -81,6 +82,8 @@ excluded:
   - { id: meta/muse-spark-1.3-contributor, reason: "115.2 ms/1k prefill, 33% cache" }
   - { id: meta/muse-spark-1.2-contributor, reason: "60.2 ms/1k prefill" }
   - { id: z-ai/glm-5.3-flash, reason: "74 tok/s, $0.0036/turn" }
+  - { id: minimax/minimax-m3.1-flash, reason: "dropped 2026-11-11: 2.77 s to first token at 60k, over the 2.70 gate. Fast writer, slow reader" }
+  - { id: gpt-6-luna, reason: "dropped 2026-11-11: best prefill measured (2.6 ms/1k) but 97 tok/s makes the turn 17.6 s at 60k, over the 15.5 gate" }
   - { id: meta/muse-spark-1.3, reason: "$0.119/turn" }
   - { id: meta/muse-spark-open, reason: "$0.119/turn, 38.9 capability" }
   - { id: meta/muse-wonder-1.0, reason: "403 MODEL_NOT_IN_PLAN" }

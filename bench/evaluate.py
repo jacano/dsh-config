@@ -125,6 +125,28 @@ def fails_static(capability, cost, g):
     return f
 
 
+# A short warm prompt hides what an agent turn costs: the prefix is re-read on
+# every call, so at 60k the prefill dominates and the ranking flips. These two
+# derived figures are what a person feels, so they are gates of their own.
+CONTEXT_K = 60
+ANSWER_TOKENS = 1500
+
+
+def at_context(m, tokens=CONTEXT_K * 1000):
+    """Time to first token once the prefix is `tokens` long."""
+    if m["ttft"] is None or m["prefill"] is None:
+        return None
+    return m["ttft"] + m["prefill"] * tokens / 1_000_000
+
+
+def turn_time(m):
+    """First token plus the writing of a typical answer, at 60k."""
+    ttft = at_context(m)
+    if ttft is None or not m["speed"]:
+        return None
+    return ttft + ANSWER_TOKENS / m["speed"]
+
+
 def fails_measured(m, capability, cost, g):
     f = fails_static(capability, cost, GATES["static"])
     if m["speed"] is None or m["speed"] < g["speed_min"]:
@@ -133,6 +155,12 @@ def fails_measured(m, capability, cost, g):
         f.append(f"latency {m['ttft'] or 0:.2f} > {g['latency_max']:.2f}")
     if m["cache"] is None or m["cache"] < g["cache_min"]:
         f.append(f"cache {m['cache'] or 0:.0%}")
+    ttft = at_context(m)
+    if ttft is None or ttft > g["latency_60k_max"]:
+        f.append(f"ttft@60k {ttft or 0:.2f} > {g['latency_60k_max']:.2f}")
+    turn = turn_time(m)
+    if turn is None or turn > g["turn_60k_max"]:
+        f.append(f"turn@60k {turn or 0:.1f} > {g['turn_60k_max']:.1f}")
     return f
 
 
@@ -198,7 +226,7 @@ def check() -> int:
         verdict = "PASS" if not f2 and not f3 else "FAIL"
         if admitted:
             shown = (f"{m['speed']:.0f} t/s  {m['ttft']:.2f} s  "
-                     f"{m['prefill']:.1f} ms/1k  ${cost:.4f}") if all(
+                     f"{m['prefill']:.1f} ms/1k  {turn_time(m):.1f} s  ${cost:.4f}") if all(
                          m[k] is not None for k in ("speed", "ttft", "prefill")) else ""
             print(f"  {verdict:4s} {m['name'][:30]:30s} {shown:46s} {', '.join(f2 + f3)}")
             if f2 or f3:

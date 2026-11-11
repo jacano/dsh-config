@@ -45,7 +45,7 @@ mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
 
 **3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
 shows two groups: **Command Code**, on the OpenAI-compatible route, and
-**Command Code (Claude)** for the rows that need the Anthropic one. The group
+**Command Code (Claude)** for the row that needs the Anthropic one. The group
 name says which models are behind it; the protocol lives in each node's `api:`
 field, where it belongs.
 

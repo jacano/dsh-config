@@ -24,8 +24,6 @@
         defaultInput: [text, image]
         models:
           - { id: deepseek/deepseek-v4.1-flash-fast, name: DeepSeek V4.1 Flash Fast (latest), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
-          - { id: minimax/minimax-m3.1-flash, name: MiniMax M3.1 Flash, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
-          - { id: gpt-6-luna, name: GPT-6 Luna, contextWindow: 1050000, maxTokens: 32768, reasoningEfforts: *efforts }
       command-code-anthropic:
         displayName: Command Code (Claude)
         api: anthropic-messages

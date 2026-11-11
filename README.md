@@ -32,5 +32,5 @@ the policy — run:
 python bench/evaluate.py
 ```
 
-That command prints the four admitted rows with their current numbers, and exits
+That command prints the admitted rows with their current numbers, and exits
 non-zero if anything in the repo disagrees.
