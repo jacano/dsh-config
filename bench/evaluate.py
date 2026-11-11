@@ -147,8 +147,8 @@ def turn_time(m):
     return ttft + ANSWER_TOKENS / m["speed"]
 
 
-def fails_measured(m, capability, cost, g):
-    f = fails_static(capability, cost, GATES["static"])
+def fails_measured(m, capability, cost, g, include_static=True):
+    f = fails_static(capability, cost, GATES["static"]) if include_static else []
     if m["speed"] is None or m["speed"] < g["speed_min"]:
         f.append(f"speed {m['speed'] or 0:.0f} < {g['speed_min']:.0f}")
     if m["ttft"] is None or m["ttft"] > g["latency_max"]:
@@ -231,6 +231,12 @@ def check() -> int:
             print(f"  {verdict:4s} {m['name'][:30]:30s} {shown:46s} {', '.join(f2 + f3)}")
             if f2 or f3:
                 problems.append(f"{m['name']} is admitted but misses: {', '.join(f2 + f3)}")
+        elif m["id"] in UTILITY:
+            # A convenience route: in the menu on purpose, never claimed to pass.
+            # It does not come from the catalog, so only the measured axes apply.
+            own = fails_measured(m, capability, cost, GATES["measured"], include_static=False) + f3
+            if own:
+                print(f"  UTIL {m['name'][:30]:30s} {', '.join(own)}")
         elif not f2 and not f3:
             print(f"  ENTER {m['name'][:32]:32s} clears every gate but is not admitted")
             problems.append(f"{m['name']} clears every gate but is not admitted")

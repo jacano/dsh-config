@@ -33,6 +33,10 @@ criteria:
   # without a threshold moving on purpose.
   phases:
     static:
+      # A floor, never a ceiling. A row more capable than the admitted ones is
+      # welcome; it only has to keep the price, the speed and the cache. What
+      # keeps the smartest models in the catalog out is the cost gate, not this
+      # one, so nothing here rewards being merely good enough.
       capability_min: 38.0
       cost_max: 0.0026
     measured:

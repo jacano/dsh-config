@@ -3,3 +3,4 @@ deepseek/deepseek-v4.1-flash-fast,deepseek-v4-1-flash-fast,DeepSeek V4.1 Flash F
 claude-haiku-5-5,claude-haiku-5-5,Claude Haiku 5.5,146,1.48,1.000,17.8,1.00,0.88,0,1.00,,3
 minimax/minimax-m3.1-flash,minimax-m3-1-flash,MiniMax M3.1 Flash,125,1.76,1.000,16.9,1.00,1.10,0,1.00,,3
 gpt-6-luna,gpt-6-luna,GPT-6 Luna,97,1.97,1.000,2.6,1.00,0.82,0,1.00,,3
+deepseek/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco,121,2.50,1.000,49.2,1.00,0.98,0,1.00,,1
