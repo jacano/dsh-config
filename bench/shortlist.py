@@ -61,9 +61,31 @@ def excluded() -> list[tuple[str, str | None]]:
         m = re.search(r"- \{\s*id:\s*([^,}]+)", line)
         if not m:
             continue
+        # A missing datum is never a reason to exclude: that call belongs to the
+        # owner. If somebody writes one here anyway, ignore it and let the row
+        # surface as a question instead of disappearing.
+        if GAP_WORDS.search(line):
+            print(f"  ignoring an exclusion based on missing data: {m.group(1).strip()}")
+            continue
         prov = re.search(r"provider:\s*([a-z-]+)", line)
         out.append((norm(m.group(1).split("/")[-1]), prov.group(1) if prov else None))
     return out
+
+
+def gaps(row: dict) -> list[str]:
+    """The facts a decision needs and this row does not have."""
+    missing = []
+    if row["reasoning"] is None:
+        missing.append("reasoning")
+    if row["tool_call"] is None:
+        missing.append("tools")
+    if row["aa"] is None:
+        missing.append("capability")
+    return missing
+
+
+GAP_WORDS = re.compile(r"no (capability|data|score|ficha)|unmeasured|unranked|sin ficha",
+                       re.IGNORECASE)
 
 
 def is_excluded(judged, model: str, provider: str) -> bool:
@@ -226,6 +248,14 @@ def main() -> int:
     human = [r for r in rows if r["bucket"] == "human"]
     print(f"\n{len(rows)} models: {len(battery)} to the battery, {len(human)} need a human, "
           f"{len(rows) - len(battery) - len(human)} out.\n")
+
+    gaps_rows = [r for r in rows if r["bucket"] != "out" and gaps(r)]
+    if gaps_rows:
+        print("PARA TI — falta un dato, y eso no lo decide el programa:")
+        for r in sorted(gaps_rows, key=lambda x: x["effective_turn_usd"] or 0):
+            print(f"  {LABEL[r['provider']]:13s} {r['model'][:32]:32s} "
+                  f"${r['effective_turn_usd']:.4f}  falta: {', '.join(gaps(r))}")
+        print()
 
     if human:
         print("waiting on a decision:")

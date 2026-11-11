@@ -73,6 +73,10 @@ A model with no AA score and no models.dev row is neither rejected nor accepted:
 it is printed as a question. That is the difference between a measurement and a
 decision, and the second one is not this script's to make.
 
+Missing data is never a reason to exclude, and the program enforces it: an entry in
+`excluded:` whose reason is a gap is ignored with a warning, so the row surfaces as
+a question instead of disappearing. A datum that is absent cannot be a verdict.
+
 ## Fold 2, and what a failure means
 
 **Measured.** Speed is the median of three 1.600-token generations; latency is the
