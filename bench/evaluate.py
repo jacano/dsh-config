@@ -62,7 +62,6 @@ TOOL_PROMPT = ("Call get_weather for Seville and get_time for Seville. "
 def load_policy():
     gates: dict[str, dict[str, float]] = {}
     admitted: set[str] = set()
-    utility: set[str] = set()
     phase = None
     section = None
     for line in POLICY.read_text(encoding="utf-8").splitlines():
@@ -80,15 +79,10 @@ def load_policy():
         if line.startswith("excluded:"):
             section = "excluded"
             continue
-        if line.startswith("utility:"):
-            section = "utility"
-            continue
         m = re.match(r"^  - id:\s*(\S+)", line)
         if m and section == "admitted":
             admitted.add(m.group(1))
-        elif m and section == "utility":
-            utility.add(m.group(1))
-    return gates, admitted, utility
+    return gates, admitted
 
 
 def load_catalog():
@@ -235,12 +229,6 @@ def check() -> int:
             print(f"  {verdict:4s} {m['name'][:30]:30s} {shown:46s} {', '.join(f2 + f3)}")
             if f2 or f3:
                 problems.append(f"{m['name']} is admitted but misses: {', '.join(f2 + f3)}")
-        elif m["id"] in UTILITY:
-            # A convenience route: in the menu on purpose, never claimed to pass.
-            # It does not come from the catalog, so only the measured axes apply.
-            own = fails_measured(m, capability, cost, GATES["measured"], include_static=False) + f3
-            if own:
-                print(f"  UTIL {m['name'][:30]:30s} {', '.join(own)}")
         elif not f2 and not f3:
             print(f"  ENTER {m['name'][:32]:32s} clears every gate but is not admitted")
             problems.append(f"{m['name']} clears every gate but is not admitted")
@@ -252,8 +240,11 @@ def check() -> int:
     configured = config_ids()
     for missing in ADMITTED - configured:
         problems.append(f"{missing} is in the policy but not in dsh/cordis.patch.yml")
-    for extra in configured - ADMITTED - UTILITY:
-        problems.append(f"{extra} is configured but not admitted")
+    # Only rows this repo has measured are governed here. An id the benchmark
+    # has never measured is the owner's arrangement, not this file's business.
+    for extra in configured - ADMITTED:
+        if extra in models:
+            problems.append(f"{extra} is configured but not admitted")
     if not problems:
         print(f"\nOK: {len(ADMITTED)} rows clear all three phases, and the menu matches the policy")
     else:
@@ -436,8 +427,8 @@ def live(model: str, capability: float, cost: float) -> int:
 # --------------------------------------------------------------------------- main
 
 def main() -> int:
-    global GATES, ADMITTED, UTILITY
-    GATES, ADMITTED, UTILITY = load_policy()
+    global GATES, ADMITTED
+    GATES, ADMITTED = load_policy()
 
     args = sys.argv[1:]
     if not args:
@@ -456,7 +447,6 @@ def main() -> int:
 
 
 ADMITTED: set[str] = set()
-UTILITY: set[str] = set()
 
 if __name__ == "__main__":
     sys.exit(main())

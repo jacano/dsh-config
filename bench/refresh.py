@@ -123,20 +123,6 @@ def open_design() -> dict:
     return out
 
 
-# --------------------------------------------------------------------------- opengateway
-
-def opengateway() -> dict:
-    m = re.search(r'OPENGATEWAY_API_KEY:\s*"([^"]+)"', CREDS.read_text(encoding="utf-8"))
-    if not m:
-        return {"error": "no OPENGATEWAY_API_KEY in credentials"}
-    try:
-        body = fetch("https://apis.opengateway.ai/v1/models",
-                     {"Authorization": f"Bearer {m.group(1)}"})
-    except Exception as exc:  # noqa: BLE001
-        return {"error": repr(exc)}
-    return {"models_available": [d.get("id") for d in json.loads(body).get("data", [])]}
-
-
 # --------------------------------------------------------------------------- report
 
 def main() -> int:
@@ -145,8 +131,7 @@ def main() -> int:
     print(f"providers.json: updated {stored.get('updated')}\n")
 
     for name, fn in (("command-code", command_code),
-                     ("open-design", open_design),
-                     ("opengateway", opengateway)):
+                     ("open-design", open_design)):
         plan = stored["providers"][name]
         try:
             fresh = fn()

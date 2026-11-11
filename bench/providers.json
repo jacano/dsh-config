@@ -144,21 +144,6 @@
         }
       ],
       "promo_seen": "Off-peak promo ? The limited-time off-peak offer lasts one week: Octob"
-    },
-    "opengateway": {
-      "plan": "prepaid",
-      "billing": "prepaid",
-      "fee_usd": null,
-      "credits_usd": null,
-      "note": "pay per use, no monthly cap; factor is what is left of the list price during the promotion; only the eco lane is offered to the current key",
-      "models": [
-        {
-          "id": "deepseek/deepseek-v4.1-flash-eco",
-          "list_turn_usd": 0.00263,
-          "capability": 39.5,
-          "factor": 0.1
-        }
-      ]
     }
   },
   "refreshed_at": "2026-11-11T22:15:49+01:00"

@@ -23,4 +23,3 @@ open-design,Go,monthly,10.0,220.0,gpt-6-luna,38.1,0.00174,4.0,0.00696,False,cost
 open-design,Go,monthly,10.0,220.0,kimi/k2.7-code,25.8,0.02386,1.0,0.02386,False,capability 25.8 < 38.0
 open-design,Go,monthly,10.0,220.0,hy4-preview,,0.008324,1.0,0.008324,False,no capability on record
 open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4-flash-vision-exp,34.8,0.001317,1.0,0.001317,False,capability 34.8 < 38.0
-opengateway,prepaid,prepaid,,,deepseek/deepseek-v4.1-flash-eco,39.5,0.00263,0.1,0.000263,True,

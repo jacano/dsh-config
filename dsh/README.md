@@ -97,12 +97,6 @@ completions route, so an Anthropic outage leaves a working model behind. Each la
 is the `name` the provider's catalog returns for that id, copied verbatim,
 parentheses included.
 
-A third route, **OpenGateway (eco)**, carries `deepseek/deepseek-v4.1-flash-eco`:
-pay-as-you-go, no weekly cap, and about nine times cheaper per turn while its
-promotion lasts. It did not clear the benchmark — prefill and warm latency — so it
-is not a menu candidate; it lives in the policy's `utility:` list, which the
-checker allows in the config without treating it as admitted.
-
 Which rows are here and why is decided in [../bench/](../bench/). This file records
 only the result, never the metrics: the numbers live in
 [`models.csv`](../bench/models.csv) and the menu in

@@ -12,8 +12,8 @@ python bench/evaluate.py --model <id> --capability 42 --cost 0.0024   # a live r
 ```
 
 Prices, credit windows and multipliers move without notice, so `refresh.py` reads
-Command Code's pricing page, OpenDesign's pricing and credits pages, and the
-OpenGateway API with your key. It prints every value next to the stored one and
+Command Code's pricing page, OpenDesign's pricing and credits pages, and OpenDesign's pricing and credits pages. It prints every value next to the stored
+one and
 writes nothing unless you pass `--write`. When a pattern does not match it says
 so and keeps the old number: a guess is worse than a stale value you know is
 stale. Run it before a selection, not on a schedule nobody reads.
@@ -35,9 +35,8 @@ here, because they move whenever a row enters or leaves. Both folds read them
 from there, so a gate moves in one place and both change.
 
 Fold 1 costs nothing and belongs to the provider, not the model: the same
-DeepSeek costs $0,0013 a turn on Command Code, $0,0007 on OpenDesign and $0,0003
-on an OpenGateway promotion, because each plan applies its own discount or credit
-multiplier. [`providers.json`](providers.json) is where that lives.
+DeepSeek costs $0,0013 a turn on Command Code and $0,0007 on OpenDesign, because
+each plan applies its own discount or credit multiplier. [`providers.json`](providers.json) is where that lives.
 
 `evaluate.py` exits non-zero if an admitted row misses a gate, has no fitness
 data, or is not in the config.
