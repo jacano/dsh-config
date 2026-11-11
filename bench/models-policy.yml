@@ -92,33 +92,34 @@ admitted:
 # on purpose: they are the reason, not the current state. Live numbers for any
 # of these models are in models.csv when they were measured.
 excluded:
-  - { id: meta/muse-ember, reason: "36.3 ms/1k prefill, 67% cache, 0.37 retention" }
-  - { id: meta/muse-spark-1.3-contributor, reason: "115.2 ms/1k prefill, 33% cache" }
-  - { id: meta/muse-spark-1.2-contributor, reason: "60.2 ms/1k prefill" }
-  - { id: z-ai/glm-5.3-flash, reason: "74 tok/s, $0.0036/turn" }
-  - { id: minimax/minimax-m3.1-flash, reason: "dropped 2026-11-11: 2.77 s to first token at 60k, over the 2.70 gate. Fast writer, slow reader" }
-  - { id: gpt-6-luna, reason: "dropped 2026-11-11: best prefill measured (2.6 ms/1k) but 97 tok/s makes the turn 17.6 s at 60k, over the 15.5 gate" }
-  - { id: meta/muse-spark-1.3, reason: "$0.119/turn" }
-  - { id: meta/muse-spark-open, reason: "$0.119/turn, 38.9 capability" }
+  # Only what a gate cannot work out by itself. A row that is merely too dear is
+  # left to cost_max, which recomputes the price on every run: writing it here
+  # again is a snapshot of yesterday pretending to be a decision.
+  #
+  # `provider:` scopes a reason to the lane it was measured on. The same model is
+  # a different route elsewhere, and an exclusion earned on one says nothing
+  # about the other.
+  - { id: meta/muse-ember, provider: command-code, reason: "measured: 36.3 ms/1k prefill, 67% cache, 0.37 retention" }
+  - { id: meta/muse-spark-1.3-contributor, provider: command-code, reason: "measured: 115.2 ms/1k prefill, 33% cache" }
+  - { id: meta/muse-spark-1.2-contributor, provider: command-code, reason: "measured: 60.2 ms/1k prefill" }
+  - { id: z-ai/glm-5.3-flash, provider: command-code, reason: "measured: 74 tok/s, below the 95 gate" }
+  - { id: minimax/minimax-m3.1-flash, provider: command-code, reason: "measured: 2.77 s to first token at 60k, over the 2.70 gate" }
+  - { id: gpt-6-luna, provider: command-code, reason: "measured: best prefill (2.6 ms/1k) undone by 97 tok/s, 17.6 s per turn at 60k" }
+  - { id: Qwen/Qwen3.7-Flash, provider: command-code, reason: "measured: 64 tok/s, 7.79 s to start" }
+  - { id: moonshotai/Kimi-K3.1-Pro, provider: command-code, reason: "measured: 32 tok/s" }
+  - { id: xiaomi/mimo-v2.6-pro, provider: command-code, reason: "measured: 26 tok/s, 8.4 s to start" }
+  - { id: deepseek/deepseek-v4.1-flash, provider: command-code, reason: "measured on this lane: 9-47 s to start" }
+  - { id: Qwen/Qwen3.8-Flash, provider: command-code, reason: "measured: HTTP 524, the route does not answer" }
+
+  # Access, not preference: the plan refuses the call.
   - { id: meta/muse-wonder-1.0, reason: "403 MODEL_NOT_IN_PLAN" }
-  - { id: claude-sonnet-5-5, reason: "$0.0259/turn" }
   - { id: claude-opus-5-5, reason: "403 MODEL_NOT_IN_PLAN" }
   - { id: claude-fable-5-2, reason: "403 MODEL_NOT_IN_PLAN" }
   - { id: gpt-6.1-sol, reason: "403 MODEL_NOT_IN_PLAN" }
   - { id: google/gemini-4-argon, reason: "403 MODEL_NOT_IN_PLAN" }
-  - { id: stepfun/Step-5-Preview, reason: "167 tok/s but $0.0095/turn" }
-  - { id: nvidia/nemotron-3.5-super-vl, reason: "$0.0045/turn, 26.5 capability" }
-  - { id: Qwen/Qwen3.7-Flash, reason: "64 tok/s, 7.79 s start" }
-  - { id: moonshotai/Kimi-K3.1-Pro, reason: "32 tok/s" }
-  - { id: xai/grok-4.7, reason: "68 tok/s, $0.0555/turn" }
-  - { id: Qwen/Qwen3.8-Max-0902, reason: "47 tok/s, $0.0333/turn" }
-  - { id: zai-org/GLM-5.3, reason: "67 tok/s, $0.0311/turn" }
-  - { id: z-ai/glm-5.3-flashx, reason: "$0.0089/turn, no published score" }
-  - { id: xiaomi/mimo-v2.6-pro, reason: "26 tok/s, 8.4 s start" }
-  - { id: deepseek/deepseek-v4.1-flash, reason: "9-47 s start on this lane" }
-  - { id: deepseek/deepseek-v4.1-flash-ultrafast, reason: "$0.0211/turn" }
-  - { id: Qwen/Qwen3.8-Flash, reason: "HTTP 524 during the measured phase; no capability on record either" }
-  - { id: jev, reason: "no capability anywhere, and the row is a decision model, not a coding one" }
-  - { id: jev-1-14-0, reason: "same model as jev, same gap: no capability, unmeasured" }
+
+  # The owner's call.
+  - { id: jev, reason: "owner: a decision model, not a coding one" }
+  - { id: jev-1-14-0, reason: "owner: same model as jev" }
   - { id: Qwen/Qwen3.8-Omni-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
   - { id: stepfun/Step-3.5-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }

@@ -48,12 +48,27 @@ def norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
 
 
-def excluded() -> set[str]:
-    """Rows the policy has already judged, so fold 1 does not reopen them."""
+def excluded() -> list[tuple[str, str | None]]:
+    """(model, provider or None) the policy has already judged.
+
+    A reason earned on one lane says nothing about another: the same model is a
+    different route somewhere else, with its own speed and its own failures.
+    """
     text = (BENCH / "models-policy.yml").read_text(encoding="utf-8")
     block = text.split("excluded:", 1)[-1]
-    # the policy may write the vendor's id, the catalog another: compare stripped
-    return {norm(m.group(1).split("/")[-1]) for m in re.finditer(r"- \{\s*id:\s*([^,\s}]+)", block)}
+    out = []
+    for line in block.splitlines():
+        m = re.search(r"- \{\s*id:\s*([^,}]+)", line)
+        if not m:
+            continue
+        prov = re.search(r"provider:\s*([a-z-]+)", line)
+        out.append((norm(m.group(1).split("/")[-1]), prov.group(1) if prov else None))
+    return out
+
+
+def is_excluded(judged, model: str, provider: str) -> bool:
+    key = norm(model.split("/")[-1])
+    return any(k == key and (p is None or p == provider) for k, p in judged)
 
 
 def scores() -> dict:
@@ -147,8 +162,8 @@ def dev_turn(cost: dict | None) -> float | None:
     return (89_000 * cached + 1_000 * fresh + 1_500 * out) / 1_000_000
 
 
-def classify(row: dict, cost_max: float, cap_min: float, judged: set[str]) -> tuple[str, str]:
-    if norm(row["model"]) in judged:
+def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, str]:
+    if is_excluded(judged, row["model"], row["provider"]):
         return "out", "excluded in the policy"
     cost = row["effective_turn_usd"]
     if cost is None:
@@ -194,8 +209,9 @@ def main() -> int:
 
         buckets = {"battery": [], "human": [], "out": []}
         for row in model_rows(plan, catalog, table, scores_table):
+            row["provider"] = pname        # before the gates: an exclusion is per lane
             bucket, why = classify(row, cost_max, cap_min, judged)
-            row.update(provider=pname, plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
+            row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
                        plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why)
             buckets[bucket].append(row)
             rows.append(row)
