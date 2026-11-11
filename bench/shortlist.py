@@ -124,6 +124,8 @@ def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> li
             "reasoning": fact.get("reasoning"),
             "tool_call": fact.get("tool_call"),
             "context": fact.get("context"),
+            "deprecated": fact.get("deprecated"),
+            "superseded_by": fact.get("superseded_by"),
             "source": fact.get("id"),
             "aa": score.get("intelligence"),
             # the same 90k/1k/1.5k turn, priced from models.dev, to check the shop
@@ -155,6 +157,9 @@ def classify(row: dict, cost_max: float, cap_min: float, judged: set[str]) -> tu
         return "out", f"cost {cost:.4f} > {cost_max:.4f}"
     if cost == 0:
         return "out", "free: not of interest"
+    if row["deprecated"]:
+        by = row.get("superseded_by")
+        return "out", f"superseded by {by}" if by else "deprecated in models.dev"
     if row["reasoning"] is False:
         return "out", "models.dev: does not reason"
     if row["tool_call"] is False:

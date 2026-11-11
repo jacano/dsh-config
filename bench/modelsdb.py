@@ -68,10 +68,36 @@ def build() -> dict:
             bare = norm(mid.split("/")[-1])
             if bare not in want and stripped(bare) not in want:
                 continue
-            if bare in seen and provider != "commandcode":
-                continue
+            canonical = meta.get("canonical_model_id")
+            replacement, cross_generation = None, False
+            if canonical:
+                bare_canonical = norm(canonical.split("/")[-1])
+                if bare_canonical != bare:
+                    replacement = canonical
+                    # "v4.1-flash" -> "v4.1-flash-1017" is a newer build of the
+                    # same model; "v4-flash" -> "v4.1-flash-1017" is a successor.
+                    cross_generation = not bare_canonical.startswith(bare)
+            deprecated = meta.get("status") == "deprecated"
+            prev = rows.get(bare)
+            if prev:
+                # any provider saying deprecated is enough; the vendor knows first.
+                # Record it before skipping, or the flag is computed and thrown away.
+                prev["deprecated"] = deprecated or prev["deprecated"]
+                if replacement and (cross_generation or not prev["cross_generation"]):
+                    prev["superseded_by"] = replacement
+                    prev["cross_generation"] = cross_generation
+                # carry it into the local copy too: the commandcode entry wins the
+                # row and would otherwise rebuild it without what we just learned
+                deprecated = prev["deprecated"]
+                replacement = prev["superseded_by"]
+                cross_generation = prev["cross_generation"]
+                if provider != "commandcode":
+                    continue
             seen.add(bare)
             rows[bare] = {
+                "deprecated": deprecated,
+                "superseded_by": replacement,
+                "cross_generation": cross_generation,
                 "id": mid,
                 "provider": provider,
                 "name": meta.get("name"),
@@ -82,6 +108,27 @@ def build() -> dict:
                 "modalities": meta.get("modalities"),
                 "release_date": meta.get("release_date"),
             }
+    # A deprecated row usually names its successor. The provider serves "latest",
+    # so the honest reading is the successor's facts, not dropping the model.
+    index = {}
+    for provider, data in body.items():
+        for mid, meta in (data.get("models") or {}).items():
+            index[mid] = meta
+    for rec in rows.values():
+        by = rec.get("superseded_by")
+        if not by or rec.get("cross_generation"):
+            continue        # a real successor: the row stays superseded
+        target = index.get(by)
+        if target is None:
+            continue
+        rec["resolved_to"] = by
+        rec["reasoning"] = target.get("reasoning")
+        rec["tool_call"] = target.get("tool_call")
+        rec["context"] = (target.get("limit") or {}).get("context")
+        rec["cost"] = target.get("cost")
+        rec["release_date"] = target.get("release_date")
+        rec["deprecated"] = False        # the chain ends somewhere alive
+
     return {
         "source": "https://models.dev/api.json",
         "fetched": datetime.now().astimezone().isoformat(timespec="seconds"),
@@ -123,6 +170,8 @@ def main() -> int:
         return probe(sys.argv[sys.argv.index("--probe") + 1])
     data = build()
     OUT.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    gone = sum(1 for m in data["models"].values() if m["deprecated"])
+    print(f"{gone} of them are deprecated in models.dev")
     reasoning = sum(1 for m in data["models"].values() if m["reasoning"])
     tools = sum(1 for m in data["models"].values() if m["tool_call"])
     print(f"{len(data['models'])} of our models found in models.dev: "
