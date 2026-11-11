@@ -123,3 +123,5 @@ excluded:
   - { id: jev-1-14-0, reason: "owner: same model as jev" }
   - { id: Qwen/Qwen3.8-Omni-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
   - { id: stepfun/Step-3.5-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
+  - { id: deepseek-v4-flash, reason: "owner, 2026-11-11: superseded by V4.1, which is already in the menu" }
+  - { id: deepseek-v4-flash-vision-exp, reason: "owner, 2026-11-11: V4 vision experiment, superseded by the V4.1 line" }

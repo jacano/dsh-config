@@ -42,7 +42,7 @@ glm-5-3-flash,GLM-5.3 Flash,0.00357,1.0,0.00357,True,True,1000000,True,,z-ai/glm
 longcat-2-0,LongCat 2.0,0.002634,1.0,0.002634,True,True,1000000,False,,longcat-2.0,,0.002634,command-code,GOAT,10.0,100.0,out,cost 0.0026 > 0.0026
 qwen3-8-flash,Qwen 3.8 Flash,0.002289,1.0,0.002289,True,True,1000000,False,,Qwen/Qwen3.8-Flash,,0.002289,command-code,GOAT,10.0,100.0,out,excluded in the policy
 deepseek-v4-flash-fast,DeepSeek V4 Flash Fast,0.00735,1.0,0.00735,True,True,1000000,False,deepseek/deepseek-v4-flash,deepseek/deepseek-v4-flash-fast,,0.007350000000000001,command-code,GOAT,10.0,100.0,out,cost 0.0073 > 0.0026
-deepseek-v4-flash-vision-exp,"DeepSeek V4 Flash Vision (exp) Off-peak shown (17h/day) · peak $0.30 / $1.20 01–04 & 06–10 UTC, Mon–Fri",0.001317,1.0,0.001317,True,True,1000000,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash-vision-exp,,0.001317,command-code,GOAT,10.0,100.0,out,superseded by deepseek/deepseek-v4.1-flash-1017
+deepseek-v4-flash-vision-exp,"DeepSeek V4 Flash Vision (exp) Off-peak shown (17h/day) · peak $0.30 / $1.20 01–04 & 06–10 UTC, Mon–Fri",0.001317,1.0,0.001317,True,True,1000000,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash-vision-exp,,0.001317,command-code,GOAT,10.0,100.0,out,excluded in the policy
 glm-5-3,GLM-5.3,0.03114,1.0,0.03114,True,True,1000000,True,,zai-org/GLM-5.3,31.653381843882,0.03114,command-code,GOAT,10.0,100.0,out,cost 0.0311 > 0.0026
 qwen3-8-27b,Qwen 3.8 27B,0.00846,1.0,0.00846,True,True,262144,False,,Qwen/Qwen3.8-27B,20.1068756031705,0.00846,command-code,GOAT,10.0,100.0,out,cost 0.0085 > 0.0026
 deepseek-v4-pro,"DeepSeek V4 Pro (latest) Off-peak shown (17h/day) · peak $1.32 / $3.96 01–04 & 06–10 UTC, Mon–Fri",0.005588,1.0,0.005588,True,True,1048576,False,deepseek/deepseek-v4-pro-0813,deepseek/deepseek-v4-pro,,0.011176,command-code,GOAT,10.0,100.0,out,cost 0.0056 > 0.0026
@@ -51,7 +51,7 @@ grok-4-6,Grok 4.6,0.0555,1.0,0.0555,True,True,500000,False,,xai/grok-4.6,,0.0555
 muse-spark-1-2,Muse Spark 1.2,0.020975,1.0,0.020975,True,True,1048576,False,,meta/muse-spark-1.2,,0.020975,command-code,GOAT,10.0,100.0,out,cost 0.0210 > 0.0026
 muse-spark-1-2-contributor,Muse Spark 1.2 Contributor,0.000578,1.0,0.000578,True,True,1048576,False,meta/muse-spark-1.2,meta/muse-spark-1.2-contributor,,0.000578,command-code,GOAT,10.0,100.0,out,excluded in the policy
 qwen3-8-max,Qwen 3.8 Max,0.03325,1.0,0.03325,True,True,1000000,False,alibaba/qwen3.8-max-preview,Qwen/Qwen3.8-Max,33.6545627367888,0.03325,command-code,GOAT,10.0,100.0,out,cost 0.0333 > 0.0026
-deepseek-v4-flash,"DeepSeek V4 Flash (latest) Off-peak shown (17h/day) · peak $0.30 / $1.20 01–04 & 06–10 UTC, Mon–Fri",0.001317,1.0,0.001317,True,True,1000000,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash,,0.001317,command-code,GOAT,10.0,100.0,out,superseded by deepseek/deepseek-v4.1-flash-1017
+deepseek-v4-flash,"DeepSeek V4 Flash (latest) Off-peak shown (17h/day) · peak $0.30 / $1.20 01–04 & 06–10 UTC, Mon–Fri",0.001317,1.0,0.001317,True,True,1000000,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash,,0.001317,command-code,GOAT,10.0,100.0,out,excluded in the policy
 inkling-small,Inkling Small,0.0112,1.0,0.0112,True,True,1000000,True,,thinkingmachines/inkling-small,,0.0112,command-code,GOAT,10.0,100.0,out,cost 0.0112 > 0.0026
 qwen3-7-flash,Qwen 3.7 Flash,0.000759,1.0,0.000759,True,True,983616,False,,qwen3-7-flash,,0.000759,command-code,GOAT,10.0,100.0,out,excluded in the policy
 claude-opus-5,Claude Opus 5,0.087,1.0,0.087,True,True,1000000,True,,claude-opus-5,,0.087,command-code,GOAT,10.0,100.0,out,cost 0.0870 > 0.0026
@@ -102,11 +102,11 @@ minimax/minimax-m3.1-flash,MiniMax M3.1 Flash,0.002385,1.0,0.002385,True,True,10
 xiaomi/mimo-v2.6-pro,MiMo-V2.6-Pro,0.00206,1.0,0.00206,True,True,1048576,False,,mimo-v2.6-pro,29.8897833093321,0.0,open-design,Go,10.0,220.0,out,capability 29.9 < 30.0
 xiaomi/mimo-v2.6-flash,MiMo-V2.6-Flash,0.000809,1.0,0.000809,True,True,1048576,False,,mimo-v2.6-flash,26.7276981444568,0.0,open-design,Go,10.0,220.0,out,capability 26.7 < 30.0
 deepseek/deepseek-v4-pro,DeepSeek V4 Pro,0.011176,1.0,0.011176,True,True,1048576,False,deepseek/deepseek-v4-pro-0813,deepseek/deepseek-v4-pro,,0.011176,open-design,Go,10.0,220.0,out,cost 0.0112 > 0.0026
-deepseek/deepseek-v4-flash,DeepSeek V4 Flash,0.003666,1.0,0.003666,True,True,1000000,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash,,0.001317,open-design,Go,10.0,220.0,out,cost 0.0037 > 0.0026
-glm-5.3-flash,GLM-5.3-Flash,0.001785,1.0,0.001785,True,True,1000000,True,,z-ai/glm-5.3-flash,,0.00357,open-design,Go,10.0,220.0,out,deprecated in models.dev
+deepseek/deepseek-v4-flash,DeepSeek V4 Flash,0.003666,1.0,0.003666,True,True,1000000,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash,,0.001317,open-design,Go,10.0,220.0,out,excluded in the policy
+glm-5.3-flash,GLM-5.3-Flash,0.001785,1.0,0.001785,True,True,1000000,True,,z-ai/glm-5.3-flash,,0.00357,open-design,Go,10.0,220.0,human,no AA score: capability unknown
 glm-5.3-flash-x,GLM-5.3-FlashX,0.00892,2.0,0.01784,True,True,1000000,False,zhipuai/glm-5.3-flash,z-ai/glm-5.3-flashx,,0.00892,open-design,Go,10.0,220.0,out,cost 0.0178 > 0.0026
 claude-haiku-5-5,Claude Haiku 5.5,0.00174,4.0,0.00696,True,True,1000000,False,,claude-haiku-5-5,36.4845435880142,0.00174,open-design,Go,10.0,220.0,out,cost 0.0070 > 0.0026
 gpt-6-luna,GPT-6 Luna,0.00174,4.0,0.00696,True,True,1050000,False,,gpt-6-luna,27.8552004938153,0.00174,open-design,Go,10.0,220.0,out,cost 0.0070 > 0.0026
 kimi/k2.7-code,Kimi K2.7 Code,0.02386,1.0,0.02386,True,True,256000,True,,moonshotai/Kimi-K2.7-Code,,0.02386,open-design,Go,10.0,220.0,out,cost 0.0239 > 0.0026
 hy4-preview,Hy4 preview,0.008323,1.0,0.008323,True,True,1024000,False,,tencent/hy4-preview,,0.0083235,open-design,Go,10.0,220.0,out,cost 0.0083 > 0.0026
-deepseek/deepseek-v4-flash-vision-exp,DeepSeek V4 Flash Vision Exp,0.003666,1.0,0.003666,True,True,1000000,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash-vision-exp,,0.001317,open-design,Go,10.0,220.0,out,cost 0.0037 > 0.0026
+deepseek/deepseek-v4-flash-vision-exp,DeepSeek V4 Flash Vision Exp,0.003666,1.0,0.003666,True,True,1000000,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash-vision-exp,,0.001317,open-design,Go,10.0,220.0,out,excluded in the policy

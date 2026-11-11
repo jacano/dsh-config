@@ -172,9 +172,6 @@ def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, s
         return "out", f"cost {cost:.4f} > {cost_max:.4f}"
     if cost == 0:
         return "out", "free: not of interest"
-    if row["deprecated"]:
-        by = row.get("superseded_by")
-        return "out", f"superseded by {by}" if by else "deprecated in models.dev"
     if row["reasoning"] is False:
         return "out", "models.dev: does not reason"
     if row["tool_call"] is False:
