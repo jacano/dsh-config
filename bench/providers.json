@@ -27,78 +27,91 @@
         "week_usd": 55.0,
         "five_hours_usd": 18.0
       },
-      "note": "credit multiplier per model: a lower one burns fewer credits for the same usage; Go has a 7-day and a 5-hour window",
+      "note": "credit multiplier per model, applied to the price OpenDesign publishes for that model; 7-day and 5-hour windows on Go",
       "models": [
         {
           "id": "deepseek/deepseek-v4.1-flash",
-          "catalog": "deepseek-v4-1-flash",
-          "factor": 0.5
+          "factor": 0.5,
+          "list_turn_usd": 0.002634,
+          "open_design_name": "deepseek-v4.1-flash"
         },
         {
           "id": "deepseek/deepseek-v4.1-flash-eco",
-          "list_turn_usd": 0.00263,
-          "capability": 39.5,
-          "factor": 0.27
+          "factor": 0.27,
+          "list_turn_usd": 0.002634,
+          "open_design_name": "deepseek-v4.1-flash-eco"
         },
         {
           "id": "minimax/minimax-m3.1-flash",
-          "catalog": "minimax-m3-1-flash",
-          "factor": 1.0
+          "factor": 1.0,
+          "list_turn_usd": 0.002385,
+          "open_design_name": "minimax-m3.1-flash"
         },
         {
           "id": "xiaomi/mimo-v2.6-pro",
-          "catalog": "mimo-v2-6-pro",
-          "factor": 1.0
+          "factor": 1.0,
+          "list_turn_usd": 0.00206,
+          "open_design_name": "mimo-v2.6-pro"
         },
         {
           "id": "xiaomi/mimo-v2.6-flash",
-          "catalog": "mimo-v2-6-flash",
-          "factor": 1.0
+          "factor": 1.0,
+          "list_turn_usd": 0.000809,
+          "open_design_name": "mimo-v2.6-flash"
         },
         {
           "id": "deepseek/deepseek-v4-pro",
-          "catalog": "deepseek-v4-pro",
-          "factor": 1.0
+          "factor": 1.0,
+          "list_turn_usd": 0.011176,
+          "open_design_name": "deepseek-v4-pro"
         },
         {
           "id": "deepseek/deepseek-v4-flash",
-          "catalog": "deepseek-v4-flash",
-          "factor": 1.0
+          "factor": 1.0,
+          "list_turn_usd": 0.003666,
+          "open_design_name": "deepseek-v4-flash"
         },
         {
           "id": "glm-5.3-flash",
-          "catalog": "glm-5-3-flash",
-          "factor": 1.0
+          "factor": 1.0,
+          "list_turn_usd": 0.001785,
+          "open_design_name": "glm-5.3-flash"
         },
         {
           "id": "glm-5.3-flash-x",
-          "catalog": "glm-5-3-flashx",
-          "factor": 2.0
+          "factor": 2.0,
+          "list_turn_usd": 0.00892,
+          "open_design_name": "glm-5.3-flashx"
         },
         {
           "id": "claude-haiku-5-5",
-          "catalog": "claude-haiku-5-5",
-          "factor": 4.0
+          "factor": 4.0,
+          "list_turn_usd": 0.00174,
+          "open_design_name": "claude-haiku-5.5"
         },
         {
           "id": "gpt-6-luna",
-          "catalog": "gpt-6-luna",
-          "factor": 4.0
+          "factor": 4.0,
+          "list_turn_usd": 0.00174,
+          "open_design_name": "gpt-6-luna"
         },
         {
           "id": "kimi/k2.7-code",
-          "catalog": "kimi-k2-7-code",
-          "factor": 1.0
+          "factor": 1.0,
+          "list_turn_usd": 0.02386,
+          "open_design_name": "kimi-k2.7-code"
         },
         {
           "id": "hy4-preview",
-          "catalog": "hy4-preview",
-          "factor": 1.0
+          "factor": 1.0,
+          "list_turn_usd": 0.008323,
+          "open_design_name": "hy4-preview"
         },
         {
           "id": "deepseek/deepseek-v4-flash-vision-exp",
-          "catalog": "deepseek-v4-flash-vision-exp",
-          "factor": 1.0
+          "factor": 1.0,
+          "list_turn_usd": 0.003666,
+          "open_design_name": "deepseek-v4-flash-vision-exp"
         }
       ],
       "promo_seen": "Off-peak promo ? The limited-time off-peak offer lasts one week: Octob"
