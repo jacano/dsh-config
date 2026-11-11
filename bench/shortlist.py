@@ -41,10 +41,19 @@ PROVIDERS = BENCH / "providers.json"
 MODELSDEV = BENCH / "models.dev.json"
 CAPABILITY = BENCH / "capability.json"
 LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
+LABEL = {"command-code": "Command Code", "open-design": "OpenDesign"}
 
 
 def norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+
+
+def excluded() -> set[str]:
+    """Rows the policy has already judged, so fold 1 does not reopen them."""
+    text = (BENCH / "models-policy.yml").read_text(encoding="utf-8")
+    block = text.split("excluded:", 1)[-1]
+    # the policy may write the vendor's id, the catalog another: compare stripped
+    return {norm(m.group(1).split("/")[-1]) for m in re.finditer(r"- \{\s*id:\s*([^,\s}]+)", block)}
 
 
 def scores() -> dict:
@@ -136,12 +145,16 @@ def dev_turn(cost: dict | None) -> float | None:
     return (89_000 * cached + 1_000 * fresh + 1_500 * out) / 1_000_000
 
 
-def classify(row: dict, cost_max: float, cap_min: float) -> tuple[str, str]:
+def classify(row: dict, cost_max: float, cap_min: float, judged: set[str]) -> tuple[str, str]:
+    if norm(row["model"]) in judged:
+        return "out", "excluded in the policy"
     cost = row["effective_turn_usd"]
     if cost is None:
         return "human", "no price on record"
     if cost > cost_max:
         return "out", f"cost {cost:.4f} > {cost_max:.4f}"
+    if cost == 0:
+        return "out", "free: not of interest"
     if row["reasoning"] is False:
         return "out", "models.dev: does not reason"
     if row["tool_call"] is False:
@@ -165,7 +178,7 @@ def main() -> int:
     cost_max = float(gates["cost_max"])
     cap_min = float(gates["capability_min"])
     catalog = ev.load_catalog()
-    table, scores_table = facts(), scores()
+    table, scores_table, judged = facts(), scores(), excluded()
 
     print(f"fold 1 · price <= ${cost_max:.4f}/turn · reasoning and tools from models.dev\n")
     rows = []
@@ -176,19 +189,19 @@ def main() -> int:
 
         buckets = {"battery": [], "human": [], "out": []}
         for row in model_rows(plan, catalog, table, scores_table):
-            bucket, why = classify(row, cost_max, cap_min)
+            bucket, why = classify(row, cost_max, cap_min, judged)
             row.update(provider=pname, plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
                        plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why)
             buckets[bucket].append(row)
             rows.append(row)
 
         for row in sorted(buckets["battery"], key=lambda r: r["effective_turn_usd"]):
-            print(f"  run   {row['model'][:30]:30s} x{row['factor']:<4.2f} "
-                  f"AA {row['aa']:5.1f}  ${row['effective_turn_usd']:.4f}")
+            print(f"  run   {LABEL[row['provider']]:13s} {row['model'][:30]:30s} "
+                  f"x{row['factor']:<4.2f} AA {row['aa']:5.1f}  ${row['effective_turn_usd']:.4f}")
         for row in sorted(buckets["human"], key=lambda r: r["effective_turn_usd"]):
             aa = "-" if row["aa"] is None else f"{row['aa']:.1f}"
-            print(f"  ????  {row['model'][:30]:30s} x{row['factor']:<4.2f} "
-                  f"AA {aa:>5}  ${row['effective_turn_usd']:.4f}  {row['why']}")
+            print(f"  ????  {LABEL[row['provider']]:13s} {row['model'][:30]:30s} "
+                  f"x{row['factor']:<4.2f} AA {aa:>5}  ${row['effective_turn_usd']:.4f}  {row['why']}")
         print(f"  ({len(buckets['out'])} out)")
 
     battery = [r for r in rows if r["bucket"] == "battery"]
@@ -199,7 +212,7 @@ def main() -> int:
     if human:
         print("waiting on a decision:")
         for r in sorted(human, key=lambda x: x["effective_turn_usd"] or 0):
-            print(f"  {r['provider']}:{r['model']}  ${r['effective_turn_usd']:.4f}  {r['why']}")
+            print(f"  {LABEL[r['provider']]:13s} {r['model']:32s} ${r['effective_turn_usd']:.4f}  {r['why']}")
 
     if "--write" in sys.argv:
         today = datetime.date.today().isoformat()

@@ -121,3 +121,5 @@ excluded:
   - { id: Qwen/Qwen3.8-Omni-Flash, reason: "no capability anywhere: absent from the catalog and from the AA snapshot. Unmeasured, so unranked" }
   - { id: jev, reason: "no capability anywhere, and the row is a decision model, not a coding one" }
   - { id: jev-1-14-0, reason: "same model as jev, same gap: no capability, unmeasured" }
+  - { id: Qwen/Qwen3.8-Omni-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
+  - { id: stepfun/Step-3.5-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
