@@ -108,9 +108,11 @@ excluded:
   - { id: deepseek/deepseek-v4.1-flash, reason: "9-47 s start on this lane" }
   - { id: deepseek/deepseek-v4.1-flash-ultrafast, reason: "$0.0211/turn" }
 
-# Routes the config may serve without being menu candidates. They did not clear
-# the funnel and are not claimed to: they are convenience rows, measured and
-# kept visible so the exception is on the record rather than in a comment.
+# The owner's call, and the only way into the config without passing the gates.
+# A row lands here because someone decided it is worth serving anyway, never
+# because a measurement said so: it is not admitted, it is not counted in the
+# envelope, and `evaluate.py` prints its misses on every run so the price of the
+# exception stays visible. Remove the entry and the row leaves the menu.
 utility:
   - id: deepseek/deepseek-v4.1-flash-eco
     provider: opengateway
