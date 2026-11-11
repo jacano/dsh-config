@@ -2,7 +2,7 @@
  "source": "https://artificialanalysis.ai/models",
  "index": "Artificial Analysis Intelligence Index",
  "variant": "AA chart default selection (per-model highest-effort variant)",
- "fetched": "2026-11-11T22:36:11+01:00",
+ "fetched": "2026-11-11T22:47:44+01:00",
  "updated": "2026-11-11",
  "models": {
   "mimov26pro": {
@@ -12,7 +12,13 @@
    "engineering": 34.2701744047619,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-09-21"
+   "release_date": "2026-09-21",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "xiaomi-token-plan-ams",
+    "id": "mimo-v2.6-pro"
+   }
   },
   "gpt6astra": {
    "aa_slug": "gpt-6-astra",
@@ -21,7 +27,13 @@
    "engineering": 61.7947113636364,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-09-03"
+   "release_date": "2026-09-03",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "gpt-6-astra"
+   }
   },
   "claudeopus55": {
    "aa_slug": "claude-opus-5-5",
@@ -30,7 +42,13 @@
    "engineering": 65.2760308441558,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-09-22"
+   "release_date": "2026-09-22",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "claude-opus-5-5"
+   }
   },
   "ling31flash1019": {
    "aa_slug": "ling-3-1-flash-1019",
@@ -39,7 +57,13 @@
    "engineering": 35.4586687770563,
    "is_reasoning": true,
    "context_window": 1048576,
-   "release_date": "2026-10-22"
+   "release_date": "2026-10-22",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "vercel",
+    "id": "inclusionai/ling-3.1-flash-1019"
+   }
   },
   "claudefable52": {
    "aa_slug": "claude-fable-5-2",
@@ -48,7 +72,13 @@
    "engineering": 72.638859469697,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-11-09"
+   "release_date": "2026-11-09",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "prime",
+    "id": "anthropic/claude-fable-5.2"
+   }
   },
   "grok47": {
    "aa_slug": "grok-4-7",
@@ -57,7 +87,13 @@
    "engineering": 41.7679916125541,
    "is_reasoning": true,
    "context_window": 500000,
-   "release_date": "2026-09-21"
+   "release_date": "2026-09-21",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "xai/grok-4.7"
+   }
   },
   "kimik31pro": {
    "aa_slug": "kimi-k3-1-pro",
@@ -66,7 +102,13 @@
    "engineering": 50.8937710497836,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-10-23"
+   "release_date": "2026-10-23",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "empiriolabs",
+    "id": "kimi-k3-1-pro"
+   }
   },
   "reflectionbeam": {
    "aa_slug": "reflection-beam",
@@ -75,7 +117,13 @@
    "engineering": 25.2201247294372,
    "is_reasoning": true,
    "context_window": 1048576,
-   "release_date": "2026-10-16"
+   "release_date": "2026-10-16",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "vercel",
+    "id": "reflection/beam"
+   }
   },
   "gpt6luna": {
    "aa_slug": "gpt-6-luna",
@@ -84,7 +132,13 @@
    "engineering": 33.298545508658,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-09-22"
+   "release_date": "2026-09-22",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "gpt-6-luna"
+   }
   },
   "claudehaiku55": {
    "aa_slug": "claude-haiku-5-5",
@@ -93,7 +147,13 @@
    "engineering": 42.5384125,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-10-07"
+   "release_date": "2026-10-07",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "claude-haiku-5-5"
+   }
   },
   "gemini38flash": {
    "aa_slug": "gemini-3-8-flash",
@@ -102,7 +162,13 @@
    "engineering": 38.7899060606061,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-09-02"
+   "release_date": "2026-09-02",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "google/gemini-3.8-flash"
+   }
   },
   "gemini4carbon": {
    "aa_slug": "gemini-4-carbon",
@@ -111,7 +177,13 @@
    "engineering": 65.3103995670996,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-10-28"
+   "release_date": "2026-10-28",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "prime",
+    "id": "google/gemini-4-carbon"
+   }
   },
   "qwen3827b": {
    "aa_slug": "qwen3-8-27b",
@@ -120,7 +192,13 @@
    "engineering": 28.0993576839827,
    "is_reasoning": true,
    "context_window": 256000,
-   "release_date": "2026-08-14"
+   "release_date": "2026-08-14",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "Qwen/Qwen3.8-27B"
+   }
   },
   "gpt61terra": {
    "aa_slug": "gpt-6-1-terra",
@@ -129,7 +207,13 @@
    "engineering": 54.7359752164502,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-10-26"
+   "release_date": "2026-10-26",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "gpt-6.1-terra"
+   }
   },
   "qwen38max": {
    "aa_slug": "qwen3-8-max",
@@ -138,7 +222,13 @@
    "engineering": 39.2803852813853,
    "is_reasoning": true,
    "context_window": 983616,
-   "release_date": "2026-09-02"
+   "release_date": "2026-09-02",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "Qwen/Qwen3.8-Max"
+   }
   },
   "claudesonnet55": {
    "aa_slug": "claude-sonnet-5-5",
@@ -147,7 +237,13 @@
    "engineering": 58.4996613636364,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-09-28"
+   "release_date": "2026-09-28",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "claude-sonnet-5-5"
+   }
   },
   "gpt61sol": {
    "aa_slug": "gpt-6-1-sol",
@@ -156,7 +252,13 @@
    "engineering": 59.3526158549784,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-09-29"
+   "release_date": "2026-09-29",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "gpt-6.1-sol"
+   }
   },
   "k2horizon375ba23b": {
    "aa_slug": "k2-horizon-375b-a23b",
@@ -165,7 +267,8 @@
    "engineering": 26.5973973484849,
    "is_reasoning": true,
    "context_window": 524288,
-   "release_date": "2026-09-03"
+   "release_date": "2026-09-03",
+   "modelsdev": {}
   },
   "glm53": {
    "aa_slug": "glm-5-3",
@@ -174,7 +277,13 @@
    "engineering": 37.59005254329,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-08-18"
+   "release_date": "2026-08-18",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "zai-org/GLM-5.3"
+   }
   },
   "tencenthy4": {
    "aa_slug": "tencent-hy4",
@@ -183,7 +292,13 @@
    "engineering": 41.0859896645022,
    "is_reasoning": true,
    "context_window": 1048576,
-   "release_date": "2026-11-03"
+   "release_date": "2026-11-03",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "vercel",
+    "id": "tencent/hy4"
+   }
   },
   "museember": {
    "aa_slug": "muse-ember",
@@ -192,7 +307,13 @@
    "engineering": 41.7630534090909,
    "is_reasoning": true,
    "context_window": 1048576,
-   "release_date": "2026-11-09"
+   "release_date": "2026-11-09",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "vercel",
+    "id": "meta/muse-ember"
+   }
   },
   "nemotron35supervl": {
    "aa_slug": "nemotron-3-5-super-vl",
@@ -201,7 +322,13 @@
    "engineering": 23.4588856060606,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-10-15"
+   "release_date": "2026-10-15",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "vercel",
+    "id": "nvidia/nemotron-3.5-super-vl"
+   }
   },
   "inkling2small": {
    "aa_slug": "inkling-2-small",
@@ -210,7 +337,13 @@
    "engineering": 38.8741721320346,
    "is_reasoning": true,
    "context_window": 1024000,
-   "release_date": "2026-11-05"
+   "release_date": "2026-11-05",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "thinkingmachines/inkling"
+   }
   },
   "musewonderfull": {
    "aa_slug": "muse-wonder-full",
@@ -219,7 +352,13 @@
    "engineering": 55.2713107142857,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-10-12"
+   "release_date": "2026-10-12",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "openrouter",
+    "id": "meta/muse-wonder"
+   }
   },
   "mistrallarge4": {
    "aa_slug": "mistral-large-4",
@@ -228,7 +367,13 @@
    "engineering": 33.4385668831169,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-10-29"
+   "release_date": "2026-10-29",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "mistral/mistral-large-4"
+   }
   },
   "deepseekv41flash1017": {
    "aa_slug": "deepseek-v4-1-flash-1017",
@@ -237,7 +382,13 @@
    "engineering": 37.5970801948052,
    "is_reasoning": true,
    "context_window": 1000000,
-   "release_date": "2026-10-17"
+   "release_date": "2026-10-17",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "empiriolabs",
+    "id": "deepseek-v4-1-flash-1017"
+   }
   },
   "musewonder": {
    "aa_slug": "muse-wonder",
@@ -246,7 +397,13 @@
    "engineering": 49.5534664502164,
    "is_reasoning": true,
    "context_window": 1048576,
-   "release_date": "2026-10-12"
+   "release_date": "2026-10-12",
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "openrouter",
+    "id": "meta/muse-wonder"
+   }
   },
   "deepseekv41flash": {
    "aa_slug": "deepseek-v4-1-flash",
@@ -255,7 +412,13 @@
    "is_reasoning": true,
    "engineering": null,
    "context_window": null,
-   "release_date": null
+   "release_date": null,
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "commandcode",
+    "id": "deepseek/deepseek-v4.1-flash"
+   }
   },
   "mimov26flash": {
    "aa_slug": "mimo-v2-6-flash",
@@ -264,7 +427,13 @@
    "is_reasoning": true,
    "engineering": null,
    "context_window": null,
-   "release_date": null
+   "release_date": null,
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "xiaomi-token-plan-ams",
+    "id": "mimo-v2.6-flash"
+   }
   },
   "minimaxm31flash": {
    "aa_slug": "minimax-m3-1-flash",
@@ -273,7 +442,18 @@
    "is_reasoning": true,
    "engineering": null,
    "context_window": null,
-   "release_date": null
+   "release_date": null,
+   "modelsdev": {
+    "reasoning": true,
+    "tool_call": true,
+    "provider": "empiriolabs",
+    "id": "minimax-m3-1-flash"
+   }
   }
+ },
+ "sources": {
+  "capability": "artificialanalysis.ai (intelligence index)",
+  "reasoning": "artificialanalysis.ai isReasoning + models.dev reasoning",
+  "tools": "models.dev tool_call"
  }
 }

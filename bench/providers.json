@@ -8,50 +8,8 @@
       "billing": "monthly",
       "fee_usd": 10.0,
       "credits_usd": 100.0,
-      "note": "catalog prices are off-peak (17 h/day); weekdays 01-04 and 06-10 UTC double",
-      "models": [
-        {
-          "id": "deepseek/deepseek-v4.1-flash",
-          "catalog": "deepseek-v4-1-flash"
-        },
-        {
-          "id": "deepseek/deepseek-v4.1-flash-fast",
-          "catalog": "deepseek-v4-1-flash-fast",
-          "capability": 39.5
-        },
-        {
-          "id": "minimax/minimax-m3.1-flash",
-          "catalog": "minimax-m3-1-flash"
-        },
-        {
-          "id": "claude-haiku-5-5",
-          "catalog": "claude-haiku-5-5"
-        },
-        {
-          "id": "gpt-6-luna",
-          "catalog": "gpt-6-luna"
-        },
-        {
-          "id": "glm-5.3-flash",
-          "catalog": "glm-5-3-flash"
-        },
-        {
-          "id": "deepseek/deepseek-v4-pro",
-          "catalog": "deepseek-v4-pro"
-        },
-        {
-          "id": "deepseek/deepseek-v4-flash",
-          "catalog": "deepseek-v4-flash"
-        },
-        {
-          "id": "kimi/k2.7-code",
-          "catalog": "kimi-k2-7-code"
-        },
-        {
-          "id": "xiaomi/mimo-v2.6-pro",
-          "catalog": "mimo-v2-6-pro"
-        }
-      ],
+      "note": "every row of catalog-2026-11-10.csv; list prices are off-peak (17 h/day), weekdays 01-04 and 06-10 UTC double",
+      "models": "catalog",
       "credits_row": [
         10,
         100,

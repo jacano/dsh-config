@@ -137,6 +137,52 @@ def build() -> dict:
     }
 
 
+def modelsdev() -> dict:
+    """Reasoning and tool support from models.dev, a third party with wide reach."""
+    try:
+        body = fetch("https://models.dev/api.json")
+    except Exception:  # noqa: BLE001
+        return {}
+    flat = {}
+    for provider, data in json.loads(body).items():
+        for mid, meta in (data.get("models") or {}).items():
+            entry = {"reasoning": meta.get("reasoning"), "tool_call": meta.get("tool_call"),
+                     "provider": provider, "id": mid}
+            # index under the full id, the bare model name, and both normalised
+            for k in (mid, mid.split("/")[-1]):
+                key = re.sub(r"[^a-z0-9]", "", k.lower())
+                if not key:
+                    continue
+                # the Command Code entry describes the row this repo actually uses
+                if key not in flat or provider == "commandcode":
+                    flat[key] = entry
+    return flat
+
+
+def merge_modelsdev(data: dict) -> dict:
+    """Attach models.dev's view to every AA row, and keep the sources apart."""
+    dev = modelsdev()
+
+    def find(slug: str) -> dict:
+        k = re.sub(r"[^a-z0-9]", "", (slug or "").lower())
+        if k in dev:
+            return dev[k]
+        # models.dev carries suffixes AA does not: -1017, -high, -sync, -batch
+        for key, entry in dev.items():
+            if len(k) >= 10 and (key.startswith(k) or k.startswith(key)):
+                return entry
+        return {}
+
+    for rec in data["models"].values():
+        rec["modelsdev"] = find(rec.get("aa_slug") or "")
+    data["sources"] = {
+        "capability": "artificialanalysis.ai (intelligence index)",
+        "reasoning": "artificialanalysis.ai isReasoning + models.dev reasoning",
+        "tools": "models.dev tool_call",
+    }
+    return data
+
+
 def load() -> dict:
     if not OUT.exists():
         raise SystemExit("no capability.json yet. run without flags.")
@@ -224,7 +270,7 @@ def main() -> int:
         return probe(sys.argv[sys.argv.index("--probe") + 1])
     if "--fit" in sys.argv:
         return fit()
-    data = build()
+    data = merge_modelsdev(build())
     OUT.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     scored = sum(1 for m in data["models"].values() if m["intelligence"] is not None)
     reasoning = sum(1 for m in data["models"].values() if m["is_reasoning"])
