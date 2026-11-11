@@ -34,6 +34,16 @@
         compat: { forceAdaptiveThinking: true }
         models:
           - { id: claude-haiku-5-5, name: Claude Haiku 5.5, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+      opendesign:
+        displayName: OpenDesign
+        api: openai-completions
+        baseURL: https://amr-link.open-design.ai/v1
+        apiKeyEnv: OPENDESIGN_API_KEY
+        defaultContextWindow: 1000000
+        defaultInput: [text, image]
+        models:
+          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 32768 }
+          - { id: deepseek-v4.1-flash-eco, name: DeepSeek V4.1 Flash Eco (OpenDesign), contextWindow: 1000000, maxTokens: 32768 }
       opengateway:
         displayName: OpenGateway (eco)
         api: openai-completions

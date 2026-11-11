@@ -44,10 +44,24 @@ mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
 ```
 
 **3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
-shows two groups: **Command Code**, on the OpenAI-compatible route, and
-**Command Code (Claude)** for the row that needs the Anthropic one. The group
-name says which models are behind it; the protocol lives in each node's `api:`
-field, where it belongs.
+shows four groups:
+
+| Group | Rows | Standing |
+| --- | --- | --- |
+| **Command Code** | DeepSeek V4.1 Flash Fast | Admitted: cleared every gate. |
+| **Command Code (Claude)** | Claude Haiku 5.5 | Admitted: the fastest writer measured. |
+| **OpenDesign** | DeepSeek V4.1 Flash and its eco lane | **Not admitted.** Kept as a spare under the owner's hand. |
+| **OpenGateway** | DeepSeek V4.1 Flash Eco | **Not admitted.** Same standing. |
+
+The last two are rows the benchmark does not endorse: they are cheaper and they
+read the context far more slowly than the admitted pair (35.6 and 76.6 ms per 1k
+against 8.4), which at 60k of context is seconds of waiting per call. They sit in
+the menu because the owner asked for a spare route, not because they passed
+anything. `bench/models-policy.yml` records them under `excluded:` and
+`python bench/evaluate.py` prints the menu with the admitted rows.
+
+The group name says which models are behind it; the protocol lives in each node's
+`api:` field, where it belongs.
 
 ## The one file
 
