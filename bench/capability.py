@@ -45,6 +45,32 @@ def fetch(url: str) -> str:
         return resp.read().decode("utf-8", "replace")
 
 
+def record(text: str, slug: str) -> dict | None:
+    """One model on its own page: score, and the reasoning flag from nearby."""
+    at = text.find(f'"slug":"{slug}"')
+    while at >= 0:
+        window = text[at:at + 4000]
+        score = re.search(r'"intelligenceIndex":([\d.]+)', window)
+        flag = re.search(r'"isReasoning":(true|false)', window)
+        if score:
+            return {"aa_slug": slug,
+                    "aa_name": (re.search(r'"name":"([^"]{1,90})"', window) or [None, slug])[1],
+                    "intelligence": float(score.group(1)),
+                    "is_reasoning": (flag.group(1) == "true") if flag else None,
+                    "engineering": None, "context_window": None, "release_date": None}
+        at = text.find(f'"slug":"{slug}"', at + 1)
+    return None
+
+
+def page_text(slug: str) -> str | None:
+    try:
+        raw = fetch(f"https://artificialanalysis.ai/models/{slug}")
+    except Exception:  # noqa: BLE001
+        return None
+    text = re.sub(r'"\]\)</script><script>self\.__next_f\.push\(\[1,"', "", raw)
+    return text.replace('\\"', '"').replace("\\\\", "\\")
+
+
 def build() -> dict:
     """AA's own default selection: the models its charts show by default."""
     raw = fetch(AA)
@@ -79,6 +105,28 @@ def build() -> dict:
             "context_window": m.get("contextWindowTokens"),
             "release_date": m.get("releaseDate"),
         }
+    # Fill the models AA does not chart by default: their own page carries one
+    # record, which is the whole point of using a page per model.
+    wanted = set()
+    for r in csv.DictReader(open(CATALOG, encoding="utf-8")):
+        try:
+            cost = float(r["best_turn"]) if r["best_turn"] else None
+        except ValueError:
+            continue
+        if cost is not None and cost <= 0.0026:
+            wanted.add(r["slug"])
+
+    for slug in sorted(wanted):
+        k = re.sub(r"[^a-z0-9]", "", slug.lower())
+        if k in models:
+            continue
+        text = page_text(slug)
+        if text is None:
+            continue
+        rec = record(text, slug)
+        if rec:
+            models[k] = rec
+
     return {
         "source": AA,
         "index": "Artificial Analysis Intelligence Index",

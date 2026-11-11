@@ -27,7 +27,44 @@ sys.path.insert(0, str(BENCH))
 
 import evaluate as ev  # noqa: E402  (same folder: shares the policy and catalog readers)
 
+import re  # noqa: E402
+
 PROVIDERS = BENCH / "providers.json"
+CAPABILITY = BENCH / "capability.json"
+
+
+def aa() -> dict:
+    """Capability and reasoning, from Artificial Analysis, never the vendor."""
+    if not CAPABILITY.exists():
+        raise SystemExit("no capability.json. run: python bench/capability.py")
+    return json.loads(CAPABILITY.read_text(encoding="utf-8"))["models"]
+
+
+LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
+
+
+def key(s: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+
+
+def rate_of(ratings: dict, model_id: str, catalog_slug: str) -> dict:
+    """A serving lane is the same model: match it to its base row."""
+    candidates = []
+    for raw in (catalog_slug, model_id.split("/")[-1], model_id):
+        if not raw:
+            continue
+        candidates.append(key(raw))
+        base = raw
+        for lane in LANES:
+            base = base.replace(f"-{lane}", "").replace(f"/{lane}", "")
+        candidates.append(key(base))
+    for c in candidates:
+        if c in ratings:
+            return ratings[c]
+    for k, rec in ratings.items():
+        if any(c and (k.startswith(c[:12]) or c.startswith(k[:12])) for c in candidates):
+            return rec
+    return {}
 
 
 def load_providers() -> dict:
@@ -38,19 +75,25 @@ def rows():
     plans = load_providers()
     gates = ev.load_policy()[0]["static"]
     cap_min, cost_max = gates["capability_min"], gates["cost_max"]
+    need_reasoning = str(gates.get("require_reasoning", "false")).lower() == "true"
     catalog = ev.load_catalog()
+    ratings = aa()
 
     out = []
     for name, plan in plans["providers"].items():
         for m in plan["models"]:
             cat = catalog.get(m.get("catalog") or "", {})
-            capability = m["capability"] if "capability" in m else cat.get("capability")
+            rate = rate_of(ratings, m["id"], m.get("catalog") or "")
+            capability = rate.get("intelligence")
+            reasons = rate.get("is_reasoning")
             listed = m["list_turn_usd"] if "list_turn_usd" in m else cat.get("cost")
             factor = float(m.get("factor", 1.0))
             effective = listed * factor if listed is not None else None
 
             if capability is None:
-                passes, reason = False, "no capability on record"
+                passes, reason = False, "no AA row: unranked"
+            elif need_reasoning and reasons is not True:
+                passes, reason = False, "no reasoning flag from AA"
             elif capability < cap_min:
                 passes, reason = False, f"capability {capability:.1f} < {cap_min:.1f}"
             elif effective is None:
@@ -63,7 +106,7 @@ def rows():
             out.append({
                 "provider": name, "plan": plan["plan"], "billing": plan["billing"],
                 "plan_fee_usd": plan["fee_usd"], "plan_credits_usd": plan["credits_usd"],
-                "model": m["id"], "capability": capability,
+                "model": m["id"], "capability": capability, "is_reasoning": reasons,
                 "list_turn_usd": listed, "factor": factor, "effective_turn_usd": effective,
                 "passes_static": passes, "reason": reason,
             })

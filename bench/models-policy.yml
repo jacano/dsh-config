@@ -33,12 +33,22 @@ criteria:
   # without a threshold moving on purpose.
   phases:
     static:
-      # A floor, never a ceiling. A row more capable than the admitted ones is
-      # welcome; it only has to keep the price, the speed and the cache. What
-      # keeps the smartest models in the catalog out is the cost gate, not this
-      # one, so nothing here rewards being merely good enough.
-      capability_min: 38.0
+      # Capability comes from Artificial Analysis (bench/capability.json), never
+      # from the provider: a sales page grades its own product. The floor is on
+      # AA's scale, re-based 2026-11-11 to the envelope of the admitted rows —
+      # AA scores DeepSeek Flash at 30.1 and the catalog used to claim 39.5 for
+      # the same model, so the old 38 was measuring a different index. The floor
+      # sits just below that score: the row the menu runs on is the bottom of
+      # the envelope, and everything else has to reach it.
+      #
+      # A floor, never a ceiling: a more capable row is welcome, it only has to
+      # keep the price, the speed and the cache.
+      capability_min: 30.0
       cost_max: 0.0026
+      # Coding work needs a model that thinks before it writes. AA sets the flag;
+      # where it is missing or disputed, `bench/capability.py --probe <id>` asks
+      # the model and looks for reasoning tokens in the response.
+      require_reasoning: true
     measured:
       speed_min: 95
       latency_max: 2.20

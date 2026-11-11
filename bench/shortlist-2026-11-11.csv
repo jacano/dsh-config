@@ -1,25 +1,25 @@
-provider,plan,billing,plan_fee_usd,plan_credits_usd,model,capability,list_turn_usd,factor,effective_turn_usd,passes_static,reason
-command-code,GOAT,monthly,10.0,100.0,deepseek/deepseek-v4.1-flash,39.5,0.001317,1.0,0.001317,True,
-command-code,GOAT,monthly,10.0,100.0,deepseek/deepseek-v4.1-flash-fast,39.5,0.002454,1.0,0.002454,True,
-command-code,GOAT,monthly,10.0,100.0,minimax/minimax-m3.1-flash,42.7,0.002385,1.0,0.002385,True,
-command-code,GOAT,monthly,10.0,100.0,claude-haiku-5-5,43.4,0.00174,1.0,0.00174,True,
-command-code,GOAT,monthly,10.0,100.0,gpt-6-luna,38.1,0.00174,1.0,0.00174,True,
-command-code,GOAT,monthly,10.0,100.0,glm-5.3-flash,41.8,0.00357,1.0,0.00357,False,cost 0.0036 > 0.0026
-command-code,GOAT,monthly,10.0,100.0,deepseek/deepseek-v4-pro,36.0,0.005588,1.0,0.005588,False,capability 36.0 < 38.0
-command-code,GOAT,monthly,10.0,100.0,deepseek/deepseek-v4-flash,34.0,0.001317,1.0,0.001317,False,capability 34.0 < 38.0
-command-code,GOAT,monthly,10.0,100.0,kimi/k2.7-code,25.8,0.02386,1.0,0.02386,False,capability 25.8 < 38.0
-command-code,GOAT,monthly,10.0,100.0,xiaomi/mimo-v2.6-pro,46.3,0.00206,1.0,0.00206,True,
-open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4.1-flash,39.5,0.001317,0.5,0.0006585,True,
-open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4.1-flash-eco,39.5,0.00263,0.27,0.0007101000000000001,True,
-open-design,Go,monthly,10.0,220.0,minimax/minimax-m3.1-flash,42.7,0.002385,1.0,0.002385,True,
-open-design,Go,monthly,10.0,220.0,xiaomi/mimo-v2.6-pro,46.3,0.00206,1.0,0.00206,True,
-open-design,Go,monthly,10.0,220.0,xiaomi/mimo-v2.6-flash,37.9,0.000809,1.0,0.000809,False,capability 37.9 < 38.0
-open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4-pro,36.0,0.005588,1.0,0.005588,False,capability 36.0 < 38.0
-open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4-flash,34.0,0.001317,1.0,0.001317,False,capability 34.0 < 38.0
-open-design,Go,monthly,10.0,220.0,glm-5.3-flash,41.8,0.00357,1.0,0.00357,False,cost 0.0036 > 0.0026
-open-design,Go,monthly,10.0,220.0,glm-5.3-flash-x,,0.00892,2.0,0.01784,False,no capability on record
-open-design,Go,monthly,10.0,220.0,claude-haiku-5-5,43.4,0.00174,4.0,0.00696,False,cost 0.0070 > 0.0026
-open-design,Go,monthly,10.0,220.0,gpt-6-luna,38.1,0.00174,4.0,0.00696,False,cost 0.0070 > 0.0026
-open-design,Go,monthly,10.0,220.0,kimi/k2.7-code,25.8,0.02386,1.0,0.02386,False,capability 25.8 < 38.0
-open-design,Go,monthly,10.0,220.0,hy4-preview,,0.008324,1.0,0.008324,False,no capability on record
-open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4-flash-vision-exp,34.8,0.001317,1.0,0.001317,False,capability 34.8 < 38.0
+provider,plan,billing,plan_fee_usd,plan_credits_usd,model,capability,is_reasoning,list_turn_usd,factor,effective_turn_usd,passes_static,reason
+command-code,GOAT,monthly,10.0,100.0,deepseek/deepseek-v4.1-flash,30.078569475636,True,0.001317,1.0,0.001317,True,
+command-code,GOAT,monthly,10.0,100.0,deepseek/deepseek-v4.1-flash-fast,30.078569475636,True,0.002454,1.0,0.002454,True,
+command-code,GOAT,monthly,10.0,100.0,minimax/minimax-m3.1-flash,29.0595214290458,True,0.002385,1.0,0.002385,False,capability 29.1 < 30.0
+command-code,GOAT,monthly,10.0,100.0,claude-haiku-5-5,36.4845435880142,True,0.00174,1.0,0.00174,True,
+command-code,GOAT,monthly,10.0,100.0,gpt-6-luna,27.8552004938153,True,0.00174,1.0,0.00174,False,capability 27.9 < 30.0
+command-code,GOAT,monthly,10.0,100.0,glm-5.3-flash,31.653381843882,True,0.00357,1.0,0.00357,False,cost 0.0036 > 0.0026
+command-code,GOAT,monthly,10.0,100.0,deepseek/deepseek-v4-pro,,,0.005588,1.0,0.005588,False,no AA row: unranked
+command-code,GOAT,monthly,10.0,100.0,deepseek/deepseek-v4-flash,,,0.001317,1.0,0.001317,False,no AA row: unranked
+command-code,GOAT,monthly,10.0,100.0,kimi/k2.7-code,,,0.02386,1.0,0.02386,False,no AA row: unranked
+command-code,GOAT,monthly,10.0,100.0,xiaomi/mimo-v2.6-pro,29.8897833093321,True,0.00206,1.0,0.00206,False,capability 29.9 < 30.0
+open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4.1-flash,30.078569475636,True,0.001317,0.5,0.0006585,True,
+open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4.1-flash-eco,30.078569475636,True,0.00263,0.27,0.0007101000000000001,True,
+open-design,Go,monthly,10.0,220.0,minimax/minimax-m3.1-flash,29.0595214290458,True,0.002385,1.0,0.002385,False,capability 29.1 < 30.0
+open-design,Go,monthly,10.0,220.0,xiaomi/mimo-v2.6-pro,29.8897833093321,True,0.00206,1.0,0.00206,False,capability 29.9 < 30.0
+open-design,Go,monthly,10.0,220.0,xiaomi/mimo-v2.6-flash,26.7276981444568,True,0.000809,1.0,0.000809,False,capability 26.7 < 30.0
+open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4-pro,,,0.005588,1.0,0.005588,False,no AA row: unranked
+open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4-flash,,,0.001317,1.0,0.001317,False,no AA row: unranked
+open-design,Go,monthly,10.0,220.0,glm-5.3-flash,31.653381843882,True,0.00357,1.0,0.00357,False,cost 0.0036 > 0.0026
+open-design,Go,monthly,10.0,220.0,glm-5.3-flash-x,31.653381843882,True,0.00892,2.0,0.01784,False,cost 0.0178 > 0.0026
+open-design,Go,monthly,10.0,220.0,claude-haiku-5-5,36.4845435880142,True,0.00174,4.0,0.00696,False,cost 0.0070 > 0.0026
+open-design,Go,monthly,10.0,220.0,gpt-6-luna,27.8552004938153,True,0.00174,4.0,0.00696,False,capability 27.9 < 30.0
+open-design,Go,monthly,10.0,220.0,kimi/k2.7-code,,,0.02386,1.0,0.02386,False,no AA row: unranked
+open-design,Go,monthly,10.0,220.0,hy4-preview,,,0.008324,1.0,0.008324,False,no AA row: unranked
+open-design,Go,monthly,10.0,220.0,deepseek/deepseek-v4-flash-vision-exp,,,0.001317,1.0,0.001317,False,no AA row: unranked

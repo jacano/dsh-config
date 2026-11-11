@@ -2,7 +2,7 @@
  "source": "https://artificialanalysis.ai/models",
  "index": "Artificial Analysis Intelligence Index",
  "variant": "AA chart default selection (per-model highest-effort variant)",
- "fetched": "2026-11-11T22:32:12+01:00",
+ "fetched": "2026-11-11T22:36:11+01:00",
  "updated": "2026-11-11",
  "models": {
   "mimov26pro": {
@@ -247,6 +247,33 @@
    "is_reasoning": true,
    "context_window": 1048576,
    "release_date": "2026-10-12"
+  },
+  "deepseekv41flash": {
+   "aa_slug": "deepseek-v4-1-flash",
+   "aa_name": "DeepSeek V4.1 Flash",
+   "intelligence": 30.078569475636,
+   "is_reasoning": true,
+   "engineering": null,
+   "context_window": null,
+   "release_date": null
+  },
+  "mimov26flash": {
+   "aa_slug": "mimo-v2-6-flash",
+   "aa_name": "MiMo-V2.6-Flash",
+   "intelligence": 26.7276981444568,
+   "is_reasoning": true,
+   "engineering": null,
+   "context_window": null,
+   "release_date": null
+  },
+  "minimaxm31flash": {
+   "aa_slug": "minimax-m3-1-flash",
+   "aa_name": "MiniMax-M3.1-Flash",
+   "intelligence": 29.0595214290458,
+   "is_reasoning": true,
+   "engineering": null,
+   "context_window": null,
+   "release_date": null
   }
  }
 }
