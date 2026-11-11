@@ -1,0 +1,252 @@
+{
+ "source": "https://artificialanalysis.ai/models",
+ "index": "Artificial Analysis Intelligence Index",
+ "variant": "AA chart default selection (per-model highest-effort variant)",
+ "fetched": "2026-11-11T22:32:12+01:00",
+ "updated": "2026-11-11",
+ "models": {
+  "mimov26pro": {
+   "aa_slug": "mimo-v2-6-pro",
+   "aa_name": "MiMo-V2.6-Pro",
+   "intelligence": 29.8897833093321,
+   "engineering": 34.2701744047619,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-09-21"
+  },
+  "gpt6astra": {
+   "aa_slug": "gpt-6-astra",
+   "aa_name": "GPT-6 Astra (Max)",
+   "intelligence": 56.8538559596797,
+   "engineering": 61.7947113636364,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-09-03"
+  },
+  "claudeopus55": {
+   "aa_slug": "claude-opus-5-5",
+   "aa_name": "Claude Opus 5.5 (Max, Default Fallback)",
+   "intelligence": 59.1060336078904,
+   "engineering": 65.2760308441558,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-09-22"
+  },
+  "ling31flash1019": {
+   "aa_slug": "ling-3-1-flash-1019",
+   "aa_name": "Ling 3.1 Flash 1019",
+   "intelligence": 29.570119369837,
+   "engineering": 35.4586687770563,
+   "is_reasoning": true,
+   "context_window": 1048576,
+   "release_date": "2026-10-22"
+  },
+  "claudefable52": {
+   "aa_slug": "claude-fable-5-2",
+   "aa_name": "Claude Fable 5.2 (Max, Default Fallback)",
+   "intelligence": 64.563595756626,
+   "engineering": 72.638859469697,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-11-09"
+  },
+  "grok47": {
+   "aa_slug": "grok-4-7",
+   "aa_name": "Grok 4.7 (Xhigh)",
+   "intelligence": 35.4850117067196,
+   "engineering": 41.7679916125541,
+   "is_reasoning": true,
+   "context_window": 500000,
+   "release_date": "2026-09-21"
+  },
+  "kimik31pro": {
+   "aa_slug": "kimi-k3-1-pro",
+   "aa_name": "Kimi K3.1 Pro",
+   "intelligence": 46.4526236744189,
+   "engineering": 50.8937710497836,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-10-23"
+  },
+  "reflectionbeam": {
+   "aa_slug": "reflection-beam",
+   "aa_name": "Beam 1.0",
+   "intelligence": 17.7307282547205,
+   "engineering": 25.2201247294372,
+   "is_reasoning": true,
+   "context_window": 1048576,
+   "release_date": "2026-10-16"
+  },
+  "gpt6luna": {
+   "aa_slug": "gpt-6-luna",
+   "aa_name": "GPT-6 Luna (Max)",
+   "intelligence": 27.8552004938153,
+   "engineering": 33.298545508658,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-09-22"
+  },
+  "claudehaiku55": {
+   "aa_slug": "claude-haiku-5-5",
+   "aa_name": "Claude Haiku 5.5 (Max)",
+   "intelligence": 36.4845435880142,
+   "engineering": 42.5384125,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-10-07"
+  },
+  "gemini38flash": {
+   "aa_slug": "gemini-3-8-flash",
+   "aa_name": "Gemini 3.8 Flash (High)",
+   "intelligence": 30.8468119957291,
+   "engineering": 38.7899060606061,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-09-02"
+  },
+  "gemini4carbon": {
+   "aa_slug": "gemini-4-carbon",
+   "aa_name": "Gemini 4 Carbon (High)",
+   "intelligence": 60.025738829526,
+   "engineering": 65.3103995670996,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-10-28"
+  },
+  "qwen3827b": {
+   "aa_slug": "qwen3-8-27b",
+   "aa_name": "Qwen3.8 27B (Xhigh)",
+   "intelligence": 20.1068756031705,
+   "engineering": 28.0993576839827,
+   "is_reasoning": true,
+   "context_window": 256000,
+   "release_date": "2026-08-14"
+  },
+  "gpt61terra": {
+   "aa_slug": "gpt-6-1-terra",
+   "aa_name": "GPT-6.1 Terra (Max)",
+   "intelligence": 51.3265188577015,
+   "engineering": 54.7359752164502,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-10-26"
+  },
+  "qwen38max": {
+   "aa_slug": "qwen3-8-max",
+   "aa_name": "Qwen3.8 Max (0902)",
+   "intelligence": 33.6545627367888,
+   "engineering": 39.2803852813853,
+   "is_reasoning": true,
+   "context_window": 983616,
+   "release_date": "2026-09-02"
+  },
+  "claudesonnet55": {
+   "aa_slug": "claude-sonnet-5-5",
+   "aa_name": "Claude Sonnet 5.5 (Max, Default Fallback)",
+   "intelligence": 54.54133407109,
+   "engineering": 58.4996613636364,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-09-28"
+  },
+  "gpt61sol": {
+   "aa_slug": "gpt-6-1-sol",
+   "aa_name": "GPT-6.1 Sol (Max)",
+   "intelligence": 54.6087338138148,
+   "engineering": 59.3526158549784,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-09-29"
+  },
+  "k2horizon375ba23b": {
+   "aa_slug": "k2-horizon-375b-a23b",
+   "aa_name": "K2 Horizon 375B A23B",
+   "intelligence": 17.8202731734027,
+   "engineering": 26.5973973484849,
+   "is_reasoning": true,
+   "context_window": 524288,
+   "release_date": "2026-09-03"
+  },
+  "glm53": {
+   "aa_slug": "glm-5-3",
+   "aa_name": "GLM-5.3 (Max)",
+   "intelligence": 31.653381843882,
+   "engineering": 37.59005254329,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-08-18"
+  },
+  "tencenthy4": {
+   "aa_slug": "tencent-hy4",
+   "aa_name": "Tencent Hy4",
+   "intelligence": 34.5552385392508,
+   "engineering": 41.0859896645022,
+   "is_reasoning": true,
+   "context_window": 1048576,
+   "release_date": "2026-11-03"
+  },
+  "museember": {
+   "aa_slug": "muse-ember",
+   "aa_name": "Muse Ember (Max)",
+   "intelligence": 36.0212987864912,
+   "engineering": 41.7630534090909,
+   "is_reasoning": true,
+   "context_window": 1048576,
+   "release_date": "2026-11-09"
+  },
+  "nemotron35supervl": {
+   "aa_slug": "nemotron-3-5-super-vl",
+   "aa_name": "Nemotron 3.5 Super VL",
+   "intelligence": 13.6203422723141,
+   "engineering": 23.4588856060606,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-10-15"
+  },
+  "inkling2small": {
+   "aa_slug": "inkling-2-small",
+   "aa_name": "Inkling 2 Small",
+   "intelligence": 30.6286781498958,
+   "engineering": 38.8741721320346,
+   "is_reasoning": true,
+   "context_window": 1024000,
+   "release_date": "2026-11-05"
+  },
+  "musewonderfull": {
+   "aa_slug": "muse-wonder-full",
+   "aa_name": "Muse Wonder Full (Max)",
+   "intelligence": 50.0772123627021,
+   "engineering": 55.2713107142857,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-10-12"
+  },
+  "mistrallarge4": {
+   "aa_slug": "mistral-large-4",
+   "aa_name": "Mistral Large 4 (High)",
+   "intelligence": 26.1249946754784,
+   "engineering": 33.4385668831169,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-10-29"
+  },
+  "deepseekv41flash1017": {
+   "aa_slug": "deepseek-v4-1-flash-1017",
+   "aa_name": "DeepSeek V4.1 Flash 1017 (Max)",
+   "intelligence": 32.5896393532027,
+   "engineering": 37.5970801948052,
+   "is_reasoning": true,
+   "context_window": 1000000,
+   "release_date": "2026-10-17"
+  },
+  "musewonder": {
+   "aa_slug": "muse-wonder",
+   "aa_name": "Muse Wonder (Max)",
+   "intelligence": 43.5748225998431,
+   "engineering": 49.5534664502164,
+   "is_reasoning": true,
+   "context_window": 1048576,
+   "release_date": "2026-10-12"
+  }
+ }
+}
