@@ -3,11 +3,20 @@
 Two folds, and only the second one costs money.
 
 ```bash
+python bench/refresh.py              # read the providers' pages, report the diff
+python bench/refresh.py --write      # store what it parsed in providers.json
 python bench/shortlist.py            # fold 1: what is worth calling at all, free
 python bench/shortlist.py --write    # same, and save shortlist-<today>.csv
 python bench/evaluate.py             # fold 2: the stored table against the gates
 python bench/evaluate.py --model <id> --capability 42 --cost 0.0024   # a live run
 ```
+
+Prices, credit windows and multipliers move without notice, so `refresh.py` reads
+Command Code's pricing page, OpenDesign's pricing and credits pages, and the
+OpenGateway API with your key. It prints every value next to the stored one and
+writes nothing unless you pass `--write`. When a pattern does not match it says
+so and keeps the old number: a guess is worse than a stale value you know is
+stale. Run it before a selection, not on a schedule nobody reads.
 
 ## The funnel
 
@@ -58,6 +67,7 @@ Claude rows go through `/messages` with a `cache_control` breakpoint: they refus
 
 | File | What it is |
 | --- | --- |
+| `refresh.py` | Reads the providers' own pages and reports what changed: plan fee, credits, windows, multipliers, and which models the key can see. |
 | `shortlist.py` | Fold 1. Reads `providers.json` and the catalog, applies the static gates, prints what is worth calling. |
 | `providers.json` | The providers, their plans and each model's discount or credit multiplier. One block per provider; no code to add one. |
 | `shortlist-<date>.csv` | A dated snapshot of fold 1, one row per provider × model. |
