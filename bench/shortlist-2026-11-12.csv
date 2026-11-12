@@ -6,7 +6,7 @@ ling-3-1-flash-1019,0.000699,Ling 3.1 Flash 1019,0.00699,1.0,0.00699,,0.1,True,T
 gpt-6-1-terra,0.0012950000000000001,GPT-6.1 Terra,0.01295,1.0,0.01295,,0.1,True,True,1050000,2026-10-26,False,,gpt-6.1-terra,51.3265188577015,0.01295,command-code,GOAT,10.0,100.0,out,cost 0.001295 > 0.000600,
 kimi-k3-1-pro,0.00348,Kimi K3.1 Pro,0.0348,1.0,0.0348,,0.1,True,True,1048576,2026-10-23,False,,kimi-k3-1-pro,46.4526236744189,0.033376,command-code,GOAT,10.0,100.0,out,excluded in the policy,
 ornith-1-5-122b,0.00029,Ornith 1.5 122B,0.0029,1.0,0.0029,,0.1,True,True,262144,2026-10-20,False,,ornith-ai/ornith-1.5-122b,,0.00961,command-code,GOAT,10.0,100.0,human,no AA score: capability unknowable,
-minimax-m3-1-flash,0.0002385,MiniMax M3.1 Flash,0.002385,1.0,0.002385,,0.1,True,True,1048576,2026-10-19,False,,minimax-m3-1-flash,29.0595214290458,0.00178875,command-code,GOAT,10.0,100.0,out,excluded in the policy,
+minimax-m3-1-flash,0.0002385,MiniMax M3.1 Flash,0.002385,1.0,0.002385,,0.1,True,True,1048576,2026-10-19,False,,minimax-m3-1-flash,29.0595214290458,0.00178875,command-code,GOAT,10.0,100.0,out,capability 29.1 < 30.0,
 muse-spark-open,0.0020975,Muse Spark Open,0.020975,1.0,0.020975,,0.1,True,True,1048576,2026-10-15,False,,meta/muse-spark-open,,0.118875,command-code,GOAT,10.0,100.0,out,cost 0.002097 > 0.000600,
 nemotron-3-5-super-vl,0.000451,Nemotron 3.5 Super VL,0.00451,1.0,0.00451,,0.1,True,True,1048576,2026-10-15,False,nvidia/nemotron-3.5-super-vl-120b-a12b,nvidia/nemotron-3.5-super-vl,13.6203422723141,0.0,command-code,GOAT,10.0,100.0,out,capability 13.6 < 30.0,
 jev-1-14-0,4.2e-06,"Jev 1.14.0 Decision model · headless (cmd -p) and Provider API only, not in /model",4.2e-05,1.0,4.2e-05,,0.1,,,,,,,,,,command-code,GOAT,10.0,100.0,out,excluded in the policy,
@@ -18,7 +18,7 @@ mistral-large-4,0.002009,Mistral Large 4,0.02009,1.0,0.02009,,0.1,True,True,5242
 gpt-6-1-sol,0.0025900000000000003,GPT-6.1 Sol,0.0259,1.0,0.0259,,0.1,True,True,1050000,2026-09-29,False,,gpt-6.1-sol,54.6087338138148,0.0259,command-code,GOAT,10.0,100.0,out,excluded in the policy,
 claude-sonnet-5-5,0.0025900000000000003,Claude Sonnet 5.5,0.0259,1.0,0.0259,,0.1,True,True,1000000,2026-09-28,False,,claude-sonnet-5-5,54.54133407109,0.0259,command-code,GOAT,10.0,100.0,out,cost 0.002590 > 0.000600,
 deepseek-v4-1-flash-fast,0.0002454,"DeepSeek V4.1 Flash Fast (latest) Off-peak shown (17h/day) · peak $0.32 / $1.16 01–04 & 06–10 UTC, Mon–Fri",0.002454,1.0,0.002454,,0.1,True,True,1000000,2026-09-10,False,deepseek/deepseek-v4.1-flash,deepseek/deepseek-v4.1-flash-fast,30.078569475636,0.002454,command-code,GOAT,10.0,100.0,battery,,
-gpt-6-luna,0.000174,GPT-6 Luna,0.00174,1.0,0.00174,0.125,0.1,True,True,1050000,2026-09-22,False,,gpt-6-luna,27.8552004938153,0.00174,command-code,GOAT,10.0,100.0,out,excluded in the policy,0.000924
+gpt-6-luna,0.000174,GPT-6 Luna,0.00174,1.0,0.00174,0.125,0.1,True,True,1050000,2026-09-22,False,,gpt-6-luna,27.8552004938153,0.00174,command-code,GOAT,10.0,100.0,out,capability 27.9 < 30.0,0.000924
 gpt-6-sol,0.00348,GPT-6 Sol,0.0348,1.0,0.0348,,0.1,True,True,1050000,2026-09-22,False,,gpt-6-sol,,0.0348,command-code,GOAT,10.0,100.0,out,cost 0.003480 > 0.000600,
 qwen3-8-max-prime,0.0066500000000000005,Qwen 3.8 Max Prime,0.0665,1.0,0.0665,,0.1,True,True,1000000,2026-09-23,False,,alibaba/qwen3.8-max-prime,,0.070357,command-code,GOAT,10.0,100.0,out,cost 0.006650 > 0.000600,
 claude-opus-5-5,0.005180000000000001,Claude Opus 5.5,0.0518,1.0,0.0518,,0.1,True,True,1000000,2026-09-22,False,,claude-opus-5-5,59.1060336078904,0.0518,command-code,GOAT,10.0,100.0,out,excluded in the policy,
@@ -64,7 +64,7 @@ gpt-5-6-luna,0.000378,GPT-5.6 Luna,0.00378,1.0,0.00378,,0.1,True,True,1050000,20
 gpt-5-6-sol,0.00945,GPT-5.6 Sol,0.0945,1.0,0.0945,,0.1,True,True,1050000,2026-07-09,True,,gpt-5.6-sol,,0.0945,command-code,GOAT,10.0,100.0,out,cost 0.009450 > 0.000600,
 gpt-5-6-terra,0.0037800000000000004,GPT-5.6 Terra,0.0378,1.0,0.0378,,0.1,True,True,1050000,2026-07-09,True,,gpt-5.6-terra,,0.0378,command-code,GOAT,10.0,100.0,out,cost 0.003780 > 0.000600,
 grok-4-5,0.00555,Grok 4.5,0.0555,1.0,0.0555,,0.1,True,True,500000,2026-07-08,False,,xai/grok-4.5,,0.0555,command-code,GOAT,10.0,100.0,out,cost 0.005550 > 0.000600,
-tencent-hy3,0.00041250000000000005,Tencent Hy3,0.004125,1.0,0.004125,,0.1,,,,,,,,,,command-code,GOAT,10.0,100.0,human,models.dev has no row: reasoning and tools unknown,
+tencent-hy3,0.00041250000000000005,Tencent Hy3,0.004125,1.0,0.004125,,0.1,,,,,,,,,,command-code,GOAT,10.0,100.0,out,excluded in the policy,
 claude-sonnet-5,0.00348,Claude Sonnet 5,0.0348,1.0,0.0348,,0.1,True,True,1000000,2026-06-30,True,,claude-sonnet-5,,0.0348,command-code,GOAT,10.0,100.0,out,cost 0.003480 > 0.000600,
 glm-5-2-fast,0.0062875000000000006,GLM-5.2 Fast,0.062875,1.0,0.062875,,0.1,True,True,1000000,2026-06-13,True,zhipuai/glm-5.2,zai-org/GLM-5.2-Fast,,0.062875,command-code,GOAT,10.0,100.0,out,cost 0.006288 > 0.000600,
 fugu-ultra,0.00945,Fugu Ultra,0.0945,1.0,0.0945,,0.1,True,True,1000000,2026-06-15,False,,sakana/fugu-ultra,,0.0945,command-code,GOAT,10.0,100.0,out,cost 0.009450 > 0.000600,

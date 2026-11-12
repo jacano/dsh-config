@@ -114,8 +114,6 @@ excluded:
   - { id: meta/muse-spark-1.2-contributor, provider: command-code, reason: "measured: 60.2 ms/1k prefill" }
   - { id: z-ai/glm-5.3-flash, provider: command-code, reason: "measured: 74 tok/s, below the 95 gate" }
   - { id: glm-5.3-flash, provider: open-design, reason: "owner, 2026-11-11: slow on this lane too; it is the same model on another route" }
-  - { id: minimax/minimax-m3.1-flash, provider: command-code, reason: "measured: 2.77 s to first token at 60k, over the 2.70 gate" }
-  - { id: gpt-6-luna, provider: command-code, reason: "measured: best prefill (2.6 ms/1k) undone by 97 tok/s, 17.6 s per turn at 60k" }
   - { id: Qwen/Qwen3.7-Flash, provider: command-code, reason: "measured: 64 tok/s, 7.79 s to start" }
   - { id: moonshotai/Kimi-K3.1-Pro, provider: command-code, reason: "measured: 32 tok/s" }
   - { id: xiaomi/mimo-v2.6-pro, provider: command-code, reason: "measured: 26 tok/s, 8.4 s to start" }
@@ -135,6 +133,7 @@ excluded:
   - { id: Qwen/Qwen3.8-Omni-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
   - { id: deepseek-v4-pro, reason: "owner, 2026-11-12: April build, two generations behind the 4.1 line, and twice the real cost of the Flash. Its own successor (v4-pro-0813) is not offered here" }
   - { id: hy4-preview, reason: "owner, 2026-11-12: superseded by Hy4 (2026-11-04), half the price and scored 34.6 on AA. Neither provider serves the released one, so this is wanted, not rejected" }
+  - { id: tencent-hy3, reason: "owner, 2026-11-12: an old model with no row anywhere. Not worth the tokens" }
   - { id: claude-haiku-5-5, provider: open-design, reason: "owner, 2026-11-12: same model as the Command Code row at $0.000317 of real money against $0.000174. No reason to buy it twice" }
   - { id: stepfun/Step-3.5-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
 
