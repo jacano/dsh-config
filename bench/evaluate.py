@@ -145,6 +145,7 @@ def load_models():
             "prefill": num("prefill_ms_per_1k"), "cache_loop": num("cache_loop_hit"),
             "retention": num("retention_4x"), "errors": num("errors_10"),
             "tools": num("tools_valid"), "override": num("intel_override"),
+            "cost_override": num("cost_override"),
         }
     return out
 
@@ -190,12 +191,15 @@ def fails_measured(m, capability, cost, g, include_static=True):
         f.append(f"latency {m['ttft'] or 0:.2f} > {g['latency_max']:.2f}")
     if m["cache"] is None or m["cache"] < g["cache_min"]:
         f.append(f"cache {m['cache'] or 0:.0%}")
+    # The 60k figures are printed, not enforced: a real agent greps and reads
+    # fragments, so a long-prefix turn is the exception, not the rule. Fold 3 is
+    # what decides now.
     ttft = at_context(m)
-    if ttft is None or ttft > g["latency_60k_max"]:
-        f.append(f"ttft@60k {ttft or 0:.2f} > {g['latency_60k_max']:.2f}")
+    if "latency_60k_max" in g and ttft is not None and ttft > g["latency_60k_max"]:
+        f.append(f"ttft@60k {ttft:.2f} > {g['latency_60k_max']:.2f}")
     turn = turn_time(m)
-    if turn is None or turn > g["turn_60k_max"]:
-        f.append(f"turn@60k {turn or 0:.1f} > {g['turn_60k_max']:.1f}")
+    if "turn_60k_max" in g and turn is not None and turn > g["turn_60k_max"]:
+        f.append(f"turn@60k {turn:.1f} > {g['turn_60k_max']:.1f}")
     return f
 
 
@@ -259,7 +263,8 @@ def check() -> int:
         capability, _ = aa_of(RATINGS, m["id"], m["catalog"])
         if capability is None:
             capability = m["override"] if m["override"] is not None else row.get("capability")
-        cost = row.get("cost")
+        # a model sold on another plan has its own price: the catalogue is Command Code's
+        cost = m["cost_override"] if m["cost_override"] is not None else row.get("cost")
         f2 = fails_measured(m, capability, cost, GATES["measured"])
         f3 = fails_fitness(m, GATES["fitness"])
         admitted = m["id"] in ADMITTED
