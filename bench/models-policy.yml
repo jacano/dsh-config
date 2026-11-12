@@ -133,6 +133,8 @@ excluded:
   - { id: jev, reason: "owner: a decision model, not a coding one" }
   - { id: jev-1-14-0, reason: "owner: same model as jev" }
   - { id: Qwen/Qwen3.8-Omni-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
+  - { id: deepseek-v4-pro, reason: "owner, 2026-11-12: April build, two generations behind the 4.1 line, and twice the real cost of the Flash. Its own successor (v4-pro-0813) is not offered here" }
+  - { id: hy4-preview, reason: "owner, 2026-11-12: superseded by Hy4 (2026-11-04), half the price and scored 34.6 on AA. Neither provider serves the released one, so this is wanted, not rejected" }
   - { id: stepfun/Step-3.5-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
 
   - { id: deepseek-v4-flash, reason: "owner, 2026-11-11: superseded by V4.1, which is already in the menu" }
