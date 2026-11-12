@@ -1,8 +1,8 @@
 slug,catalog_slug,name,speed_tps,ttft_s,cache_hit,prefill_ms_per_1k,cache_loop_hit,retention_4x,errors_10,tools_valid,intel_override,cost_override,rounds
-deepseek/deepseek-v4.1-flash-fast,deepseek-v4-1-flash-fast,DeepSeek V4.1 Flash Fast,114,1.44,1.000,8.4,1.00,0.80,0,1.00,39.5,,3
-claude-haiku-5-5,claude-haiku-5-5,Claude Haiku 5.5,146,1.48,1.000,17.8,1.00,0.88,0,1.00,,,3
+deepseek/deepseek-v4.1-flash-fast,deepseek-v4-1-flash-fast,DeepSeek V4.1 Flash Fast,114,1.44,1.000,8.4,1.00,0.80,0,1.00,39.5,0.0002454,3
+claude-haiku-5-5,claude-haiku-5-5,Claude Haiku 5.5,146,1.48,1.000,17.8,1.00,0.88,0,1.00,,0.0001740,3
 minimax/minimax-m3.1-flash,minimax-m3-1-flash,MiniMax M3.1 Flash,125,1.76,1.000,16.9,1.00,1.10,0,1.00,,,3
 gpt-6-luna,gpt-6-luna,GPT-6 Luna,97,1.97,1.000,2.6,1.00,0.82,0,1.00,,,3
-deepseek-v4.1-flash,,DeepSeek V4.1 Flash (OpenDesign),105,2.45,1.000,35.6,1.00,0.76,0,1.00,30.1,0.001317,1
+deepseek-v4.1-flash,,DeepSeek V4.1 Flash (OpenDesign),105,2.45,1.000,35.6,1.00,0.76,0,1.00,30.1,0.0000599,1
 opendesign/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco (OpenDesign),59,2.37,1.000,76.6,1.00,0.94,0,1.00,30.1,,1
-deepseek/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco,121,2.50,1.000,49.2,1.00,0.98,0,1.00,30.1,0.000527,1
+deepseek/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco,121,2.50,1.000,49.2,1.00,0.98,0,1.00,30.1,0.0005270,1

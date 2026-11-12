@@ -153,13 +153,17 @@ def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> li
         bare = m["id"].split("/")[-1]
         listed = m["list_turn_usd"] if "list_turn_usd" in m else cat.get("cost")
         factor = float(m.get("factor", 1.0))
+        leverage = float(plan.get("usd_per_usage_dollar", 1.0))
+        usage = listed * factor if listed is not None else None
         out.append({
             "model": m["id"],
+            "real_turn_usd": usage * leverage if usage is not None else None,
             "name": cat.get("name") or fact.get("name") or m["id"],
             "list_turn_usd": listed,
             "factor": factor,
-            "effective_turn_usd": listed * factor if listed is not None else None,
+            "effective_turn_usd": usage,
             "cache_write_usd_per_m": (plan.get("cache_write_usd_per_m") or {}).get(bare),
+            "leverage": leverage,
             "reasoning": fact.get("reasoning"),
             "tool_call": fact.get("tool_call"),
             "context": fact.get("context"),
@@ -192,9 +196,10 @@ CTX = 60_000          # the context a turn is priced at
 def cold_call(row: dict) -> float | None:
     """The first call of a session also writes the prefix, and that is not free."""
     write = row.get("cache_write_usd_per_m")
-    if not write or row["effective_turn_usd"] is None:
+    if not write or row["real_turn_usd"] is None:
         return None
-    return row["effective_turn_usd"] + CTX * write / 1_000_000 * row["factor"]
+    usage = row["effective_turn_usd"] + CTX * write / 1_000_000 * row["factor"]
+    return usage * float(row.get("leverage", 1.0))
 
 
 def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, str]:
@@ -203,8 +208,10 @@ def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, s
     cost = row["effective_turn_usd"]
     if cost is None:
         return "human", "no price on record"
-    if cost > cost_max:
-        return "out", f"cost {cost:.4f} > {cost_max:.4f}"
+    if row["real_turn_usd"] is None:
+        return "human", "no price on record"
+    if row["real_turn_usd"] > cost_max:
+        return "out", f"cost {row['real_turn_usd']:.6f} > {cost_max:.6f}"
     if cost == 0:
         return "out", "free: not of interest"
     if row["reasoning"] is False:
@@ -251,13 +258,14 @@ def main() -> int:
 
         for row in sorted(buckets["battery"], key=lambda r: r["effective_turn_usd"]):
             cold = cold_call(row)
-            extra = f"  (1.a llamada ${cold:.4f})" if cold else ""
-            print(f"  run   {LABEL[row['provider']]:13s} {row['model'][:30]:30s} "
-                  f"x{row['factor']:<4.2f} AA {row['aa']:5.1f}  ${row['effective_turn_usd']:.4f}{extra}")
+            extra = f"  1.a ${cold:.5f}" if cold else ""
+            print(f"  run   {LABEL[row['provider']]:13s} {row['model'][:28]:28s} "
+                  f"uso ${row['effective_turn_usd']:.5f}  real ${row['real_turn_usd']:.6f}{extra}")
         for row in sorted(buckets["human"], key=lambda r: r["effective_turn_usd"]):
             aa = "-" if row["aa"] is None else f"{row['aa']:.1f}"
-            print(f"  ????  {LABEL[row['provider']]:13s} {row['model'][:30]:30s} "
-                  f"x{row['factor']:<4.2f} AA {aa:>5}  ${row['effective_turn_usd']:.4f}  {row['why']}")
+            money = row["real_turn_usd"]
+            print(f"  ????  {LABEL[row['provider']]:13s} {row['model'][:28]:28s} "
+                  f"real ${money:.6f}  AA {aa:>5}  {row['why']}")
         print(f"  ({len(buckets['out'])} out)")
 
     battery = [r for r in rows if r["bucket"] == "battery"]
@@ -269,14 +277,14 @@ def main() -> int:
     if gaps_rows:
         print("PARA TI — falta un dato, y eso no lo decide el programa:")
         for r in sorted(gaps_rows, key=lambda x: x["effective_turn_usd"] or 0):
-            print(f"  {LABEL[r['provider']]:13s} {r['model'][:32]:32s} "
-                  f"${r['effective_turn_usd']:.4f}  falta: {', '.join(gaps(r))}")
+            print(f"  {LABEL[r['provider']]:13s} {r['model'][:30]:30s} "
+                  f"real ${r['real_turn_usd']:.6f}  falta: {', '.join(gaps(r))}")
         print()
 
     if human:
         print("waiting on a decision:")
         for r in sorted(human, key=lambda x: x["effective_turn_usd"] or 0):
-            print(f"  {LABEL[r['provider']]:13s} {r['model']:32s} ${r['effective_turn_usd']:.4f}  {r['why']}")
+            print(f"  {LABEL[r['provider']]:13s} {r['model']:30s} real ${r['real_turn_usd']:.6f}  {r['why']}")
 
     if "--write" in sys.argv:
         today = datetime.date.today().isoformat()

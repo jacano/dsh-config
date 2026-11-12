@@ -8,7 +8,7 @@
       "billing": "monthly",
       "fee_usd": 10.0,
       "credits_usd": 100.0,
-      "note": "every row of catalog-2026-11-10.csv; list prices are off-peak (17 h/day), weekdays 01-04 and 06-10 UTC double; DeepSeek rows carry no cache-write charge, Claude and Luna charge $0.125/M",
+      "note": "every row of catalog-2026-11-10.csv; list prices are off-peak (17 h/day), weekdays 01-04 and 06-10 UTC double. The plan sells $100 of usage for $10, so a dollar of usage costs ten cents",
       "models": "catalog",
       "credits_row": [
         10,
@@ -20,7 +20,8 @@
       "cache_write_usd_per_m": {
         "claude-haiku-5-5": 0.125,
         "gpt-6-luna": 0.125
-      }
+      },
+      "usd_per_usage_dollar": 0.1
     },
     "open-design": {
       "plan": "Go",
@@ -31,7 +32,7 @@
         "week_usd": 55.0,
         "five_hours_usd": 18.0
       },
-      "note": "credit multiplier per model, applied to the price OpenDesign publishes for that model; 7-day and 5-hour windows on Go",
+      "note": "credit multiplier per model, applied to the price OpenDesign publishes; $10 buys $220 of usage, so a dollar costs 4.5 cents. Go has a 7-day and a 5-hour window",
       "models": [
         {
           "id": "deepseek/deepseek-v4.1-flash",
@@ -118,7 +119,8 @@
           "open_design_name": "deepseek-v4-flash-vision-exp"
         }
       ],
-      "promo_seen": "Off-peak promo ? The limited-time off-peak offer lasts one week: Octob"
+      "promo_seen": "Off-peak promo ? The limited-time off-peak offer lasts one week: Octob",
+      "usd_per_usage_dollar": 0.0455
     }
   },
   "refreshed_at": "2026-11-11T22:15:49+01:00"

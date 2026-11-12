@@ -42,7 +42,11 @@ criteria:
       #
       # The provider is asked for neither: a shop grades its own product.
       capability_min: 30.0
-      cost_max: 0.0026
+      # Money, not usage. A plan that sells $100 of usage for $10 makes a dollar
+      # cost ten cents; OpenDesign sells $220 for $10, so 4.5. Gating on usage
+      # flatters prepaid routes and punishes the generous plans, which is the
+      # opposite of what the wallet says.
+      cost_max: 0.0006
       require_reasoning: true
       require_tool_call: true
 
