@@ -92,7 +92,7 @@ admitted:
   - id: deepseek-v4.1-flash
     note: OpenDesign; cleared the gates after they were relaxed, and solved the agentic fold 3/3
   - id: deepseek/deepseek-v4.1-flash-eco
-    note: OpenGateway; 121 tok/s, 3/3 agentic and the fastest of the four. Admitted on the promo price, so it leaves the day the discount does
+    note: OpenGateway; 121 tok/s, 3/3 agentic, fastest of the four. Priced from a real invoice, not the advertised -90%: that bill came to 1.94x the promo, so the effective discount is about -80%
 
 # Measured and rejected. The numbers here are as of the drop date and stay put
 # on purpose: they are the reason, not the current state. Live numbers for any
