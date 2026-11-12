@@ -13,6 +13,9 @@ benchmark, no measurements and no history — that is [`../bench/`](../bench/).
 | Desktop | macOS Intel | [deepseek-harness-0.2.0-rc.2-mac-x64.zip](https://download.deepseek.com/dsh-desk/bin/mac-x64/deepseek-harness-0.2.0-rc.2-mac-x64.zip) |
 | Web | any platform | `npm install -g @deepseek-ai/dsh`, then `dsh web` |
 
+These are release-candidate builds. A later build can change the configuration
+format, so re-read this file when the app moves on.
+
 ## Setup
 
 Install from the table, then:
