@@ -2,8 +2,8 @@
  "source": "https://artificialanalysis.ai/models",
  "index": "Artificial Analysis Intelligence Index",
  "variant": "AA chart default selection, plus the model's own page",
- "fetched": "2026-11-11T23:00:12+01:00",
- "updated": "2026-11-11",
+ "fetched": "2026-11-12T16:01:20+01:00",
+ "updated": "2026-11-12",
  "models": {
   "mimov26pro": {
    "aa_slug": "mimo-v2-6-pro",
@@ -207,6 +207,16 @@
   "deepseekv41flash": {
    "aa_slug": "deepseek-v4-1-flash",
    "intelligence": 30.078569475636,
+   "is_reasoning": true
+  },
+  "deepseekv4flash": {
+   "aa_slug": "deepseek-v4-flash",
+   "intelligence": 64.563595756626,
+   "is_reasoning": true
+  },
+  "step35flash": {
+   "aa_slug": "step-3-5-flash",
+   "intelligence": 64.563595756626,
    "is_reasoning": true
   }
  }
