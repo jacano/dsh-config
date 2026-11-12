@@ -105,7 +105,7 @@ deepseek/deepseek-v4-pro,0.000508508,DeepSeek V4 Pro,0.011176,1.0,0.011176,,0.04
 deepseek/deepseek-v4-flash,0.00016680299999999998,DeepSeek V4 Flash,0.003666,1.0,0.003666,,0.0455,True,True,1000000,2026-04-24,True,deepseek/deepseek-v4.1-flash-1017,deepseek/deepseek-v4-flash,,0.001317,open-design,Go,10.0,220.0,out,excluded in the policy,
 glm-5.3-flash,8.12175e-05,GLM-5.3-Flash,0.001785,1.0,0.001785,,0.0455,True,True,1000000,2026-08-26,True,,z-ai/glm-5.3-flash,,0.00357,open-design,Go,10.0,220.0,out,excluded in the policy,
 glm-5.3-flash-x,0.00081172,GLM-5.3-FlashX,0.00892,2.0,0.01784,,0.0455,True,True,1000000,2026-08-26,False,zhipuai/glm-5.3-flash,z-ai/glm-5.3-flashx,,0.00892,open-design,Go,10.0,220.0,out,cost 0.000812 > 0.000600,
-claude-haiku-5-5,0.00031668,Claude Haiku 5.5,0.00174,4.0,0.00696,,0.0455,True,True,1000000,2026-10-07,False,,claude-haiku-5-5,36.4845435880142,0.00174,open-design,Go,10.0,220.0,battery,,
+claude-haiku-5-5,0.00031668,Claude Haiku 5.5,0.00174,4.0,0.00696,,0.0455,True,True,1000000,2026-10-07,False,,claude-haiku-5-5,36.4845435880142,0.00174,open-design,Go,10.0,220.0,out,excluded in the policy,
 gpt-6-luna,0.00031668,GPT-6 Luna,0.00174,4.0,0.00696,,0.0455,True,True,1050000,2026-09-22,False,,gpt-6-luna,27.8552004938153,0.00174,open-design,Go,10.0,220.0,out,capability 27.9 < 30.0,
 kimi/k2.7-code,0.00108563,Kimi K2.7 Code,0.02386,1.0,0.02386,,0.0455,True,True,256000,2026-06-12,True,,moonshotai/Kimi-K2.7-Code,,0.02386,open-design,Go,10.0,220.0,out,cost 0.001086 > 0.000600,
 hy4-preview,0.0003786965,Hy4 preview,0.008323,1.0,0.008323,,0.0455,True,True,1024000,2026-08-28,False,,tencent/hy4-preview,,0.0083235,open-design,Go,10.0,220.0,out,excluded in the policy,

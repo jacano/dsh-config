@@ -253,6 +253,9 @@ def main() -> int:
     print(f"fold 1 · price <= ${cost_max:.4f}/turn · reasoning and tools from models.dev\n")
     rows = []
     for pname, plan in plans.items():
+        if plan.get("active") is False:
+            print(f"\n{pname}  [prepared, not enabled] {plan.get('note', '')[:90]}")
+            continue
         money = f"${plan['fee_usd']:.0f}/{plan.get('billing', 'mo')}" if plan.get("fee_usd") else "prepaid"
         credits = f" + ${plan['credits_usd']:.0f} credits" if plan.get("credits_usd") else ""
         print(f"{pname}  [{plan['plan']} {money}{credits}]")
