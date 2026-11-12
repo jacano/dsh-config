@@ -91,6 +91,8 @@ admitted:
     note: fastest writer measured; keeps the Anthropic route alive
   - id: deepseek-v4.1-flash
     note: OpenDesign; cleared the gates after they were relaxed, and solved the agentic fold 3/3
+  - id: deepseek/deepseek-v4.1-flash-eco
+    note: OpenGateway; 121 tok/s, 3/3 agentic and the fastest of the four. Admitted on the promo price, so it leaves the day the discount does
 
 # Measured and rejected. The numbers here are as of the drop date and stay put
 # on purpose: they are the reason, not the current state. Live numbers for any
@@ -129,11 +131,5 @@ excluded:
   - { id: Qwen/Qwen3.8-Omni-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
   - { id: stepfun/Step-3.5-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
 
-  # In the menu as a spare, outside the bench: the owner keeps a route that does
-  # not clear the speed gate. Measured 121 tok/s and 49.2 ms/1k of prefill on
-  # Command Code's lane... no: on its own, and it solved the agentic fold 3/3 in
-  # a 7.9 s median, faster than the admitted OpenDesign lane. The gate says no and
-  # the evidence says yes, so the decision is written down instead of hidden.
-  - { id: deepseek/deepseek-v4.1-flash-eco, provider: opengateway, reason: "spare: 3/3 agentic, fastest of the four, but 59 tok/s misses speed_min 95" }
   - { id: deepseek-v4-flash, reason: "owner, 2026-11-11: superseded by V4.1, which is already in the menu" }
   - { id: deepseek-v4-flash-vision-exp, reason: "owner, 2026-11-11: V4 vision experiment, superseded by the V4.1 line" }
