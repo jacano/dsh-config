@@ -167,6 +167,7 @@ def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> li
             "reasoning": fact.get("reasoning"),
             "tool_call": fact.get("tool_call"),
             "context": fact.get("context"),
+            "release_date": fact.get("release_date"),
             "deprecated": fact.get("deprecated"),
             "superseded_by": fact.get("superseded_by"),
             "source": fact.get("id"),
@@ -202,7 +203,8 @@ def cold_call(row: dict) -> float | None:
     return usage * float(row.get("leverage", 1.0))
 
 
-def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, str]:
+def classify(row: dict, cost_max: float, cap_min: float, judged,
+             oldest: str | None = None) -> tuple[str, str]:
     if is_excluded(judged, row["model"], row["provider"]):
         return "out", "excluded in the policy"
     cost = row["effective_turn_usd"]
@@ -225,7 +227,13 @@ def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, s
     if row["tool_call"] is None:
         return "human", "tool support unreported"
     if row["aa"] is None:
-        return "human", "no AA score: capability unknown"
+        # An unranked model is a question, not a verdict — unless it was already
+        # old when the menu's oldest row shipped. Then nobody is going to score it
+        # and waiting is just noise.
+        released = row.get("release_date")
+        if oldest and released and released < oldest:
+            return "out", f"no score and released {released}, before the menu's oldest ({oldest})"
+        return "human", "no AA score: capability unknowable"
     if row["aa"] < cap_min:
         return "out", f"capability {row['aa']:.1f} < {cap_min:.1f}"
     return "battery", ""
@@ -238,6 +246,9 @@ def main() -> int:
     cap_min = float(gates["capability_min"])
     catalog = ev.load_catalog()
     table, scores_table, judged = facts(), scores(), excluded()
+    admitted_ids = ev.load_policy()[1]
+    dates = [fact_of(table, i.split("/")[-1], "").get("release_date") for i in admitted_ids]
+    oldest = min([d for d in dates if d], default=None)
 
     print(f"fold 1 · price <= ${cost_max:.4f}/turn · reasoning and tools from models.dev\n")
     rows = []
@@ -249,7 +260,7 @@ def main() -> int:
         buckets = {"battery": [], "human": [], "out": []}
         for row in model_rows(plan, catalog, table, scores_table):
             row["provider"] = pname        # before the gates: an exclusion is per lane
-            bucket, why = classify(row, cost_max, cap_min, judged)
+            bucket, why = classify(row, cost_max, cap_min, judged, oldest)
             row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
                        plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why,
                        cold_call_usd=cold_call(row))
