@@ -11,6 +11,9 @@ Three steps, in this order, and each can only remove rows:
               discount or credit multiplier applied. Free.
   2. signals  reasoning and tool calling from models.dev, a third party. A model
               no source describes is not thrown away, it is named for the owner.
+              models.dev never prices anything: step 1 is the only source of a
+              number, and that number is the shop's. The column models.dev does
+              produce is a cross-check, and no gate reads it.
   3. decision what survives goes to bench/evaluate.py, the battery. A row missing
               a decisive signal waits for the owner, one by one.
 
@@ -172,14 +175,23 @@ def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> li
             "superseded_by": fact.get("superseded_by"),
             "source": fact.get("id"),
             "aa": score.get("intelligence"),
-            # the same 90k/1k/1.5k turn, priced from models.dev, to check the shop
-            "dev_turn_usd": dev_turn(fact.get("cost")),
+            # What models.dev says the same turn costs, next to what the shop
+            # charges. A cross-check for a human, never an input: no gate reads
+            # this column, and bench/test_cost_sources.py fails if one ever does.
+            # models.dev quotes the peak lane (0,30/1,20/0,007), so the figure
+            # sits about twice the catalogue's off-peak one and is nobody's price.
+            "crosscheck_turn_usd": crosscheck_turn(fact.get("cost")),
         })
     return out
 
 
-def dev_turn(cost: dict | None) -> float | None:
-    """A turn of 89k cached, 1k fresh and 1.5k written, at models.dev prices."""
+def crosscheck_turn(cost: dict | None) -> float | None:
+    """A turn of 89k cached, 1k fresh and 1.5k written, at models.dev prices.
+
+    Not a price of anything this fold buys: models.dev is a third party with its
+    own lane and its own mix. This exists so a reader can see the shop's figure
+    next to somebody else's, and it stops there.
+    """
     if not cost:
         return None
     try:

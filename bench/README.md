@@ -45,6 +45,15 @@ The provider is never asked to grade itself. Prices do come from the provider,
 because nobody else can know them — but the *capability* and the *shape* of a
 model come from catalogues that are not selling anything.
 
+**models.dev never prices anything.** The `cost` block it carries is copied into
+the shortlist as `crosscheck_turn_usd`, so a reader can put the shop's figure next
+to a third party's; models.dev quotes the peak lane (0,30 / 1,20 / 0,007), so that
+column runs about twice the catalogue's off-peak one and is the price of nothing.
+No gate reads it, and `python bench/test_cost_sources.py` keeps it that way: it
+multiplies those prices by a thousand, zeroes them and deletes them, then requires
+every priced column and every verdict to stay put — and, so the test cannot pass by
+looking at nothing, that turning a *signal* off does move verdicts.
+
 ## Fold 1 in detail
 
 A turn is assumed to be **89.000 tokens read from cache + 1.000 fresh + 1.500
@@ -106,7 +115,7 @@ Claude rows go through `/messages` with a `cache_control` breakpoint: they refus
 | `refresh.py` | Reads the providers' own pages and reports what changed: fee, credits, windows, multipliers. |
 | `modelsdb.py` | Reads models.dev: reasoning, tool calling, context, and the price per token. `--probe <id>` asks a model whether it reasons. |
 | `capability.py` | Reads Artificial Analysis for the intelligence score. |
-| `providers.json` | The plans: fee, credits, windows, and each model's multiplier or own price. One block per provider, no code. |
+| `providers.json` | The plans: fee, credits, windows, and each model's multiplier or own price. One block per provider, no code. A promo is stored with its end date (`promo_until`), because an offer without one is a price by the time anybody reads it. |
 | `shortlist.py` | Fold 1: price, identity, capability, then the policy. Free. |
 | `shortlist-<date>.csv` | A dated snapshot of fold 1, one row per provider × model. |
 | `evaluate.py` | Fold 2: the gates, the live measurement, the config sync. |
@@ -115,7 +124,8 @@ Claude rows go through `/messages` with a `cache_control` breakpoint: they refus
 | `catalog-2026-11-10.csv` | Command Code's priced catalogue, frozen. |
 | `open-design-prices.csv` | OpenDesign's price catalogue, as its console shows it. |
 | `capability.json` | The AA snapshot, with its date. |
-| `models.dev.json` | The models.dev snapshot, with its date. |
+| `models.dev.json` | The models.dev snapshot, with its date. Identity only: no gate takes a price from here. |
+| `test_cost_sources.py` | Proof that models.dev cannot move a price, and that its signals can still move a verdict. |
 
 ## Adding a model or a provider
 

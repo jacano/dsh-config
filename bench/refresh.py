@@ -47,6 +47,30 @@ def key(name: str) -> str:
     return re.sub(r"[^a-z0-9]", "", name.lower())
 
 
+MONTHS = {name: i for i, name in enumerate(
+    ("January", "February", "March", "April", "May", "June", "July", "August",
+     "September", "October", "November", "December"), 1)}
+
+
+def promo_until(text: str, today: date | None = None) -> str | None:
+    """The day a promo sentence says it ends, as ISO, or nothing at all.
+
+    A promo whose end date nobody stored is indistinguishable from a price, and
+    that is how a one-week offer ends up quoted as a standing one.
+    """
+    m = re.search(r"to\s+([A-Z][a-z]+)\s+(\d{1,2})\s+at\s+\d{1,2}:\d{2}", text)
+    if not m or m.group(1) not in MONTHS:
+        return None
+    today = today or date.today()
+    try:
+        end = date(today.year, MONTHS[m.group(1)], int(m.group(2)))
+    except ValueError:
+        return None
+    if (end - today).days > 30:      # a December end read in January is last year
+        end = end.replace(year=end.year - 1)
+    return end.isoformat()
+
+
 def find(models: list, name: str):
     """Exact key first, then the loosest substring. GLM-5.3 Flash and Flash-X
     differ by one letter and must not be confused."""
@@ -76,9 +100,9 @@ def command_code() -> dict:
     if row:
         out["credits_row"] = [int(n or m) for n, m in re.findall(r"\$(\d+)|Up to \$(\d+)", row.group(1))][:5]
 
-    deals = re.search(r"(Limited-time bonus[^.]{0,80})", clean)
+    deals = re.search(r"(Limited-time bonus[^.]{0,160})", clean)
     if deals:
-        out["note_seen"] = deals.group(1)[:70]
+        out["note_seen"] = deals.group(1).strip()
     return out
 
 
@@ -117,9 +141,15 @@ def open_design() -> dict:
     if mults:
         out["multipliers"] = mults
 
-    promo = re.search(r"(Off-peak promo[^.]{0,60})", text_of(html))
+    promo = re.search(r"(Off-peak promo\s*\?[^.]{0,220})", text_of(html))
     if promo:
-        out["promo_seen"] = promo.group(1)[:70]
+        # The dates are the whole point. Cut at 70 characters this sentence used
+        # to stop before "lasts one week: October 20 … October 27", which made
+        # the temporary multiplier it explains look like the standing price.
+        out["promo_seen"] = promo.group(1).strip()
+        until = promo_until(out["promo_seen"])
+        if until:
+            out["promo_until"] = until
     return out
 
 
@@ -166,15 +196,17 @@ def main() -> int:
             for gone in sorted(have - seen):
                 print(f"    {gone}  stored but not offered to this key")
 
-        for field in ("credits_row", "promo_seen", "note_seen", "error"):
+        for field in ("credits_row", "note_seen", "promo_seen", "promo_until", "error"):
             if field in fresh:
-                print(f"  {field}: {fresh[field]}")
+                value = fresh[field]
+                shown = f"{value[:100]}…" if isinstance(value, str) and len(value) > 100 else value
+                print(f"  {field}: {shown}")
 
         if write:
             for field in ("fee_usd", "credits_usd", "windows"):
                 if field in fresh:
                     plan[field] = fresh[field]
-            for field in ("credits_row", "promo_seen"):
+            for field in ("credits_row", "promo_seen", "promo_until"):
                 if field in fresh:
                     plan[field] = fresh[field]
         print()

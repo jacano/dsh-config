@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-11",
+  "updated": "2026-11-13",
   "about": "Providers and plans the selection fold reads. A new provider is one block: no code change. `catalog` pulls price and capability from catalog-2026-11-10.csv; `list_turn_usd` and `capability` are the fallback when the catalog does not carry the row. `factor` multiplies the list price: 0.5 is half price, 0.1 is a 90% discount.",
   "providers": {
     "command-code": {
@@ -119,8 +119,9 @@
           "open_design_name": "deepseek-v4-flash-vision-exp"
         }
       ],
-      "promo_seen": "Off-peak promo ? The limited-time off-peak offer lasts one week: Octob",
-      "usd_per_usage_dollar": 0.0455
+      "promo_seen": "Off-peak promo ? The limited-time off-peak offer lasts one week: October 20 at 18:00 to October 27 at 18:00 (UTC+8)",
+      "usd_per_usage_dollar": 0.0455,
+      "promo_until": "2026-10-27"
     },
     "opencode-go": {
       "plan": "Go",
@@ -337,5 +338,5 @@
       ]
     }
   },
-  "refreshed_at": "2026-11-11T22:15:49+01:00"
+  "refreshed_at": "2026-11-13T22:04:59+01:00"
 }
