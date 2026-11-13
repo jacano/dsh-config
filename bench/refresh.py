@@ -52,23 +52,43 @@ MONTHS = {name: i for i, name in enumerate(
      "September", "October", "November", "December"), 1)}
 
 
-def promo_until(text: str, today: date | None = None) -> str | None:
-    """The day a promo sentence says it ends, as ISO, or nothing at all.
+def promo_block(text: str, today: date | None = None) -> dict | None:
+    """A dated offer, as a window plus the multiplier it drops to.
 
     A promo whose end date nobody stored is indistinguishable from a price, and
-    that is how a one-week offer ends up quoted as a standing one.
+    that is how a one-week offer ends up quoted as a standing one. The multiplier
+    is the value it drops *to*: 0,5x -> 0,25x is a 0,25x week, not a permanent
+    0,25x plan, and the reader of the file has to be able to tell.
     """
-    m = re.search(r"to\s+([A-Z][a-z]+)\s+(\d{1,2})\s+at\s+\d{1,2}:\d{2}", text)
-    if not m or m.group(1) not in MONTHS:
+    m = re.search(r"((?:[A-Z][A-Za-z0-9.\-]*)(?:\s+[A-Z0-9][A-Za-z0-9.\-]*){0,4})"
+                  r"\s+Off-peak promo\s*\?(.{0,320})", text)
+    if not m:
+        return None
+    model, rest = m.group(1).strip(), m.group(2)
+    mult = re.search(r"from\s+([\d.]+)\s*[×x]\s*to\s+([\d.]+)\s*[×x]", rest)
+    days = re.findall(r"([A-Z][a-z]+)\s+(\d{1,2})\s+at\s+\d{1,2}:\d{2}", rest)
+    if not (mult and len(days) == 2):
         return None
     today = today or date.today()
-    try:
-        end = date(today.year, MONTHS[m.group(1)], int(m.group(2)))
-    except ValueError:
+
+    def iso(month: str, day: str) -> str | None:
+        try:
+            when = date(today.year, MONTHS[month], int(day))
+        except (KeyError, ValueError):
+            return None
+        if (when - today).days > 30:          # a December end read in January
+            when = when.replace(year=when.year - 1)
+        if (when - today).days < -300:        # a January end read in December
+            when = when.replace(year=when.year + 1)
+        return when.isoformat()
+
+    start, end = iso(*days[0]), iso(*days[1])
+    if not (start and end):
         return None
-    if (end - today).days > 30:      # a December end read in January is last year
-        end = end.replace(year=end.year - 1)
-    return end.isoformat()
+    seen = re.sub(r"\s+", " ", f"{model} — {rest}").strip()[:200]
+    seen = seen[:seen.rfind(".") + 1] if "." in seen else seen
+    return {"model": model, "multiplier": float(mult.group(2)),
+            "from": start, "until": end, "seen": seen}
 
 
 def find(models: list, name: str):
@@ -141,15 +161,9 @@ def open_design() -> dict:
     if mults:
         out["multipliers"] = mults
 
-    promo = re.search(r"(Off-peak promo\s*\?[^.]{0,220})", text_of(html))
+    promo = promo_block(text_of(html))
     if promo:
-        # The dates are the whole point. Cut at 70 characters this sentence used
-        # to stop before "lasts one week: October 20 … October 27", which made
-        # the temporary multiplier it explains look like the standing price.
-        out["promo_seen"] = promo.group(1).strip()
-        until = promo_until(out["promo_seen"])
-        if until:
-            out["promo_until"] = until
+        out["promos"] = [promo]
     return out
 
 
@@ -196,7 +210,10 @@ def main() -> int:
             for gone in sorted(have - seen):
                 print(f"    {gone}  stored but not offered to this key")
 
-        for field in ("credits_row", "note_seen", "promo_seen", "promo_until", "error"):
+        for promo in fresh.get("promos", []):
+            print(f"  promo: {promo['model']} {promo['multiplier']:g}x  "
+                  f"{promo['from']} -> {promo['until']}")
+        for field in ("credits_row", "note_seen", "error"):
             if field in fresh:
                 value = fresh[field]
                 shown = f"{value[:100]}…" if isinstance(value, str) and len(value) > 100 else value
@@ -206,7 +223,7 @@ def main() -> int:
             for field in ("fee_usd", "credits_usd", "windows"):
                 if field in fresh:
                     plan[field] = fresh[field]
-            for field in ("credits_row", "promo_seen", "promo_until"):
+            for field in ("credits_row", "promos"):
                 if field in fresh:
                     plan[field] = fresh[field]
         print()

@@ -10,6 +10,7 @@ python bench/modelsdb.py         # refresh what models.dev says about our models
 python bench/capability.py       # refresh the AA scores
 python bench/shortlist.py        # fold 1: what is worth calling at all
 python bench/shortlist.py --write  # and save shortlist-<today>.csv
+python bench/plan_cost.py        # what each plan costs per token, blend included
 python bench/evaluate.py         # fold 2: the stored table against the gates
 python bench/evaluate.py --model <id> --capability 30 --cost 0.0013   # a live run
 ```
@@ -86,6 +87,33 @@ Missing data is never a reason to exclude, and the program enforces it: an entry
 `excluded:` whose reason is a gap is ignored with a warning, so the row surfaces as
 a question instead of disappearing. A datum that is absent cannot be a verdict.
 
+## What a plan costs per token
+
+Fold 1 asks whether a model is worth calling. This asks what the plan selling it
+really charges, and it is the only table that folds the four things that decide a
+subscription into one number:
+
+```bash
+python bench/plan_cost.py                       # today, every plan, DeepSeek V4.1 Flash
+python bench/plan_cost.py --today 2026-10-22    # the day a promo was live
+python bench/plan_cost.py --model deepseek-v4-pro
+python bench/plan_cost.py --write
+```
+
+- **the money** — fee ÷ the usage it buys, times the model's multiplier;
+- **the promo** — inside its window only. The number goes back up the day the
+  offer closes, because a discount that never ends is a price, and this file
+  refuses to treat one as the other;
+- **the week** — five weekdays of seven peak hours are 20,8 % of the week at the
+  peak price, and the catalogue says so itself ("Off-peak shown (17h/day) · peak
+  $0.30 / $1.20"). A plan that publishes a flat price gets no blend; one that
+  sells the peak lane as its own row is blended, not counted twice;
+- **the window** — weekly and five-hour caps limit the *rate*, not the total.
+  When one bites, the plan buys less than its credits and the price climbs.
+
+`tokens/¥` is what one yuan buys at the plan's blended marginal price — the only
+axis a $10 plan and a ¥500 plan can be put on together.
+
 ## Fold 2, and what a failure means
 
 **Measured.** Speed is the median of three 1.600-token generations; latency is the
@@ -115,9 +143,11 @@ Claude rows go through `/messages` with a `cache_control` breakpoint: they refus
 | `refresh.py` | Reads the providers' own pages and reports what changed: fee, credits, windows, multipliers. |
 | `modelsdb.py` | Reads models.dev: reasoning, tool calling, context, and the price per token. `--probe <id>` asks a model whether it reasons. |
 | `capability.py` | Reads Artificial Analysis for the intelligence score. |
-| `providers.json` | The plans: fee, credits, windows, and each model's multiplier or own price. One block per provider, no code. A promo is stored with its end date (`promo_until`), because an offer without one is a price by the time anybody reads it. |
+| `providers.json` | The plans: fee, credits, windows, and each model's multiplier or own price. One block per provider, no code. A promo is stored as a window — model, `from`, `until`, the multiplier it drops to — because an offer without an end date is a price by the time anybody reads it. |
 | `shortlist.py` | Fold 1: price, identity, capability, then the policy. Free. |
 | `shortlist-<date>.csv` | A dated snapshot of fold 1, one row per provider × model. |
+| `plan_cost.py` | What a plan really costs per million tokens: fee, multiplier, promo and peak week folded in. Free. |
+| `plan-cost-<date>.csv` | A dated snapshot of that comparison. |
 | `evaluate.py` | Fold 2: the gates, the live measurement, the config sync. |
 | `models-policy.yml` | Decisions: the gates, what is admitted, what is excluded and why. |
 | `models.csv` | The measured rows, medians of three rounds. The `rounds` column says so. |

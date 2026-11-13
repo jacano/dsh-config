@@ -119,9 +119,16 @@
           "open_design_name": "deepseek-v4-flash-vision-exp"
         }
       ],
-      "promo_seen": "Off-peak promo ? The limited-time off-peak offer lasts one week: October 20 at 18:00 to October 27 at 18:00 (UTC+8)",
       "usd_per_usage_dollar": 0.0455,
-      "promo_until": "2026-10-27"
+      "promos": [
+        {
+          "model": "DeepSeek V4.1 Flash",
+          "multiplier": 0.25,
+          "from": "2026-10-20",
+          "until": "2026-10-27",
+          "seen": "DeepSeek V4.1 Flash — The limited-time off-peak offer lasts one week: October 20 at 18:00 to October 27 at 18:00 (UTC+8). The multiplier drops from 0.5× to 0.25×, then returns to 0.5×."
+        }
+      ]
     },
     "opencode-go": {
       "plan": "Go",
@@ -338,5 +345,5 @@
       ]
     }
   },
-  "refreshed_at": "2026-11-13T22:04:59+01:00"
+  "refreshed_at": "2026-11-13T22:24:09+01:00"
 }
