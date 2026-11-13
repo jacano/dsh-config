@@ -29,7 +29,7 @@ For the live picture — who is in, what it measures, and whether the menu match
 the policy — run:
 
 ```bash
-python bench/evaluate.py
+python bench/measure/evaluate.py
 ```
 
 That command prints the admitted rows with their current numbers, and exits

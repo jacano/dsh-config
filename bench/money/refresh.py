@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Refresh what each provider charges today, from the provider's own pages.
 
-    python bench/refresh.py            # fetch and report, change nothing
-    python bench/refresh.py --write    # store the parsed numbers in providers.json
+    python bench/money/refresh.py            # fetch and report, change nothing
+    python bench/money/refresh.py --write    # store the parsed numbers in providers.json
 
 Prices, credit windows and multipliers move without notice, and a plan is not the
 same shape as the model it serves: the same DeepSeek is cheap on one and dear on
@@ -22,8 +22,8 @@ import urllib.request
 from datetime import date, datetime
 from pathlib import Path
 
-BENCH = Path(__file__).resolve().parent
-PROVIDERS = BENCH / "providers.json"
+HERE = Path(__file__).resolve().parent
+PROVIDERS = HERE / "providers.json"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 UA = {"User-Agent": "curl/8.5.0"}
 PLAN_TABS = {"go", "go plus", "go pro", "go max", "plus", "pro", "max"}

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Capability only: how good a model is, from Artificial Analysis.
 
-    python bench/capability.py           # refresh capability.json
+    python bench/select/capability.py    # refresh capability.json
 
 There is no public AA API (404 and 410), so this reads the dataset AA embeds in
 its pages. One coherent set: the array AA marks as its chart default, plus a
@@ -9,7 +9,7 @@ per-model page for the rows AA does not chart but does score.
 
 What this file does NOT do: decide whether a model reasons, calls tools, or what
 it costs. That is identity, not quality, and it comes from models.dev through
-bench/modelsdb.py. Two sources, two questions, no overlap.
+bench/select/modelsdb.py. Two sources, two questions, no overlap.
 
 A model AA has not scored keeps an empty capability and goes to the owner instead
 of being assumed.
@@ -25,9 +25,13 @@ from datetime import date, datetime
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-BENCH = Path(__file__).resolve().parent
-OUT = BENCH / "capability.json"
-CATALOG = BENCH / "catalog-2026-11-10.csv"
+HERE = Path(__file__).resolve().parent
+BENCH = HERE.parent
+sys.path.insert(0, str(BENCH))
+
+from common import CATALOG  # noqa: E402
+
+OUT = HERE / "capability.json"
 AA = "https://artificialanalysis.ai/models"
 UA = {"User-Agent": "curl/8.5.0"}
 

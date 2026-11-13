@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Fold 1: everything a provider sells, priced, then filtered by what it is. Free.
 
-    python bench/modelsdb.py            # refresh what models.dev says
-    python bench/shortlist.py           # price, then signals, then the buckets
-    python bench/shortlist.py --write   # and save shortlist-<today>.csv
+    python bench/select/modelsdb.py     # refresh what models.dev says
+    python bench/select/shortlist.py    # price, then signals, then the buckets
+    python bench/select/shortlist.py --write  # and save shortlist-<today>.csv
 
 Three steps, in this order, and each can only remove rows:
 
@@ -14,7 +14,7 @@ Three steps, in this order, and each can only remove rows:
               models.dev never prices anything: step 1 is the only source of a
               number, and that number is the shop's. The column models.dev does
               produce is a cross-check, and no gate reads it.
-  3. decision what survives goes to bench/evaluate.py, the battery. A row missing
+  3. decision what survives goes to bench/measure/evaluate.py, the battery. A row missing
               a decisive signal waits for the owner, one by one.
 
 There is no capability score in this fold. The sources that publish one grade a
@@ -34,15 +34,16 @@ import re
 import sys
 from pathlib import Path
 
-BENCH = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent
+BENCH = HERE.parent
 REPO = BENCH.parent
 sys.path.insert(0, str(BENCH))
 
-import evaluate as ev  # noqa: E402
+import common  # noqa: E402
 
-PROVIDERS = BENCH / "providers.json"
-MODELSDEV = BENCH / "models.dev.json"
-CAPABILITY = BENCH / "capability.json"
+PROVIDERS = BENCH / "money" / "providers.json"
+MODELSDEV = HERE / "models.dev.json"
+CAPABILITY = HERE / "capability.json"
 LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
 LABEL = {"command-code": "Command Code", "open-design": "OpenDesign"}
 
@@ -57,7 +58,7 @@ def excluded() -> list[tuple[str, str | None]]:
     A reason earned on one lane says nothing about another: the same model is a
     different route somewhere else, with its own speed and its own failures.
     """
-    text = (BENCH / "models-policy.yml").read_text(encoding="utf-8")
+    text = common.POLICY.read_text(encoding="utf-8")
     block = text.split("excluded:", 1)[-1]
     out = []
     for line in block.splitlines():
@@ -99,13 +100,13 @@ def is_excluded(judged, model: str, provider: str) -> bool:
 def scores() -> dict:
     """AA: how good. A row without a score is not assumed good."""
     if not CAPABILITY.exists():
-        raise SystemExit("no capability.json. run: python bench/capability.py")
+        raise SystemExit("no capability.json. run: python bench/select/capability.py")
     return json.loads(CAPABILITY.read_text(encoding="utf-8"))["models"]
 
 
 def facts() -> dict:
     if not MODELSDEV.exists():
-        raise SystemExit("no models.dev.json. run: python bench/modelsdb.py")
+        raise SystemExit("no models.dev.json. run: python bench/select/modelsdb.py")
     return json.loads(MODELSDEV.read_text(encoding="utf-8"))["models"]
 
 
@@ -177,7 +178,7 @@ def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> li
             "aa": score.get("intelligence"),
             # What models.dev says the same turn costs, next to what the shop
             # charges. A cross-check for a human, never an input: no gate reads
-            # this column, and bench/test_cost_sources.py fails if one ever does.
+            # this column, and bench/select/test_cost_sources.py fails if one ever does.
             # models.dev quotes the peak lane (0,30/1,20/0,007), so the figure
             # sits about twice the catalogue's off-peak one and is nobody's price.
             "crosscheck_turn_usd": crosscheck_turn(fact.get("cost")),
@@ -253,12 +254,12 @@ def classify(row: dict, cost_max: float, cap_min: float, judged,
 
 def main() -> int:
     plans = json.loads(PROVIDERS.read_text(encoding="utf-8"))["providers"]
-    gates = ev.load_policy()[0]["static"]
+    gates = common.load_policy()[0]["static"]
     cost_max = float(gates["cost_max"])
     cap_min = float(gates["capability_min"])
-    catalog = ev.load_catalog()
+    catalog = common.load_catalog()
     table, scores_table, judged = facts(), scores(), excluded()
-    admitted_ids = ev.load_policy()[1]
+    admitted_ids = common.load_policy()[1]
     dates = [fact_of(table, i.split("/")[-1], "").get("release_date") for i in admitted_ids]
     oldest = min([d for d in dates if d], default=None)
 

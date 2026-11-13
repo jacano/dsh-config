@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Second fold: the test battery. What actually costs tokens.
 
-    python bench/evaluate.py                 # check the stored table against the gates
-    python bench/evaluate.py --model <id> --capability 42 --cost 0.0024
+    python bench/measure/evaluate.py          # check the stored table against the gates
+    python bench/measure/evaluate.py --model <id> --capability 42 --cost 0.0024
                                              # live run: measured, then fitness
 
-The first fold is bench/shortlist.py: it reads the providers and the catalog and
+The first fold is bench/select/shortlist.py: it reads the providers and the catalog and
 says which rows are worth calling at all. This file assumes that has happened
 and spends the requests.
 
@@ -34,13 +34,15 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-BENCH = Path(__file__).resolve().parent
+BENCH = Path(__file__).resolve().parent.parent
 REPO = BENCH.parent
-POLICY = BENCH / "models-policy.yml"
-CATALOG = BENCH / "catalog-2026-11-10.csv"
-MODELS = BENCH / "models.csv"
-CAPABILITY = BENCH / "capability.json"
-CONFIG = REPO / "dsh" / "cordis.patch.yml"
+sys.path.insert(0, str(BENCH))
+
+from common import CONFIG, load_catalog, load_policy  # noqa: E402
+
+HERE = Path(__file__).resolve().parent
+MODELS = HERE / "models.csv"
+CAPABILITY = BENCH / "select" / "capability.json"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 # The battery has to run wherever the model is sold: the same model on another
 # gateway is another route, with its own speed and its own failures.
@@ -63,45 +65,6 @@ TOOLS = [
 ]
 TOOL_PROMPT = ("Call get_weather for Seville and get_time for Seville. "
                "Use both tools in this single reply. Do not answer in prose.")
-
-
-# --------------------------------------------------------------------------- policy
-
-def load_policy():
-    gates: dict[str, dict[str, float]] = {}
-    admitted: set[str] = set()
-    phase = None
-    section = None
-    for line in POLICY.read_text(encoding="utf-8").splitlines():
-        m = re.match(r"^    (static|measured|fitness):\s*$", line)
-        if m:
-            phase, gates[m.group(1)] = m.group(1), {}
-            continue
-        m = re.match(r"^      (\w+):\s*([\d.]+)\s*$", line)
-        if m and phase:
-            gates[phase][m.group(1)] = float(m.group(2))
-            continue
-        if line.startswith("admitted:"):
-            section, phase = "admitted", None
-            continue
-        if line.startswith("excluded:"):
-            section = "excluded"
-            continue
-        m = re.match(r"^  - id:\s*(\S+)", line)
-        if m and section == "admitted":
-            admitted.add(m.group(1))
-    return gates, admitted
-
-
-def load_catalog():
-    rows = {}
-    for r in csv.DictReader(open(CATALOG, encoding="utf-8")):
-        rows[r["slug"]] = {
-            "name": r["name"],
-            "capability": float(r["intelligence"]) if re.match(r"^[\d.]+$", r.get("intelligence") or "") else None,
-            "cost": float(r["best_turn"]) if r.get("best_turn") else None,
-        }
-    return rows
 
 
 AA_LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync")
@@ -501,7 +464,7 @@ def main() -> int:
         if capability is None or cost is None:
             raise SystemExit("--model needs --capability and --cost (the static phase)")
         return live(model, capability, cost)
-    raise SystemExit("usage: evaluate.py | --model <id> --capability X --cost Y   (the free first fold is bench/shortlist.py)")
+    raise SystemExit("usage: evaluate.py | --model <id> --capability X --cost Y   (the free first fold is bench/select/shortlist.py)")
 
 
 ADMITTED: set[str] = set()

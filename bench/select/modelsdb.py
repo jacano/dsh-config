@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """What a model is, from models.dev — and never from the shop selling it.
 
-    python bench/modelsdb.py           # refresh models.dev.json
-    python bench/modelsdb.py --probe <id>
+    python bench/select/modelsdb.py    # refresh models.dev.json
+    python bench/select/modelsdb.py --probe <id>
                                        # ask the model itself whether it reasons
 
 models.dev is a third-party catalogue of 3,500+ models across 235 providers, with
@@ -23,10 +23,14 @@ from datetime import date, datetime
 from pathlib import Path
 from urllib.request import Request, urlopen
 
-BENCH = Path(__file__).resolve().parent
-OUT = BENCH / "models.dev.json"
-CATALOG = BENCH / "catalog-2026-11-10.csv"
-PROVIDERS = BENCH / "providers.json"
+HERE = Path(__file__).resolve().parent
+BENCH = HERE.parent
+sys.path.insert(0, str(BENCH))
+
+from common import CATALOG, MONEY  # noqa: E402
+
+OUT = HERE / "models.dev.json"
+PROVIDERS = MONEY / "providers.json"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 URL = "https://models.dev/api.json"
 UA = {"User-Agent": "curl/8.5.0"}

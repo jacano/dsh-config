@@ -1,13 +1,13 @@
 # Model policy — what may enter dsh/cordis.patch.yml
 #
 # The menu is a curated list, not a catalog window: a row is admitted only while
-# it clears every gate below. `bench/evaluate.py` enforces the list; run it before
+# it clears every gate below. `bench/measure/evaluate.py` enforces the list; run it before
 # every commit.
 #
-# Two folds. The first costs nothing and lives in `bench/shortlist.py`: it prices
+# Two folds. The first costs nothing and lives in `bench/select/shortlist.py`: it prices
 # every model a provider sells, applies that plan's discount or credit
 # multiplier, and keeps the rows that are cheap enough, reason, and call tools.
-# The second is `bench/evaluate.py`: it measures the survivors, and that is the
+# The second is `bench/measure/evaluate.py`: it measures the survivors, and that is the
 # only part that spends tokens.
 #
 # Nothing here trusts the shop. Capability comes from Artificial Analysis
@@ -64,8 +64,8 @@ criteria:
       cache_min: 0.80
 
   # Third phase: does the route serve the model well enough for a loop?
-  # Measured by `bench/evaluate.py` and recorded in models.csv
-  # and enforced by bench/evaluate.py. One run per model for now; re-run it
+  # Measured by `bench/measure/evaluate.py` and recorded in measure/models.csv
+  # and enforced by bench/measure/evaluate.py. One run per model for now; re-run it
   # when a provider changes something.
     fitness:
       # 100 ms/1k is "this model cannot be used", not "this model is not optimal".

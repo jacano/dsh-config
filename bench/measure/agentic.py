@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Fold 3: does the model actually do the work?
 
-    python bench/agentic.py --provider opendesign --model deepseek-v4.1-flash
-    python bench/agentic.py --provider opengateway --model deepseek/deepseek-v4.1-flash-eco --rounds 3
+    python bench/measure/agentic.py --provider opendesign --model deepseek-v4.1-flash
+    python bench/measure/agentic.py --provider opengateway --model deepseek/deepseek-v4.1-flash-eco --rounds 3
 
 Synthetic numbers measure the route: speed, latency, prefill. They say nothing
 about whether a model can read a repository, find the bug and fix it. This runs a
@@ -28,7 +28,7 @@ import sys
 import time
 from pathlib import Path
 
-BENCH = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent
 WORK = Path.home() / "workspace" / "agentic-fold3"
 
 MODULE = '''"""Small pricing helpers. Three behaviours are expected; one is broken."""
@@ -109,7 +109,7 @@ def main() -> int:
     ap.add_argument("--rounds", type=int, default=3)
     a = ap.parse_args()
 
-    patch = BENCH / "_agentic-patch.yml"
+    patch = HERE / "_agentic-patch.yml"
     patch.write_text(PATCH.format(provider=a.provider, model=a.model), encoding="utf-8")
 
     print(f"{a.provider}/{a.model}: {a.rounds} rounds")

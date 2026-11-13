@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """models.dev may say what a model is. It may not say what it costs.
 
-    python bench/test_cost_sources.py
+    python bench/select/test_cost_sources.py
 
 Two proofs, both free and both offline:
 
@@ -24,8 +24,10 @@ import json
 import sys
 from pathlib import Path
 
-BENCH = Path(__file__).resolve().parent
-sys.path.insert(0, str(BENCH))
+HERE = Path(__file__).resolve().parent
+BENCH = HERE.parent
+for lane in (BENCH, HERE, BENCH / "measure"):
+    sys.path.insert(0, str(lane))
 
 import evaluate as ev  # noqa: E402
 import shortlist as sl  # noqa: E402
@@ -34,16 +36,16 @@ COLUMN = "crosscheck_turn_usd"
 PRICED = ("list_turn_usd", "factor", "effective_turn_usd", "real_turn_usd", "leverage")
 
 
-def load(name: str, key: str = "models") -> dict:
-    return json.loads((BENCH / name).read_text(encoding="utf-8"))[key]
+def load(path: Path, key: str = "models") -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))[key]
 
 
 def priced_rows(table: dict) -> dict:
     """Fold 1 as the gates see it: no file written, no model called."""
     gates = ev.load_policy()[0]["static"]
-    catalog, judged, scores = ev.load_catalog(), sl.excluded(), load("capability.json")
+    catalog, judged, scores = ev.load_catalog(), sl.excluded(), load(HERE / "capability.json")
     out = {}
-    for provider, plan in load("providers.json", "providers").items():
+    for provider, plan in load(BENCH / "money" / "providers.json", "providers").items():
         if plan.get("active") is False:      # fold 1 never prices a prepared plan
             continue
         for row in sl.model_rows(plan, catalog, table, scores):
@@ -93,7 +95,7 @@ def same_price(base: dict, other: dict, label: str) -> int:
 
 
 def main() -> int:
-    table = load("models.dev.json")
+    table = load(HERE / "models.dev.json")
     base = priced_rows(table)
     if not base:
         print("FAIL: no rows priced, nothing to prove")
@@ -128,7 +130,7 @@ def main() -> int:
     failures += 0 if not no_money else 1
 
     print("\nstructure:")
-    readers = [p.name for p in sorted(BENCH.glob("*.py"))
+    readers = [p.name for p in sorted(BENCH.rglob("*.py"))
                if p.name not in (Path(__file__).name, "shortlist.py")
                and COLUMN in p.read_text(encoding="utf-8")]
     print(f"  {'ok  ' if not readers else 'FAIL'} only shortlist.py names the column"

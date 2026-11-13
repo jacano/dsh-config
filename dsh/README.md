@@ -63,7 +63,7 @@ eco lane was here and is gone: 76.6 ms per 1k and 59 tok/s made a turn take 32
 seconds. They sit in
 the menu because the owner asked for a spare route, not because they passed
 anything. `bench/models-policy.yml` records them under `excluded:` and
-`python bench/evaluate.py` prints the menu with the admitted rows.
+`python bench/measure/evaluate.py` prints the menu with the admitted rows.
 
 The group name says which models are behind it; the protocol lives in each node's
 `api:` field, where it belongs.
@@ -99,7 +99,7 @@ Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`,
 
 The rows are the `models:` list in [`cordis.patch.yml`](cordis.patch.yml). This
 file does not repeat them: a second copy of the menu drifts from the first, and
-`python bench/evaluate.py` prints the list with its current numbers whenever you
+`python bench/measure/evaluate.py` prints the list with its current numbers whenever you
 want to see it.
 
 Claude does not speak Chat Completions on this provider: every `claude-*` id in
@@ -118,8 +118,8 @@ parentheses included.
 
 Which rows are here and why is decided in [../bench/](../bench/). This file records
 only the result, never the metrics: the numbers live in
-[`models.csv`](../bench/models.csv) and the menu in
-[`cordis.patch.yml`](cordis.patch.yml). `python bench/evaluate.py` prints both.
+[`models.csv`](../bench/measure/models.csv) and the menu in
+[`cordis.patch.yml`](cordis.patch.yml). `python bench/measure/evaluate.py` prints both.
 
 ## Notes
 
@@ -132,7 +132,7 @@ only the result, never the metrics: the numbers live in
 - **Cache.** The prefix cache is not automatic on the Anthropic route: without a
   `cache_control` breakpoint the same 60k prompt reads back 0 cached tokens and
   costs 3.2-3.5 s to first token. pi-ai marks the last message itself, so the row
-  needs no setting; the numbers in [models.csv](../bench/models.csv) were measured with that
+  needs no setting; the numbers in [models.csv](../bench/measure/models.csv) were measured with that
   breakpoint in place.
 - **Images.** Every row reads images, declared once as `defaultInput: [text, image]`.
   A text-only model added later must declare `input: [text]`, or its images are

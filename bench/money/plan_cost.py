@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """What a subscription really costs per million tokens, blend included.
 
-    python bench/plan_cost.py                       # every plan, today's promos
-    python bench/plan_cost.py --model v4.1-flash    # another model
-    python bench/plan_cost.py --today 2026-10-22    # a day a promo was live
-    python bench/plan_cost.py --write               # save plan-cost-<day>.csv
+    python bench/money/plan_cost.py                 # every plan, today's promos
+    python bench/money/plan_cost.py --model v4.1-flash    # another model
+    python bench/money/plan_cost.py --today 2026-10-22    # a day a promo was live
+    python bench/money/plan_cost.py --write               # save plan-cost-<day>.csv
 
 Three things are folded in, so the number on screen is the number to compare:
 
@@ -30,10 +30,11 @@ import sys
 from datetime import date
 from pathlib import Path
 
-BENCH = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent
+BENCH = HERE.parent
 REPO = BENCH.parent
 
-TURN = 91_500          # bench/README: 89k cache + 1k fresh + 1.5k written
+TURN = 91_500          # bench/README.md: 89k cache + 1k fresh + 1.5k written
 FX = 6.714             # CNY per USD, the rate a Chinese price list is read at
 DAYS = 30.0            # a month, for the windows
 DEFAULT = "deepseek-v4-1-flash"
@@ -47,7 +48,7 @@ def norm(s) -> str:
 
 
 def catalog() -> dict:
-    with open(BENCH / "catalog-2026-11-10.csv", encoding="utf-8") as fh:
+    with open(HERE / "catalog-2026-11-10.csv", encoding="utf-8") as fh:
         rows = [dict(r) for r in csv.DictReader(fh)]
     for r in rows:                       # the fold-1 name for the same figure
         r["cost"] = float(r["best_turn"]) if r.get("best_turn") else None
@@ -124,7 +125,7 @@ def wanted(model_id: str, want: str) -> bool:
 
 def rows(day: date, want: str) -> list[dict]:
     cat = catalog()
-    stored = json.loads((BENCH / "providers.json").read_text(encoding="utf-8"))["providers"]
+    stored = json.loads((HERE / "providers.json").read_text(encoding="utf-8"))["providers"]
     out: list[dict] = []
     target = norm(want)
 
