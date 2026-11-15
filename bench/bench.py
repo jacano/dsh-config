@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """bench — one script, two data files, three questions.
 
-    python bench/bench.py refresh            # re-read the providers and both catalogues
+    python bench/bench.py refresh            # re-read the providers and the board
     python bench/bench.py refresh --write    # store what it parsed in data/
     python bench/bench.py plan               # what a subscription costs per token
     python bench/bench.py plan --today 2026-10-22
@@ -18,7 +18,7 @@ Three questions, in the order they cost money:
   select   fold 1: price, Terminal-Bench, then the policy.
            Free, calls no model.
   measure  fold 2: speed, latency, cache, prefill, retention, errors, tool calls.
-           fold 3: agentic.py's task — a real bug, a real repository, pytest.
+           fold 3: the agentic task — a real bug, a real repository, pytest.
 
 data/plans.json    the plans, what they publish, and the catalogue they price from
 data/tbench.json   the board: what each model does on Terminal-Bench, and through

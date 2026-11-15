@@ -16,7 +16,7 @@ python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 | --- | --- |
 | `data/plans.json` | the plans, what they publish, and the catalogue they price from |
 | `data/tbench.json` | the board: what each model does on Terminal-Bench |
-| `models-policy.yml` | the gates, what is admitted, what is excluded and why |
+| `models-policy.yml` | the gates, and what is admitted |
 | `models.csv` | the measured rows, medians of three rounds |
 
 Nothing here edits the DSH configuration; that is a separate change in
@@ -88,9 +88,9 @@ What fold 1 will not do:
 - price a model from another provider's catalogue, unless no catalogue exists and
   that is written down;
 - judge capability from a provider's own claim;
-- reopen a model the policy has already judged. That list is `excluded:` in
-  [`models-policy.yml`](models-policy.yml), and a reason there can be scoped to one
-  provider, because a measurement on one route says nothing about another.
+- keep a list of models it has judged. There is no `excluded:` any more: a row that
+  the gate rejects is rejected again on the next run, and writing it down was a
+  snapshot of yesterday wearing a decision's clothes.
 
 **One scale, and nothing else about the model.** Terminal-Bench 4.1 (`tb`) is the
 only thing fold 1 knows about a model beyond its price: it runs terminal tasks and
@@ -105,11 +105,12 @@ row — a purchase rule, not a judgement about the model. Everything else a mode
 removed on 2026-11-15: it gated nothing, and a number that gates nothing ends up
 being quoted as if it did.
 
-Missing data is never a reason to *exclude a model*, and the program enforces it: an
-entry in `excluded:` whose reason is a gap is ignored with a warning, so the row
-surfaces as a question instead of disappearing. A datum that is absent cannot be a
-verdict. Refusing to buy what cannot be compared is a different thing, and it is
-written as a gate (`tbench_min`), not as a verdict on the model.
+Two rows in the shortlist are the same model on different routes, and the filter
+does not merge them: it prices both and lets the number speak. That is how
+OpenDesign's Haiku turned out cheaper than Command Code's after the console showed
+the plan billing ×2 where the page prints ×4 — `billed_factor` carries the bill,
+`factor` keeps what the page says, and a refresh can no longer overwrite the
+observation with the brochure.
 
 ## measure — fold 2
 
@@ -152,7 +153,7 @@ numbers meaningless; that mistake was made once.
 | Question | Source | Where |
 | --- | --- | --- |
 | What does the plan cost, and what does it give? | `commandcode.ai/pricing`, `open-design.ai` | `data/plans.json` |
-| What does a token cost on that provider? | Command Code: its own catalogue. OpenDesign and OpenCode: their own price lists | `data/plans.json` |
+| What does a token cost on that provider? | each provider's own catalogue or price list | `data/plans.json` |
 | Can it do the work? | Terminal-Bench 4.1, executed and graded | `data/tbench.json` |
 | How does it behave on the wire? | measured here | `models.csv` |
 
@@ -167,8 +168,8 @@ that runs it and grades the result. Two sources, and neither one is the seller.
    plus a `factor`. Run `python bench/bench.py refresh` to see whether the pages
    agree with you, and `python bench/bench.py plan` to see what it costs per token.
 2. **A new model on an existing provider** is one entry in that list. Run
-   `python bench/bench.py select`: if the row says `out`, the reason is printed —
-   record it in `excluded:` only if a gate could not have known it.
+   `python bench/bench.py select`: if the row says `out`, the printed reason is the
+   whole story — nothing is recorded, because the gate will say it again tomorrow.
 3. **Live, only for rows fold 1 marks `run`:**
 
    ```bash

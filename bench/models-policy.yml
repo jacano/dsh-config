@@ -4,9 +4,9 @@
 # it clears every gate below. `python bench/bench.py measure` enforces the list; run it before
 # every commit.
 #
-# Two folds. The first costs nothing and lives in `python bench/bench.py select`: it prices
-# every model a provider sells, applies that plan's discount or credit
-# multiplier, and keeps the rows that are cheap enough, reason, and call tools.
+# Two folds. The first costs nothing and lives in `python bench/bench.py select`: it
+# prices every model a provider sells, applies that plan's discount or credit
+# multiplier, and keeps the rows the board ranks and the plan sells cheaply enough.
 # The second is `python bench/bench.py measure`: it measures the survivors, and that is the
 # only part that spends tokens.
 #
@@ -15,7 +15,7 @@
 # own published catalogue. A provider grading its own product is not evidence.
 
 version: 1
-updated: 2026-11-15
+updated: 2026-11-16
 
 criteria:
   # Thresholds are the envelope of the admitted set: no row may be worse than the
@@ -30,7 +30,7 @@ criteria:
 
   phases:
     static:
-      # Two sources, two questions, no overlap.
+      # One source for capability, one for money, and no overlap between them.
       #
       # Terminal-Bench 4.1 answers "can it do the work": terminal tasks that are
       # executed and graded by whether they got done, ranked per model and agent

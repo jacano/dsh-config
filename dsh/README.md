@@ -57,6 +57,10 @@ shows five groups:
 | **OpenDesign (Claude)** | Claude Haiku 5.5 | Anthropic | Admitted: 149 t/s, 0,000158 a turn. |
 | **OpenGateway** | DeepSeek V4.1 Flash Eco | OpenAI | Admitted: 121 t/s, 49,2 ms/1k, 0,000527 a turn. |
 
+The two Command Code rows are unreachable while that subscription is lapsed
+(2026-11-16: every call answers *insufficient credits*, the key is fine). They stay
+in the menu so renewing is one copy away; until then the default is OpenDesign's.
+
 All five are admitted by `bench/models.csv` and `admitted:` in
 `bench/models-policy.yml`; `python bench/bench.py measure` prints them and fails if
 the menu and the policy drift apart. Claude models go through an
