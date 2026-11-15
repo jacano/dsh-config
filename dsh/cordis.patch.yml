@@ -43,6 +43,7 @@
         defaultInput: [text, image]
         models:
           - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+          - { id: claude-haiku-5.5, name: Claude Haiku 5.5 (OpenDesign), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
       opengateway:
         displayName: OpenGateway
         api: openai-completions
