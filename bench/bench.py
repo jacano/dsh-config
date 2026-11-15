@@ -432,16 +432,16 @@ def build_models(store: dict) -> dict:
         rec["resolved_to"] = by
         rec["reasoning"] = target.get("reasoning")
         rec["tool_call"] = target.get("tool_call")
-        rec["context"] = (target.get("limit") or {}).get("context")
         rec["cost"] = target.get("cost")
-        rec["release_date"] = target.get("release_date")
         rec["deprecated"] = False        # the chain ends somewhere alive
 
     # Now that the successor chain is resolved, keep only what a reader uses: the
     # merge's working fields (cross_generation, resolved_to) are not evidence, and
     # modalities was never asked for.
+    # What is read anywhere: the two gates, the price the test guards, the name
+    # the CSV falls back to, and the join/repair fields.
     keep = {"deprecated", "superseded_by", "id", "provider", "name", "reasoning",
-            "tool_call", "context", "cost", "release_date"}
+            "tool_call", "cost"}
     rows = {k: {f: v for f, v in rec.items() if f in keep} for k, rec in rows.items()}
 
     return {
@@ -797,9 +797,6 @@ def model_rows(plan: dict, catalog: dict, table: dict, board: dict) -> list[dict
             "leverage": leverage,
             "reasoning": fact.get("reasoning"),
             "tool_call": fact.get("tool_call"),
-            "context": fact.get("context"),
-            "release_date": fact.get("release_date"),
-            "source": fact.get("id"),
             "tb": (ranked or {}).get("score"),
             # What models.dev says the same turn costs, next to what the shop
             # charges. A cross-check for a human, never an input: no gate reads

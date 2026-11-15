@@ -13,13 +13,11 @@
     "name": "MiniMax-M3",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.3,
      "output": 1.2,
      "cache_read": 0.06
-    },
-    "release_date": "2026-06-01"
+    }
    },
    "minimaxm27": {
     "deprecated": true,
@@ -29,13 +27,11 @@
     "name": "MiniMax-M2.7",
     "reasoning": true,
     "tool_call": true,
-    "context": 200000,
     "cost": {
      "input": 0.3,
      "output": 1.2,
      "cache_read": 0.06
-    },
-    "release_date": "2026-03-18"
+    }
    },
    "minimaxm25": {
     "deprecated": true,
@@ -45,13 +41,11 @@
     "name": "MiniMax-M2.5",
     "reasoning": true,
     "tool_call": true,
-    "context": 200000,
     "cost": {
      "input": 0.3,
      "output": 1.2,
      "cache_read": 0.03
-    },
-    "release_date": "2026-02-12"
+    }
    },
    "minimaxm31flash": {
     "deprecated": false,
@@ -61,13 +55,11 @@
     "name": "MiniMax-M3.1-Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.15,
      "output": 0.6,
      "cache_read": 0.015
-    },
-    "release_date": "2026-10-19"
+    }
    },
    "kimik3": {
     "deprecated": true,
@@ -77,13 +69,11 @@
     "name": "Kimi K3",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 3,
      "output": 15,
      "cache_read": 0.3
-    },
-    "release_date": "2026-07-16"
+    }
    },
    "kimik26": {
     "deprecated": true,
@@ -93,13 +83,11 @@
     "name": "Kimi K2.6",
     "reasoning": true,
     "tool_call": true,
-    "context": 256000,
     "cost": {
      "input": 0.95,
      "output": 4,
      "cache_read": 0.16
-    },
-    "release_date": "2026-04-20"
+    }
    },
    "qwen3827b": {
     "deprecated": false,
@@ -109,13 +97,11 @@
     "name": "Qwen3.8 27B",
     "reasoning": true,
     "tool_call": true,
-    "context": 262144,
     "cost": {
      "input": 0.4,
      "output": 3,
      "cache_read": 0.04
-    },
-    "release_date": "2026-08-14"
+    }
    },
    "glm51": {
     "deprecated": true,
@@ -125,13 +111,11 @@
     "name": "GLM-5.1",
     "reasoning": true,
     "tool_call": true,
-    "context": 202752,
     "cost": {
      "input": 1.21,
      "output": 4.2,
      "cache_read": 0.6
-    },
-    "release_date": "2026-04-07"
+    }
    },
    "glm53flash": {
     "deprecated": true,
@@ -141,13 +125,11 @@
     "name": "GLM-5.3-Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.15,
      "output": 0.5,
      "cache_read": 0.03
-    },
-    "release_date": "2026-08-26"
+    }
    },
    "glm53": {
     "deprecated": true,
@@ -157,13 +139,11 @@
     "name": "GLM-5.3",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 1.4,
      "output": 4.4,
      "cache_read": 0.26
-    },
-    "release_date": "2026-08-14"
+    }
    },
    "glm52": {
     "deprecated": true,
@@ -173,13 +153,11 @@
     "name": "GLM-5.2",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 1.4,
      "output": 4.4,
      "cache_read": 0.26
-    },
-    "release_date": "2026-06-13"
+    }
    },
    "kimik27codehighspeed": {
     "deprecated": false,
@@ -189,13 +167,11 @@
     "name": "Kimi K2.7 Code Highspeed",
     "reasoning": true,
     "tool_call": true,
-    "context": 262000,
     "cost": {
      "input": 1.9,
      "output": 8,
      "cache_read": 0.38
-    },
-    "release_date": "2026-06-12"
+    }
    },
    "kimik27code": {
     "deprecated": true,
@@ -205,13 +181,11 @@
     "name": "Kimi K2.7 Code",
     "reasoning": true,
     "tool_call": true,
-    "context": 256000,
     "cost": {
      "input": 0.95,
      "output": 4,
      "cache_read": 0.19
-    },
-    "release_date": "2026-06-12"
+    }
    },
    "kimik31pro": {
     "deprecated": false,
@@ -221,13 +195,11 @@
     "name": "Kimi K3.1 Pro",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 2,
      "output": 10,
      "cache_read": 0.2
-    },
-    "release_date": "2026-10-23"
+    }
    },
    "deepseekv4pro": {
     "deprecated": false,
@@ -237,13 +209,11 @@
     "name": "DeepSeek V4 Pro",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 2,
      "output": 4,
      "cache_read": 0.5
-    },
-    "release_date": "2026-08-13"
+    }
    },
    "deepseekv4flash": {
     "deprecated": true,
@@ -253,13 +223,11 @@
     "name": "DeepSeek V4 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.15,
      "output": 0.6,
      "cache_read": 0.003
-    },
-    "release_date": "2026-04-24"
+    }
    },
    "glm5": {
     "deprecated": true,
@@ -269,13 +237,11 @@
     "name": "GLM-5",
     "reasoning": true,
     "tool_call": true,
-    "context": 200000,
     "cost": {
      "input": 1,
      "output": 3.2,
      "cache_read": 0.2
-    },
-    "release_date": "2026-02-12"
+    }
    },
    "glm53flashx": {
     "deprecated": false,
@@ -285,13 +251,11 @@
     "name": "GLM-5.3-FlashX",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.37,
      "output": 1.25,
      "cache_read": 0.075
-    },
-    "release_date": "2026-08-26"
+    }
    },
    "hy3": {
     "deprecated": true,
@@ -301,14 +265,12 @@
     "name": "Hy3",
     "reasoning": true,
     "tool_call": true,
-    "context": 256000,
     "cost": {
      "input": 0,
      "output": 0,
      "cache_read": 0,
      "cache_write": 0
-    },
-    "release_date": "2026-07-06"
+    }
    },
    "hy4": {
     "deprecated": false,
@@ -318,13 +280,11 @@
     "name": "Hy4",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0.834,
      "output": 2.501,
      "cache_read": 0.042
-    },
-    "release_date": "2026-11-04"
+    }
    },
    "hy4preview": {
     "deprecated": false,
@@ -334,13 +294,11 @@
     "name": "Hy4 preview",
     "reasoning": true,
     "tool_call": true,
-    "context": 1024000,
     "cost": {
      "input": 0.834,
      "output": 2.501,
      "cache_read": 0.042
-    },
-    "release_date": "2026-08-28"
+    }
    },
    "mimov26flash": {
     "deprecated": false,
@@ -350,13 +308,11 @@
     "name": "MiMo-V2.6-Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0.14,
      "output": 0.28,
      "cache_read": 0.0028
-    },
-    "release_date": "2026-09-22"
+    }
    },
    "fuguultra": {
     "deprecated": false,
@@ -366,13 +322,11 @@
     "name": "Fugu Ultra",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 5,
      "output": 30,
      "cache_read": 0.5
-    },
-    "release_date": "2026-06-15"
+    }
    },
    "claudehaiku45": {
     "deprecated": true,
@@ -382,14 +336,12 @@
     "name": "Claude 4.5 Haiku",
     "reasoning": true,
     "tool_call": true,
-    "context": 200000,
     "cost": {
      "input": 1.058,
      "output": 5.29,
      "cache_read": 0.1058,
      "cache_write": 1.3225
-    },
-    "release_date": "2025-10-15"
+    }
    },
    "claudefable51": {
     "deprecated": false,
@@ -399,14 +351,12 @@
     "name": "Claude Fable 5.1",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 10,
      "output": 50,
      "cache_read": 0.25,
      "cache_write": 12.5
-    },
-    "release_date": "2026-09-01"
+    }
    },
    "claudeopus5": {
     "deprecated": true,
@@ -416,14 +366,12 @@
     "name": "Claude Opus 5",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 5,
      "output": 25,
      "cache_read": 0.5,
      "cache_write": 6.25
-    },
-    "release_date": "2026-07-24"
+    }
    },
    "claudeopus55": {
     "deprecated": false,
@@ -433,14 +381,12 @@
     "name": "Claude Opus 5.5",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 4,
      "output": 20,
      "cache_read": 0.2,
      "cache_write": 5
-    },
-    "release_date": "2026-09-22"
+    }
    },
    "claudeopus48": {
     "deprecated": true,
@@ -450,14 +396,12 @@
     "name": "Claude Opus 4.8",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 5,
      "output": 25,
      "cache_read": 0.5,
      "cache_write": 6.25
-    },
-    "release_date": "2026-05-28"
+    }
    },
    "claudeopus47": {
     "deprecated": true,
@@ -467,14 +411,12 @@
     "name": "Claude Opus 4.7",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 5,
      "output": 25,
      "cache_read": 0.5,
      "cache_write": 6.25
-    },
-    "release_date": "2026-04-16"
+    }
    },
    "claudesonnet5": {
     "deprecated": true,
@@ -484,14 +426,12 @@
     "name": "Claude Sonnet 5",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 2,
      "output": 10,
      "cache_read": 0.2,
      "cache_write": 2.5
-    },
-    "release_date": "2026-06-30"
+    }
    },
    "claudesonnet46": {
     "deprecated": false,
@@ -501,14 +441,12 @@
     "name": "Claude Sonnet 4.6",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 3,
      "output": 15,
      "cache_read": 0.3,
      "cache_write": 3.75
-    },
-    "release_date": "2026-02-17"
+    }
    },
    "claudehaiku55": {
     "deprecated": false,
@@ -518,7 +456,6 @@
     "name": "Claude Haiku 5.5",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.1,
      "output": 0.5,
@@ -536,8 +473,7 @@
        }
       }
      ]
-    },
-    "release_date": "2026-10-07"
+    }
    },
    "claudesonnet55": {
     "deprecated": false,
@@ -547,14 +483,12 @@
     "name": "Claude Sonnet 5.5",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 2,
      "output": 10,
      "cache_read": 0.1,
      "cache_write": 2.5
-    },
-    "release_date": "2026-09-28"
+    }
    },
    "claudefable5": {
     "deprecated": true,
@@ -564,14 +498,12 @@
     "name": "Claude Fable 5",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 10,
      "output": 50,
      "cache_read": 1,
      "cache_write": 12.5
-    },
-    "release_date": "2026-06-09"
+    }
    },
    "inklingsmall": {
     "deprecated": true,
@@ -581,13 +513,11 @@
     "name": "Inkling Small",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.5,
      "output": 1.2,
      "cache_read": 0.1
-    },
-    "release_date": "2026-07-30"
+    }
    },
    "inkling": {
     "deprecated": true,
@@ -597,13 +527,11 @@
     "name": "Inkling",
     "reasoning": true,
     "tool_call": true,
-    "context": 256000,
     "cost": {
      "input": 1,
      "output": 4.05,
      "cache_read": 0.17
-    },
-    "release_date": "2026-07-15"
+    }
    },
    "gemini37flash": {
     "deprecated": true,
@@ -613,14 +541,12 @@
     "name": "Gemini 3.7 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 1.5,
      "output": 7.5,
      "cache_read": 0.15,
      "cache_write": 0.08334
-    },
-    "release_date": "2026-08-13"
+    }
    },
    "gemini38flash": {
     "deprecated": false,
@@ -630,13 +556,11 @@
     "name": "Gemini 3.8 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 1.5,
      "output": 7.5,
      "cache_read": 0.15
-    },
-    "release_date": "2026-09-02"
+    }
    },
    "gemini31flashlitepreview": {
     "deprecated": true,
@@ -646,14 +570,12 @@
     "name": "Gemini 3.1 Flash Lite Preview",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.2645,
      "output": 1.587,
      "cache_read": 0.02645,
      "cache_write": 0.088167
-    },
-    "release_date": "2026-03-03"
+    }
    },
    "gemini36flash": {
     "deprecated": true,
@@ -663,13 +585,11 @@
     "name": "Gemini 3.6 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 1.5,
      "output": 7.5,
      "cache_read": 0.15
-    },
-    "release_date": "2026-07-21"
+    }
    },
    "gpt56terra": {
     "deprecated": true,
@@ -679,7 +599,6 @@
     "name": "GPT-5.6 Terra",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 2,
      "output": 12,
@@ -703,8 +622,7 @@
       "cache_read": 0.4,
       "cache_write": 5
      }
-    },
-    "release_date": "2026-07-09"
+    }
    },
    "gpt61terra": {
     "deprecated": false,
@@ -714,7 +632,6 @@
     "name": "GPT-6.1 Terra",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 1,
      "output": 5,
@@ -738,8 +655,7 @@
       "cache_read": 0.1,
       "cache_write": 2.5
      }
-    },
-    "release_date": "2026-10-26"
+    }
    },
    "gpt54": {
     "deprecated": true,
@@ -749,14 +665,12 @@
     "name": "GPT-5.4",
     "reasoning": true,
     "tool_call": true,
-    "context": 400000,
     "cost": {
      "input": 2.5,
      "output": 15,
      "cache_read": 0.25,
      "cache_write": 0
-    },
-    "release_date": "2026-03-05"
+    }
    },
    "gpt55": {
     "deprecated": true,
@@ -766,14 +680,12 @@
     "name": "GPT-5.5",
     "reasoning": true,
     "tool_call": true,
-    "context": 400000,
     "cost": {
      "input": 5,
      "output": 30,
      "cache_read": 0.5,
      "cache_write": 0
-    },
-    "release_date": "2026-04-23"
+    }
    },
    "gpt6luna": {
     "deprecated": false,
@@ -783,7 +695,6 @@
     "name": "GPT-6 Luna",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 0.1,
      "output": 0.5,
@@ -807,8 +718,7 @@
       "cache_read": 0.02,
       "cache_write": 0.25
      }
-    },
-    "release_date": "2026-09-22"
+    }
    },
    "gpt54mini": {
     "deprecated": true,
@@ -818,14 +728,12 @@
     "name": "GPT-5.4 mini",
     "reasoning": true,
     "tool_call": true,
-    "context": 400000,
     "cost": {
      "input": 0.75,
      "output": 4.5,
      "cache_read": 0.075,
      "cache_write": 0
-    },
-    "release_date": "2026-03-17"
+    }
    },
    "gpt53codex": {
     "deprecated": true,
@@ -835,14 +743,12 @@
     "name": "GPT-5.3 Codex",
     "reasoning": true,
     "tool_call": true,
-    "context": 400000,
     "cost": {
      "input": 2,
      "output": 8,
      "cache_read": 0.5,
      "cache_write": 0
-    },
-    "release_date": "2026-02-05"
+    }
    },
    "gpt56luna": {
     "deprecated": true,
@@ -852,7 +758,6 @@
     "name": "GPT-5.6 Luna",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 0.2,
      "output": 1.2,
@@ -876,8 +781,7 @@
       "cache_read": 0.04,
       "cache_write": 0.5
      }
-    },
-    "release_date": "2026-07-09"
+    }
    },
    "gpt6astra": {
     "deprecated": false,
@@ -887,7 +791,6 @@
     "name": "GPT-6 Astra",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 10,
      "output": 50,
@@ -911,8 +814,7 @@
       "cache_read": 2,
       "cache_write": 25
      }
-    },
-    "release_date": "2026-09-04"
+    }
    },
    "gpt6sol": {
     "deprecated": false,
@@ -922,7 +824,6 @@
     "name": "GPT-6 Sol",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 2,
      "output": 10,
@@ -946,8 +847,7 @@
       "cache_read": 0.4,
       "cache_write": 5
      }
-    },
-    "release_date": "2026-09-22"
+    }
    },
    "gpt61sol": {
     "deprecated": false,
@@ -957,7 +857,6 @@
     "name": "GPT-6.1 Sol",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 2,
      "output": 10,
@@ -981,8 +880,7 @@
       "cache_read": 0.2,
       "cache_write": 5
      }
-    },
-    "release_date": "2026-09-29"
+    }
    },
    "gpt56sol": {
     "deprecated": true,
@@ -992,7 +890,6 @@
     "name": "GPT-5.6 Sol",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 5,
      "output": 30,
@@ -1016,8 +913,7 @@
       "cache_read": 1,
       "cache_write": 12.5
      }
-    },
-    "release_date": "2026-07-09"
+    }
    },
    "deepseekv4flashvisionexp": {
     "deprecated": true,
@@ -1027,13 +923,11 @@
     "name": "DeepSeek V4 Flash Vision Exp",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.15,
      "output": 0.6,
      "cache_read": 0.003
-    },
-    "release_date": "2026-08-21"
+    }
    },
    "deepseekv41flash": {
     "deprecated": false,
@@ -1043,13 +937,11 @@
     "name": "DeepSeek V4.1 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.3,
      "output": 1.2,
      "cache_read": 0.006
-    },
-    "release_date": "2026-10-17"
+    }
    },
    "mimov25": {
     "deprecated": true,
@@ -1059,13 +951,11 @@
     "name": "MiMo V2.5",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.14812,
      "output": 0.29624,
      "cache_read": 0.002962
-    },
-    "release_date": "2026-04-22"
+    }
    },
    "mimov25pro": {
     "deprecated": true,
@@ -1075,13 +965,11 @@
     "name": "MiMo V2.5 Pro",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.46023,
      "output": 0.92046,
      "cache_read": 0.003809
-    },
-    "release_date": "2026-04-22"
+    }
    },
    "musespark11": {
     "deprecated": false,
@@ -1091,13 +979,11 @@
     "name": "Muse Spark 1.1",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 1.25,
      "output": 4.25,
      "cache_read": 0.15
-    },
-    "release_date": "2026-04-08"
+    }
    },
    "musespark12": {
     "deprecated": false,
@@ -1107,13 +993,11 @@
     "name": "Muse Spark 1.2",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 1.25,
      "output": 4.25,
      "cache_read": 0.15
-    },
-    "release_date": "2026-08-05"
+    }
    },
    "musespark13": {
     "deprecated": false,
@@ -1123,13 +1007,11 @@
     "name": "Muse Spark 1.3",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 1.25,
      "output": 4.25,
      "cache_read": 0.15
-    },
-    "release_date": "2026-09-02"
+    }
    },
    "qwen38max": {
     "deprecated": false,
@@ -1139,14 +1021,12 @@
     "name": "Qwen3.8 Max",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 2,
      "output": 6,
      "cache_read": 0.25,
      "cache_write": 2.5
-    },
-    "release_date": "2026-08-03"
+    }
    },
    "qwen38maxprime": {
     "deprecated": false,
@@ -1156,13 +1036,11 @@
     "name": "Qwen 3.8 Max Prime",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 4,
      "output": 12,
      "cache_read": 0.5
-    },
-    "release_date": "2026-09-23"
+    }
    },
    "qwen38flash": {
     "deprecated": false,
@@ -1172,13 +1050,11 @@
     "name": "Qwen3.8 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.16,
      "output": 0.47,
      "cache_read": 0.016
-    },
-    "release_date": "2026-08-26"
+    }
    },
    "step5preview": {
     "deprecated": true,
@@ -1188,13 +1064,11 @@
     "name": "Step 5 Preview",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 1,
      "output": 2.7,
      "cache_read": 0.05
-    },
-    "release_date": "2026-09-16"
+    }
    },
    "qwen36maxpreview": {
     "deprecated": true,
@@ -1204,13 +1078,11 @@
     "name": "Qwen3.6 Max Preview",
     "reasoning": true,
     "tool_call": true,
-    "context": 245800,
     "cost": {
      "input": 1.32,
      "output": 7.9,
      "cache_read": 0.132
-    },
-    "release_date": "2026-04-20"
+    }
    },
    "qwen37flash": {
     "deprecated": false,
@@ -1220,13 +1092,11 @@
     "name": "Qwen3.7 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.03,
      "output": 0.13,
      "cache_read": 0.006
-    },
-    "release_date": "2026-07-15"
+    }
    },
    "qwen37plus": {
     "deprecated": false,
@@ -1236,13 +1106,11 @@
     "name": "Qwen3.7 Plus",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.4,
      "output": 1.6,
      "cache_read": 0.08
-    },
-    "release_date": "2026-06-02"
+    }
    },
    "kimik25": {
     "deprecated": true,
@@ -1252,13 +1120,11 @@
     "name": "Kimi K2.5",
     "reasoning": true,
     "tool_call": true,
-    "context": 256000,
     "cost": {
      "input": 0.6,
      "output": 3,
      "cache_read": 0.1
-    },
-    "release_date": "2026-01-27"
+    }
    },
    "qwen36plus": {
     "deprecated": true,
@@ -1268,13 +1134,11 @@
     "name": "Qwen3.6 Plus",
     "reasoning": true,
     "tool_call": true,
-    "context": 200000,
     "cost": {
      "input": 0.5,
      "output": 3,
      "cache_read": 0.1
-    },
-    "release_date": "2026-04-02"
+    }
    },
    "qwen38omniflash": {
     "deprecated": false,
@@ -1284,13 +1148,11 @@
     "name": "Qwen3.8 Omni Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.15,
      "output": 0.47,
      "cache_read": 0.016
-    },
-    "release_date": "2026-09-17"
+    }
    },
    "qwen37max": {
     "deprecated": false,
@@ -1300,13 +1162,11 @@
     "name": "Qwen3.7 Max",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 2.5,
      "output": 7.5,
      "cache_read": 0.5
-    },
-    "release_date": "2026-05-21"
+    }
    },
    "mistrallarge4": {
     "deprecated": false,
@@ -1316,13 +1176,11 @@
     "name": "Mistral Large 4",
     "reasoning": true,
     "tool_call": true,
-    "context": 524288,
     "cost": {
      "input": 1.36,
      "output": 4.18,
      "cache_read": 0.14
-    },
-    "release_date": "2026-10-06"
+    }
    },
    "nemotron3ultra550ba55b": {
     "deprecated": true,
@@ -1332,13 +1190,11 @@
     "name": "Nemotron 3 Ultra 550B A55B",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.6,
      "output": 2.4,
      "cache_read": 0.12
-    },
-    "release_date": "2026-06-04"
+    }
    },
    "grok47": {
     "deprecated": false,
@@ -1348,7 +1204,6 @@
     "name": "Grok 4.7",
     "reasoning": true,
     "tool_call": true,
-    "context": 500000,
     "cost": {
      "input": 2,
      "output": 6,
@@ -1369,8 +1224,7 @@
       "output": 12,
       "cache_read": 1
      }
-    },
-    "release_date": "2026-09-21"
+    }
    },
    "gemini35flashlite": {
     "deprecated": false,
@@ -1380,13 +1234,11 @@
     "name": "Gemini 3.5 Flash Lite",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.3,
      "output": 2.5,
      "cache_read": 0.03
-    },
-    "release_date": "2026-07-21"
+    }
    },
    "grok45": {
     "deprecated": false,
@@ -1396,13 +1248,11 @@
     "name": "Grok 4.5",
     "reasoning": true,
     "tool_call": true,
-    "context": 500000,
     "cost": {
      "input": 2,
      "output": 6,
      "cache_read": 0.5
-    },
-    "release_date": "2026-07-08"
+    }
    },
    "grok46": {
     "deprecated": false,
@@ -1412,7 +1262,6 @@
     "name": "Grok 4.6",
     "reasoning": true,
     "tool_call": true,
-    "context": 500000,
     "cost": {
      "input": 2,
      "output": 6,
@@ -1433,8 +1282,7 @@
       "output": 12,
       "cache_read": 1
      }
-    },
-    "release_date": "2026-08-12"
+    }
    },
    "mimov26pro": {
     "deprecated": false,
@@ -1444,13 +1292,11 @@
     "name": "MiMo-V2.6-Pro",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0.435,
      "output": 0.87,
      "cache_read": 0.0036
-    },
-    "release_date": "2026-09-22"
+    }
    },
    "gemini35flash": {
     "deprecated": true,
@@ -1460,13 +1306,11 @@
     "name": "Gemini 3.5 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 1.5,
      "output": 9,
      "cache_read": 0.15
-    },
-    "release_date": "2026-05-19"
+    }
    },
    "step37flash": {
     "deprecated": true,
@@ -1476,13 +1320,11 @@
     "name": "Step 3.7 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 256000,
     "cost": {
      "input": 0.2,
      "output": 1.15,
      "cache_read": 0.04
-    },
-    "release_date": "2026-05-29"
+    }
    },
    "musewonder10": {
     "deprecated": false,
@@ -1492,13 +1334,11 @@
     "name": "Muse Wonder",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 4,
      "output": 20,
      "cache_read": 0.2
-    },
-    "release_date": "2026-10-12"
+    }
    },
    "glm52fast": {
     "deprecated": false,
@@ -1508,13 +1348,11 @@
     "name": "GLM-5.2-Fast",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 3,
      "output": 10.25,
      "cache_read": 0.5
-    },
-    "release_date": "2026-06-13"
+    }
    },
    "gemini4argon": {
     "deprecated": false,
@@ -1524,13 +1362,11 @@
     "name": "Gemini 4 Argon",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 2,
      "output": 10,
      "cache_read": 0.1
-    },
-    "release_date": "2026-10-13"
+    }
    },
    "musesparkopen": {
     "deprecated": false,
@@ -1540,13 +1376,11 @@
     "name": "Muse Spark Open",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 1.25,
      "output": 4.25,
      "cache_read": 0.15
-    },
-    "release_date": "2026-10-15"
+    }
    },
    "gemini31flashlite": {
     "deprecated": false,
@@ -1556,7 +1390,6 @@
     "name": "Gemini 3.1 Flash Lite",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0.25,
      "output": 1.5,
@@ -1564,8 +1397,7 @@
      "cache_read": 0.025,
      "cache_write": 0.083333,
      "input_audio": 0.5
-    },
-    "release_date": "2026-03-03"
+    }
    },
    "longcat25free": {
     "deprecated": false,
@@ -1575,13 +1407,11 @@
     "name": "LongCat 2.5 Free",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0,
      "output": 0,
      "cache_read": 0
-    },
-    "release_date": "2026-11-02"
+    }
    },
    "longcat25previewfree": {
     "deprecated": true,
@@ -1591,13 +1421,11 @@
     "name": "LongCat 2.5 Preview Free",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0,
      "output": 0,
      "cache_read": 0
-    },
-    "release_date": "2026-09-25"
+    }
    },
    "beamfree": {
     "deprecated": false,
@@ -1607,13 +1435,11 @@
     "name": "Beam 1.0",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0,
      "output": 0,
      "cache_read": 0
-    },
-    "release_date": "2026-10-05"
+    }
    },
    "longcat20": {
     "deprecated": false,
@@ -1623,13 +1449,11 @@
     "name": "LongCat-2.0",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.3,
      "output": 1.2,
      "cache_read": 0.006
-    },
-    "release_date": "2026-06-30"
+    }
    },
    "icemancontributorfree": {
     "deprecated": false,
@@ -1639,13 +1463,11 @@
     "name": "Iceman Contributor Free",
     "reasoning": true,
     "tool_call": true,
-    "context": 262144,
     "cost": {
      "input": 0,
      "output": 0,
      "cache_read": 0
-    },
-    "release_date": "2026-10-24"
+    }
    },
    "musespark12contributor": {
     "deprecated": false,
@@ -1655,13 +1477,11 @@
     "name": "Muse Spark 1.2 (Contributor)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0.1,
      "output": 0.2,
      "cache_read": 0.002
-    },
-    "release_date": "2026-08-05"
+    }
    },
    "musespark13contributor": {
     "deprecated": false,
@@ -1671,13 +1491,11 @@
     "name": "Muse Spark 1.3 (Contributor)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0.1,
      "output": 0.2,
      "cache_read": 0.002
-    },
-    "release_date": "2026-09-02"
+    }
    },
    "claudefable52": {
     "deprecated": false,
@@ -1687,14 +1505,12 @@
     "name": "Claude Fable 5.2",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 4.8,
      "output": 24,
      "cache_read": 0.12,
      "cache_write": 6
-    },
-    "release_date": "2026-11-09"
+    }
    },
    "mimov26proultraspeed": {
     "deprecated": false,
@@ -1704,13 +1520,11 @@
     "name": "MiMo-V2.6-Pro-UltraSpeed",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 4.35,
      "output": 8.7,
      "cache_read": 0.036
-    },
-    "release_date": "2026-09-21"
+    }
    },
    "step35flash": {
     "deprecated": true,
@@ -1720,13 +1534,11 @@
     "name": "Step 3.5 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 256000,
     "cost": {
      "input": 0.09,
      "output": 0.3,
      "cache_read": 0.02
-    },
-    "release_date": "2026-01-29"
+    }
    },
    "qwen38max0902": {
     "deprecated": false,
@@ -1736,13 +1548,11 @@
     "name": "Qwen3.8 Max 0902",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 2,
      "output": 6,
      "cache_read": 0.25
-    },
-    "release_date": "2026-09-02"
+    }
    },
    "nemotron35supervl": {
     "deprecated": false,
@@ -1752,12 +1562,10 @@
     "name": "Nemotron 3.5 Super VL 120B A12B",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0,
      "output": 0
-    },
-    "release_date": "2026-10-15"
+    }
    },
    "ornith15122b": {
     "deprecated": false,
@@ -1767,13 +1575,11 @@
     "name": "Ornith 1.5 122B",
     "reasoning": true,
     "tool_call": true,
-    "context": 262144,
     "cost": {
      "input": 0.16,
      "output": 0.64,
      "cache_read": 0.02
-    },
-    "release_date": "2026-10-20"
+    }
    },
    "deepseekv4flashlatest": {
     "deprecated": false,
@@ -1783,13 +1589,11 @@
     "name": "DeepSeek V4 Flash Latest",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0.1,
      "output": 0.6,
      "cache_read": 0.0042
-    },
-    "release_date": "2026-08-02"
+    }
    },
    "ling31flash": {
     "deprecated": false,
@@ -1799,13 +1603,11 @@
     "name": "Ling 3.1 Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 262144,
     "cost": {
      "input": 0.3,
      "output": 0.9,
      "cache_read": 0.06
-    },
-    "release_date": "2026-09-29"
+    }
    },
    "museember": {
     "deprecated": false,
@@ -1815,13 +1617,11 @@
     "name": "Muse Ember",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 0.1,
      "output": 0.5,
      "cache_read": 0.004
-    },
-    "release_date": "2026-11-11"
+    }
    },
    "deepseekv41flashfast": {
     "deprecated": false,
@@ -1831,13 +1631,11 @@
     "name": "DeepSeek V4.1 Flash Fast",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.16,
      "output": 0.58,
      "cache_read": 0.016
-    },
-    "release_date": "2026-09-10"
+    }
    },
    "deepseekv4flashfast": {
     "deprecated": false,
@@ -1847,13 +1645,11 @@
     "name": "DeepSeek V4 Flash Fast",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.28,
      "output": 0.56,
      "cache_read": 0.07
-    },
-    "release_date": "2026-04-24"
+    }
    },
    "glm53fast": {
     "deprecated": false,
@@ -1863,13 +1659,11 @@
     "name": "GLM-5.3 Fast",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 1.4,
      "output": 4.4,
      "cache_read": 0.26
-    },
-    "release_date": "2026-08-14"
+    }
    },
    "deepseekv4profast": {
     "deprecated": false,
@@ -1879,13 +1673,11 @@
     "name": "DeepSeek V4 Pro Fast",
     "reasoning": true,
     "tool_call": true,
-    "context": 1048576,
     "cost": {
      "input": 1.68,
      "output": 3.38,
      "cache_read": 0.14
-    },
-    "release_date": "2026-04-24"
+    }
    },
    "deepseekv41flashlatest": {
     "deprecated": false,
@@ -1895,13 +1687,11 @@
     "name": "deepseek-v4.1-flash-latest",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 0.135,
      "output": 0.54,
      "cache_read": 0.003
-    },
-    "release_date": "2026-10-17"
+    }
    },
    "kimik3fast": {
     "deprecated": true,
@@ -1911,13 +1701,11 @@
     "name": "Kimi K3",
     "reasoning": true,
     "tool_call": true,
-    "context": 1040384,
     "cost": {
      "input": 4.5,
      "output": 22.5,
      "cache_read": 0.45
-    },
-    "release_date": "2026-07-16"
+    }
    },
    "hy3preview": {
     "deprecated": true,
@@ -1927,13 +1715,11 @@
     "name": "Hy3 Preview",
     "reasoning": true,
     "tool_call": true,
-    "context": 256000,
     "cost": {
      "input": 0.17,
      "output": 0.566661,
      "cache_read": 0.051
-    },
-    "release_date": "2026-04-20"
+    }
    },
    "claudeopus55fast": {
     "deprecated": false,
@@ -1943,14 +1729,12 @@
     "name": "Claude Opus 5.5 Fast",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 8,
      "output": 40,
      "cache_read": 0.4,
      "cache_write": 10
-    },
-    "release_date": "2026-09-22"
+    }
    },
    "claudeopus5fast": {
     "deprecated": true,
@@ -1960,14 +1744,12 @@
     "name": "Claude Opus 5 Fast",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 10,
      "output": 50,
      "cache_read": 1,
      "cache_write": 12.5
-    },
-    "release_date": "2026-07-24"
+    }
    },
    "glm53flashfast": {
     "deprecated": false,
@@ -1977,13 +1759,11 @@
     "name": "GLM-5.3-Flash",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.3,
      "output": 1,
      "cache_read": 0.06
-    },
-    "release_date": "2026-08-26"
+    }
    },
    "kimik26fast": {
     "deprecated": true,
@@ -1993,12 +1773,10 @@
     "name": "Kimi K2.6 Fast",
     "reasoning": true,
     "tool_call": true,
-    "context": 262144,
     "cost": {
      "input": 1.655,
      "output": 8.778
-    },
-    "release_date": "2026-04-20"
+    }
    },
    "gpt56lunafast": {
     "deprecated": false,
@@ -2008,14 +1786,12 @@
     "name": "OpenAI: GPT 5.6 Luna (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 0.4,
      "output": 2.4,
      "cache_read": 0.04,
      "cache_write": 0.5
-    },
-    "release_date": "2026-07-09"
+    }
    },
    "gpt55fast": {
     "deprecated": false,
@@ -2025,13 +1801,11 @@
     "name": "OpenAI: GPT 5.5 (Fast) ($$$$)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 12.5,
      "output": 75,
      "cache_read": 1.25
-    },
-    "release_date": "2026-04-23"
+    }
    },
    "gpt54minifast": {
     "deprecated": false,
@@ -2041,13 +1815,11 @@
     "name": "OpenAI: GPT 5.4 Mini (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 400000,
     "cost": {
      "input": 1.5,
      "output": 9,
      "cache_read": 0.15
-    },
-    "release_date": "2026-03-17"
+    }
    },
    "gpt61solfast": {
     "deprecated": false,
@@ -2057,14 +1829,12 @@
     "name": "OpenAI: GPT-6.1 Sol (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 4,
      "output": 20,
      "cache_read": 0.2,
      "cache_write": 5
-    },
-    "release_date": "2026-09-29"
+    }
    },
    "gpt6solfast": {
     "deprecated": false,
@@ -2074,14 +1844,12 @@
     "name": "OpenAI: GPT-6 Sol (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 4,
      "output": 20,
      "cache_read": 0.4,
      "cache_write": 5
-    },
-    "release_date": "2026-09-22"
+    }
    },
    "gpt61terrafast": {
     "deprecated": false,
@@ -2091,14 +1859,12 @@
     "name": "OpenAI: GPT-6.1 Terra (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 2,
      "output": 10,
      "cache_read": 0.1,
      "cache_write": 2.5
-    },
-    "release_date": "2026-10-26"
+    }
    },
    "gpt6lunafast": {
     "deprecated": false,
@@ -2108,14 +1874,12 @@
     "name": "OpenAI: GPT-6 Luna (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 0.2,
      "output": 1,
      "cache_read": 0.02,
      "cache_write": 0.25
-    },
-    "release_date": "2026-09-22"
+    }
    },
    "gpt56terrafast": {
     "deprecated": false,
@@ -2125,14 +1889,12 @@
     "name": "OpenAI: GPT 5.6 Terra (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 4,
      "output": 24,
      "cache_read": 0.4,
      "cache_write": 5
-    },
-    "release_date": "2026-07-09"
+    }
    },
    "gpt54fast": {
     "deprecated": false,
@@ -2142,13 +1904,11 @@
     "name": "OpenAI: GPT 5.4 (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 5,
      "output": 30,
      "cache_read": 0.5
-    },
-    "release_date": "2026-03-05"
+    }
    },
    "gpt6astrafast": {
     "deprecated": false,
@@ -2158,14 +1918,12 @@
     "name": "OpenAI: GPT-6 Astra (Fast) ($$$$)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 20,
      "output": 100,
      "cache_read": 2,
      "cache_write": 25
-    },
-    "release_date": "2026-09-04"
+    }
    },
    "gpt53codexfast": {
     "deprecated": false,
@@ -2175,13 +1933,11 @@
     "name": "OpenAI: GPT 5.3 Codex (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 400000,
     "cost": {
      "input": 3.5,
      "output": 28,
      "cache_read": 0.35
-    },
-    "release_date": "2026-02-05"
+    }
    },
    "gpt56solfast": {
     "deprecated": false,
@@ -2191,14 +1947,12 @@
     "name": "OpenAI: GPT 5.6 Sol (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1050000,
     "cost": {
      "input": 8,
      "output": 40,
      "cache_read": 0.8,
      "cache_write": 10
-    },
-    "release_date": "2026-07-09"
+    }
    },
    "ling31flash1019": {
     "deprecated": false,
@@ -2208,13 +1962,11 @@
     "name": "inclusionAI: Ling 3.1 Flash 1019",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 0.3,
      "output": 0.9,
      "cache_read": 0.06
-    },
-    "release_date": "2026-10-30"
+    }
    },
    "claudefable52fast": {
     "deprecated": false,
@@ -2224,14 +1976,12 @@
     "name": "Claude Fable 5.2 (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 16,
      "output": 80,
      "cache_read": 0.4,
      "cache_write": 20
-    },
-    "release_date": "2026-11-09"
+    }
    },
    "claudeopus48fast": {
     "deprecated": false,
@@ -2241,14 +1991,12 @@
     "name": "Claude Opus 4.8 (Fast)",
     "reasoning": true,
     "tool_call": true,
-    "context": 1000000,
     "cost": {
      "input": 10,
      "output": 50,
      "cache_read": 1,
      "cache_write": 12.5
-    },
-    "release_date": "2026-05-28"
+    }
    }
   }
  },
