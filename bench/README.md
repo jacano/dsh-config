@@ -16,7 +16,7 @@ python bench/bench.py test               # models.dev cannot move a price
 | | |
 | --- | --- |
 | `data/plans.json` | the plans, what they publish, and the catalogue they price from |
-| `data/models.json` | what a model is (models.dev), how good it is (AA), and what it does in two executed benchmarks (Forcebench, Terminal-Bench) |
+| `data/models.json` | what a model is (models.dev) and what it does on Terminal-Bench |
 | `models-policy.yml` | the gates, what is admitted, what is excluded and why |
 | `models.csv` | the measured rows, medians of three rounds |
 
@@ -30,7 +30,7 @@ prices   every model a provider sells, in every lane, with that plan's discount
    │     or credit multiplier — and what the plan costs per token once the blend,
    │     the promo and the window are folded in          (bench.py plan)
    ↓
-fold 1   price → identity (models.dev: reason, tools) → capability (AA) → policy
+fold 1   price → identity (models.dev: reason, tools) → Terminal-Bench → policy
    │     free, calls no model                            (bench.py select)
    ↓
 fold 2   speed, latency, cache, prefill, retention, errors, tool calls
@@ -93,34 +93,26 @@ What fold 1 will not do:
   [`models-policy.yml`](models-policy.yml), and a reason there can be scoped to one
   provider, because a measurement on one route says nothing about another.
 
-**Three capability axes, one gate.** AA's index answers "how good in general" and
-is what `capability_min` is scaled to. The other two answer narrower questions and
-are printed beside it:
+**One capability axis.** Terminal-Bench 4.1 (`tb`) is the only scale here: it runs
+terminal tasks and grades whether they got done, and it ranks model **and agent**
+— "38,5 with Claude Code" is a different claim from "38,5 alone", which is why the
+agent is stored with the number. `tbench_min` is the floor, and a model the board
+does not rank is not bought.
 
-- `fb` — Forcebench: 272 Salesforce tasks (Apex, Flow, LWC, SOQL) executed against
-  hidden tests in a scratch org, with error bars. Correlates 0,87 with AA where
-  they overlap: a second opinion, nowhere near a substitute.
-- `tb` — Terminal-Bench 4.1: terminal work, ranked per model **and agent** ("38,5
-  with Claude Code" is a different claim from "38,5 alone"), best run per model.
+AA's index and Forcebench were both in here until 2026-11-15 and both were removed,
+not because they were wrong but because a number that decides nothing ends up being
+quoted as if it did. The menu's order never changed: the four rows below are the
+same four. What went away is a second and third opinion nobody was gating on.
 
-Neither is the same scale and no gate reads either. They are there to be read next
-to AA when a decision is close, and to catch the case that motivated them: a model
-whose maker claimed parity that an executed benchmark did not confirm.
-
-A model with no AA score is a question, not a verdict — unless the policy says it
-only buys what AA can rank, which it does (`require_aa: 1`). Then the row is out
-with that reason written on it: a purchase rule, not a judgement about the model.
-Set the flag to 0 and the questions come back.
-
-A model AA does not rank can still be bought, if the owner writes the number down
-in `capability_overrides:` with its basis. The row prints with a `*` and the basis
-under the table, so a borrowed score never passes for a measured one.
+A model the board does not rank is out, with that reason printed on the row: a
+purchase rule, not a judgement about the model. A row that is *old and unranked*
+is the same case and needs no second rule.
 
 Missing data is never a reason to *exclude a model*, and the program enforces it: an
 entry in `excluded:` whose reason is a gap is ignored with a warning, so the row
 surfaces as a question instead of disappearing. A datum that is absent cannot be a
 verdict. Refusing to buy what cannot be compared is a different thing, and it is
-written as a gate (`require_aa`), not as a verdict on the model.
+written as a gate (`tbench_min`), not as a verdict on the model.
 
 ## measure — fold 2
 
@@ -146,7 +138,7 @@ Claude rows go through `/messages` with a `cache_control` breakpoint: they refus
 
 ```bash
 python bench/bench.py measure                    # the stored table against the gates
-python bench/bench.py measure --model <id> --capability 30 --cost 0.0013
+python bench/bench.py measure --model <id> --tbench 38.5 --cost 0.0013
 python bench/bench.py measure --provider opendesign --model deepseek-v4.1-flash
 ```
 
@@ -165,7 +157,7 @@ numbers meaningless; that mistake was made once.
 | What does the plan cost, and what does it give? | `commandcode.ai/pricing`, `open-design.ai` | `data/plans.json` |
 | What does a token cost on that provider? | Command Code: its own catalogue. OpenDesign and OpenCode: their own price lists | `data/plans.json` |
 | Does it reason? Does it call tools? Context? | models.dev, a third party | `data/models.json` |
-| How good is it? | Artificial Analysis | `data/models.json` |
+| Can it do the work? | Terminal-Bench 4.1, executed and graded | `data/models.json` |
 | How does it behave on the wire? | measured here | `models.csv` |
 
 The provider is never asked to grade itself. Prices do come from the provider,
@@ -193,7 +185,7 @@ looking at nothing, that turning a *signal* off does move verdicts.
 3. **Live, only for rows fold 1 marks `run`:**
 
    ```bash
-   python bench/bench.py measure --model <id> --capability <AA score> --cost <usd per turn>
+   python bench/bench.py measure --model <id> --tbench <board score> --cost <usd per turn>
    ```
 
 4. **If it clears everything:** append the row to `models.csv`, add the id to
@@ -207,9 +199,10 @@ calls, concurrency — use [jacano/llm-endpoint-bench](https://github.com/jacano
 ## Re-baselining
 
 The gates are the envelope of the admitted rows. When the source of a gate
-changes, the floor moves with it: the capability floor went from 38 to 30,0 the
-day it stopped coming from the catalog and started coming from AA, because the two
-scales are not the same thing and pretending otherwise would have admitted nothing.
+changes, the floor moves with it: it went 38 -> 30,0 when the catalogue's claim was
+replaced by AA's index, and 30,0 -> 38,0 when AA was replaced by Terminal-Bench.
+Each move is a different scale, and pretending otherwise would have admitted
+nothing.
 
 ## Still open
 

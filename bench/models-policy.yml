@@ -10,51 +10,44 @@
 # The second is `python bench/bench.py measure`: it measures the survivors, and that is the
 # only part that spends tokens.
 #
-# Nothing here trusts the shop. Capability comes from Artificial Analysis
-# (`capability.json`), identity and tool support from models.dev
-# (`models.dev.json`), and prices from each provider's own published catalogue.
-# A provider grading its own product is not evidence.
+# Nothing here trusts the shop. Capability comes from Terminal-Bench 4.1, which
+# runs the tasks and grades whether they got done; identity and tool support from
+# models.dev; prices from each provider's own published catalogue. A provider
+# grading its own product is not evidence.
 
 version: 1
 updated: 2026-11-15
-
-# A number the sources cannot give. AA does not rank every model a shop sells,
-# and a row this repo cannot compare is a row it cannot gate on - so the owner
-# decides, in writing, and the row becomes measurable like any other. Score is
-# on the AA scale by construction; the basis is what makes it an inference and
-# not a measurement.
-capability_overrides:
-  # Empty as of 2026-11-15. The one entry it held - ornith-1-5-122b at 32,0,
-  # anchored on the maker's own peer table - did not survive the only independent
-  # run that exists: Forcebench scores it 21,2 [16,7-26,0] on 272 executed
-  # Salesforce tasks, against 59,1 for DeepSeek V4.1 Flash on the same local
-  # quantized setup. A number the owner writes down can be withdrawn by evidence;
-  # that is what writing its basis down is for.
 
 criteria:
   # Thresholds are the envelope of the admitted set: no row may be worse than the
   # current worst on any axis, so nothing enters without a threshold moving on
   # purpose, in a commit that names the number.
   #
-  # The capability floor was re-based on 2026-11-11 when the source changed: AA
-  # scores DeepSeek V4.1 Flash at 30.1 where the catalog claimed 39.5, and the old
-  # 38 was measuring an index that no longer exists.
+  # The capability floor moved on 2026-11-15, when the source changed from AA's
+  # index to Terminal-Bench's resolution rate. One scale replaced another, so the
+  # number moved with it (30,0 -> 38,0) and the two are not comparable: exactly
+  # the mistake this file is supposed to prevent.
   method: "price, reasoning and tools, then the agentic fold; synthetic metrics inform, they do not veto"
 
   phases:
     static:
       # Two sources, two questions, no overlap.
       #
-      # Artificial Analysis answers "how good is it": one index, one scale, and a
-      # row it has not scored is not assumed good. The floor sits just under the
-      # row the menu runs on, which is what an envelope means.
+      # Terminal-Bench 4.1 answers "can it do the work": terminal tasks that are
+      # executed and graded by whether they got done, ranked per model and agent
+      # ("38,5 with Claude Code" is a different claim from "38,5 alone"). It is
+      # the only capability scale here. A model the board does not rank is not
+      # bought - a purchase rule, not a verdict about the model.
       #
       # models.dev answers "what is it": whether it reasons, whether it calls
-      # tools, its context and window, its canonical id across providers, and
-      # what a token costs. It carries no score and is not asked for one.
+      # tools, its context and window, its canonical id across providers. It
+      # carries no score and is not asked for one.
       #
       # The provider is asked for neither: a shop grades its own product.
-      capability_min: 30.0
+      #
+      # The floor is the envelope of what the menu runs on: DeepSeek V4.1 Flash
+      # resolves 38,5 %, and nothing enters under it.
+      tbench_min: 38.0
       # Money, not usage. A plan that sells $100 of usage for $10 makes a dollar
       # cost ten cents; OpenDesign sells $220 for $10, so 4.5. Gating on usage
       # flatters prepaid routes and punishes the generous plans, which is the
@@ -64,11 +57,6 @@ criteria:
       # does neither, and a row nobody has described waits for the owner instead
       # of being guessed at. Writing them as flags invited the reader to think
       # they could be turned off, so they are not written.
-      # Only rows AA can rank are worth buying here. Not because an unranked
-      # model is bad - AA covers a subset, and its silence is not a verdict on
-      # capability - but because a number this repo cannot compare is a number
-      # it cannot gate on, and the floor above is an AA number.
-      require_aa: 1
 
     measured:
       # These are floors for "broken", not targets for "good". A real agent run
@@ -78,7 +66,7 @@ criteria:
       # fragments — it rarely puts 60k into one call. The time goes on reasoning.
       #
       # So the 60k gates are gone from here. They are still printed by
-      # evaluate.py, as information, and fold 3 decides.
+      # `bench.py measure`, as information, and fold 3 decides.
       speed_min: 95
       latency_max: 2.60
       cache_min: 0.80
@@ -138,7 +126,7 @@ excluded:
   - { id: moonshotai/Kimi-K3.1-Pro, provider: command-code, reason: "measured: 32 tok/s" }
   - { id: xiaomi/mimo-v2.6-pro, provider: command-code, reason: "measured: 26 tok/s, 8.4 s to start" }
   # Capability, not coverage: the model is on three routes and priced at 0,00029 here.
-  - { id: ornith-1-5-122b, reason: "owner, 2026-11-15: Forcebench 21,2 [16,7-26,0] on 272 executed tasks, against 59,1 for DeepSeek V4.1 Flash on the same local quantized run; the maker's parity claim does not survive it" }
+  - { id: ornith-1-5-122b, reason: "not on Terminal-Bench; when Forcebench was still in use it scored it 21,2 [16,7-26,0] against 59,1 for DeepSeek V4.1 Flash, so the maker's parity claim did not survive the one independent run" }
   - { id: deepseek/deepseek-v4.1-flash, provider: command-code, reason: "measured on this lane: 9-47 s to start" }
   - { id: Qwen/Qwen3.8-Flash, provider: command-code, reason: "measured: HTTP 524, the route does not answer" }
 

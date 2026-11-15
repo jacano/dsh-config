@@ -16,7 +16,7 @@ Three questions, in the order they cost money:
   plan     what a plan really charges per million tokens: the fee, the model's
            multiplier, the promo inside its window, and the peak share of the
            week. Free, calls no model.
-  select   fold 1: price, identity (models.dev), capability (AA), then the policy.
+  select   fold 1: price, identity (models.dev), Terminal-Bench, then the policy.
            Free, calls no model.
   measure  fold 2: speed, latency, cache, prefill, retention, errors, tool calls.
            fold 3: agentic.py's task — a real bug, a real repository, pytest.
@@ -61,7 +61,6 @@ FX = 6.714             # CNY per USD, the rate a Chinese price list is read at
 DAYS = 30.0            # a month, for the windows
 LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
 UA = {"User-Agent": "curl/8.5.0"}
-AA_URL = "https://artificialanalysis.ai/models"
 MODELS_URL = "https://models.dev/api.json"
 GATEWAYS = {
     "command-code": ("https://api.commandcode.ai/provider/v1", "COMMANDCODE_API_KEY"),
@@ -102,6 +101,12 @@ def by_build(table: dict, probes: list[str]) -> dict | None:
             if rest.isdigit():
                 return rec
     return None
+
+
+def board_score(board: dict, model_id: str) -> float | None:
+    """What the board gives this model, or nothing at all if it does not rank it."""
+    hit = by_label(board, model_id, "")
+    return None if hit is None else hit["score"]
 
 
 def by_label(table: dict, model_id: str, catalog_slug: str) -> dict | None:
@@ -157,9 +162,8 @@ def plans() -> dict:
 
 
 def catalogue() -> dict:
-    """slug -> the three things fold 1 asks of a price row."""
-    return {slug: {"name": row["name"], "capability": row.get("intelligence"),
-                   "cost": row.get("turn")}
+    """slug -> the two things fold 1 asks of a price row."""
+    return {slug: {"name": row["name"], "cost": row.get("turn")}
             for slug, row in plans()["catalog"].items()}
 
 
@@ -167,8 +171,9 @@ def identities() -> dict:
     return read_json(MODELS_FILE)["models.dev"]["models"]
 
 
-def scores() -> dict:
-    return read_json(MODELS_FILE)["capability"]["models"]
+def tbench() -> dict:
+    """The board: model + agent, one row per model, the best run it got."""
+    return read_json(MODELS_FILE)["tbench"]["models"]
 
 
 def load_policy() -> tuple[dict, set]:
@@ -197,22 +202,6 @@ def load_policy() -> tuple[dict, set]:
             admitted.add(m.group(1))
     return gates, admitted
 
-
-def capability_overrides() -> dict[str, tuple[float, str]]:
-    """Scores the sources cannot give, written down by the owner with a basis."""
-    out: dict[str, tuple[float, str]] = {}
-    inside = False
-    for line in POLICY.read_text(encoding="utf-8").splitlines():
-        if line.startswith("capability_overrides:"):
-            inside = True
-            continue
-        if inside and line and not line.startswith((" ", "#")):
-            break
-        m = re.match(r"\s*-?\s*\{id:\s*([^,]+),\s*score:\s*([\d.]+)", line)
-        if inside and m:
-            basis = re.search(r'basis:\s*"([^"]*)"', line)
-            out[norm(m.group(1))] = (float(m.group(2)), basis.group(1) if basis else "")
-    return out
 
 # --------------------------------------------------------------------------- refresh
 
@@ -456,119 +445,6 @@ def build_models(store: dict) -> dict:
     }
 
 
-def aa_joined(raw: str) -> str:
-    text = re.sub(r'"\]\)</script><script>self\.__next_f\.push\(\[1,"', "", raw)
-    return text.replace('\\"', '"').replace("\\\\", "\\")
-
-
-def aa_page_record(text: str, slug: str) -> dict | None:
-    at = text.find(f'"slug":"{slug}"')
-    while at >= 0:
-        window = text[at:at + 4000]
-        score = re.search(r'"intelligenceIndex":([\d.]+)', window)
-        flag = re.search(r'"isReasoning":(true|false)', window)
-        if score:
-            return {"aa_slug": slug, "intelligence": float(score.group(1)),
-                    "is_reasoning": (flag.group(1) == "true") if flag else None}
-        at = text.find(f'"slug":"{slug}"', at + 1)
-    return None
-
-
-def build_capability(store: dict) -> dict:
-    text = aa_joined(fetch(AA_URL))
-    at = text.find('"initialModels":[')
-    if at < 0:
-        raise SystemExit("AA payload changed: no initialModels array")
-    start = text.index("[", at)
-    depth, i = 0, start
-    while i < len(text):
-        if text[i] == "[":
-            depth += 1
-        elif text[i] == "]":
-            depth -= 1
-            if depth == 0:
-                break
-        i += 1
-
-    models = {}
-    for m in json.loads(text[start:i + 1]):
-        slug = m.get("slug")
-        if not slug:
-            continue
-        models[norm(slug)] = {
-            "aa_slug": slug,
-            "aa_name": m.get("name"),
-            "intelligence": m.get("intelligenceIndex"),
-            "engineering": (m.get("capabilities") or {}).get("engineering"),
-            "is_reasoning": m.get("isReasoning"),
-        }
-
-    # rows AA scores but does not chart: their own page carries one record
-    for slug, row in store["catalog"].items():
-        cost = row.get("turn")
-        if cost is None or cost > 0.0026:
-            continue
-        k = norm(slug)
-        if k in models:
-            continue
-        try:
-            rec = aa_page_record(aa_joined(fetch(f"{AA_URL}/{slug}")), slug)
-        except Exception:  # noqa: BLE001
-            continue
-        if rec:
-            models[k] = rec
-
-    return {
-        "source": AA_URL,
-        "index": "Artificial Analysis Intelligence Index",
-        "variant": "AA chart default selection, plus the model's own page",
-        "fetched": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "updated": date.today().isoformat(),
-        "models": models,
-    }
-
-
-FORCEBENCH_URL = "https://forcebench.ai/leaderboard.json"
-
-
-def build_forcebench(store: dict) -> dict:
-    """Forcebench: how often a model does real Salesforce work, executed and graded.
-
-    A different question from AA's index - Apex, Flow, LWC and SOQL that has to
-    pass hidden tests in a scratch org - so it is stored as its own scale and no
-    gate reads it. Best configuration per model, with its interval.
-    """
-    data = json.loads(fetch(FORCEBENCH_URL, timeout=120))
-    want = wanted_ids(store)
-    best: dict[str, dict] = {}
-    for entry in data.get("entries") or []:
-        mid = entry.get("model_id") or entry.get("model") or ""
-        overall = entry.get("overall") or {}
-        score = overall.get("score")
-        if score is None:
-            continue
-        key = norm(mid)
-        if key not in want and lane_stripped(key) not in want:
-            continue
-        if key in best and best[key]["score"] >= score:
-            continue
-        best[key] = {
-            "name": entry.get("model"), "model_id": mid, "score": score,
-            "ci_low": overall.get("ci_low"), "ci_high": overall.get("ci_high"),
-            "provider": entry.get("provider"), "effort": entry.get("effort"),
-            "open_weights": entry.get("open_weights"),
-        }
-    return {
-        "source": FORCEBENCH_URL, "benchmark": data.get("benchmark"),
-        "version": data.get("version"), "generated_at": data.get("generated_at"),
-        "domain": "Salesforce engineering: Apex, Flow, LWC, SOQL, packaging",
-        "tasks": len(data.get("tasks") or []),
-        "suites": [(s.get("id"), s.get("n_tasks")) for s in data.get("suites") or []],
-        "fetched": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "models": best,
-    }
-
-
 TBENCH_URL = "https://www.tbench.ai/"
 
 
@@ -638,7 +514,7 @@ def build_tbench(store: dict) -> dict:
 def cmd_refresh(args) -> int:
     store = plans()
     only = {s.strip() for s in
-            (args.only or "plans,models,capability,forcebench,tbench").split(",")
+            (args.only or "plans,models,tbench").split(",")
             if s.strip()}
     data = read_json(MODELS_FILE)
 
@@ -660,17 +536,6 @@ def cmd_refresh(args) -> int:
         except Exception as exc:  # noqa: BLE001
             print(f"models.dev unreadable ({exc!r}). Stored rows kept.")
 
-    if "capability" in only:
-        try:
-            fresh = build_capability(store)
-            scored = sum(1 for m in fresh["models"].values() if m["intelligence"] is not None)
-            print(f"artificial analysis: {len(fresh['models'])} models, {scored} with a score")
-            if args.write:
-                data["capability"] = fresh
-                write_json(MODELS_FILE, data)
-                print(f"written: {MODELS_FILE.relative_to(REPO)}")
-        except Exception as exc:  # noqa: BLE001
-            print(f"artificial analysis unreadable ({exc!r}). Stored rows kept.")
 
     if "tbench" in only:
         try:
@@ -683,17 +548,6 @@ def cmd_refresh(args) -> int:
         except Exception as exc:  # noqa: BLE001
             print(f"terminal-bench unreadable ({exc!r}). Stored rows kept.")
 
-    if "forcebench" in only:
-        try:
-            fresh = build_forcebench(store)
-            print(f"forcebench: {len(fresh['models'])} of our models, {fresh['tasks']} tasks, "
-                  f"v{fresh['version']} ({fresh['generated_at'][:10]})")
-            if args.write:
-                data["forcebench"] = fresh
-                write_json(MODELS_FILE, data)
-                print(f"written: {MODELS_FILE.relative_to(REPO)}")
-        except Exception as exc:  # noqa: BLE001
-            print(f"forcebench unreadable ({exc!r}). Stored rows kept.")
 
     if args.write and "plans" in only:
         store["updated"] = date.today().isoformat()
@@ -890,8 +744,8 @@ def gaps(row: dict) -> list[str]:
         missing.append("reasoning")
     if row["tool_call"] is None:
         missing.append("tools")
-    if row["aa"] is None:
-        missing.append("capability")
+    if row["tb"] is None:
+        missing.append("tbench")
     return missing
 
 
@@ -912,22 +766,14 @@ def fact_of(table: dict, model_id: str, catalog_slug: str) -> dict:
     return {}
 
 
-def score_of(table: dict, model_id: str, catalog_slug: str) -> dict:
-    probes = probes_for(model_id, catalog_slug)
-    for probe in probes:
-        if probe in table:
-            return table[probe]
-    return by_build(table, probes) or {}
-
-
-def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> list[dict]:
+def model_rows(plan: dict, catalog: dict, table: dict, board: dict) -> list[dict]:
     entries = ([{"id": slug, "catalog": slug} for slug in catalog]
                if plan["models"] == "catalog" else plan["models"])
     out = []
     for m in entries:
         cat = catalog.get(m.get("catalog") or "", {})
         fact = fact_of(table, m["id"], m.get("catalog") or "")
-        score = score_of(scores_table, m["id"], m.get("catalog") or "")
+        ranked = by_label(board, m["id"], m.get("catalog") or "")
         bare = m["id"].split("/")[-1]
         listed = m["list_turn_usd"] if "list_turn_usd" in m else cat.get("cost")
         factor = float(m.get("factor", 1.0))
@@ -949,7 +795,7 @@ def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> li
             "deprecated": fact.get("deprecated"),
             "superseded_by": fact.get("superseded_by"),
             "source": fact.get("id"),
-            "aa": score.get("intelligence"),
+            "tb": (ranked or {}).get("score"),
             # What models.dev says the same turn costs, next to what the shop
             # charges. A cross-check for a human, never an input: no gate reads
             # this column, and `bench.py test` fails if one ever does.
@@ -988,14 +834,11 @@ def cold_call(row: dict) -> float | None:
     return usage * float(row.get("leverage", 1.0))
 
 
-def classify(row: dict, cost_max: float, cap_min: float, judged,
-             oldest: str | None = None, require_aa: bool = False) -> tuple[str, str]:
+def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, str]:
     if is_excluded(judged, row["model"], row["provider"]):
         return "out", "excluded in the policy"
     cost = row["effective_turn_usd"]
-    if cost is None:
-        return "human", "no price on record"
-    if row["real_turn_usd"] is None:
+    if cost is None or row["real_turn_usd"] is None:
         return "human", "no price on record"
     if row["real_turn_usd"] > cost_max:
         return "out", f"cost {row['real_turn_usd']:.6f} > {cost_max:.6f}"
@@ -1011,47 +854,23 @@ def classify(row: dict, cost_max: float, cap_min: float, judged,
         return "human", "reasoning unreported"
     if row["tool_call"] is None:
         return "human", "tool support unreported"
-    if row["aa"] is None:
-        # The policy may refuse to buy what it cannot compare. That is a purchase
-        # rule, not a judgement about the model: AA covers a subset, and a row it
-        # has not scored is not assumed bad.
-        if require_aa:
-            return "out", "policy: AA does not rank it, and this policy buys ranked rows only"
-        # Otherwise an unranked model is a question, not a verdict — unless it was
-        # already old when the menu's oldest row shipped. Then nobody is going to
-        # score it and waiting is just noise.
-        released = row.get("release_date")
-        if oldest and released and released < oldest:
-            return "out", f"no score and released {released}, before the menu's oldest ({oldest})"
-        return "human", "no AA score: capability unknowable"
-    if row["aa"] < cap_min:
-        return "out", f"capability {row['aa']:.1f} < {cap_min:.1f}"
+    # One scale, and it is the board's: a model it does not rank is not bought.
+    if row["tb"] is None:
+        return "out", "not on Terminal-Bench, and this policy buys only what it ranks"
+    if row["tb"] < cap_min:
+        return "out", f"tbench {row['tb']:.1f} < {cap_min:.1f}"
     return "battery", ""
 
 
 def cmd_select(args) -> int:
     store = plans()
-    gates, admitted_ids = load_policy()
+    gates, _ = load_policy()
     static = gates["static"]
-    cost_max, cap_min = float(static["cost_max"]), float(static["capability_min"])
-    catalog = catalogue()
-    table, score_table, judged = identities(), scores(), judged_models()
-    overrides = capability_overrides()
-    boards = read_json(MODELS_FILE)
-    fb = boards.get("forcebench", {}).get("models", {})
-    tb = boards.get("tbench", {}).get("models", {})
+    cost_max, cap_min = float(static["cost_max"]), float(static["tbench_min"])
+    catalog, board = catalogue(), tbench()
+    table, judged = identities(), judged_models()
 
-    def board_score(table: dict, model_id: str) -> float | None:
-        hit = by_label(table, model_id, "")
-        return None if hit is None else hit["score"]
-
-    def fb_of(model_id: str) -> float | None:
-        score = board_score(fb, model_id)
-        return None if score is None else score * 100
-    dates = [fact_of(table, i.split("/")[-1], "").get("release_date") for i in admitted_ids]
-    oldest = min([d for d in dates if d], default=None)
-
-    print(f"fold 1 · price <= ${cost_max:.4f}/turn · reasoning and tools from models.dev\n")
+    print(f"fold 1 · price <= ${cost_max:.4f}/turn · Terminal-Bench >= {cap_min:.1f}\n")
     rows = []
     for pname, plan in store["providers"].items():
         if plan.get("active") is False:
@@ -1063,14 +882,9 @@ def cmd_select(args) -> int:
         print(f"{pname}  [{plan['plan']} {money}{credits}]")
 
         buckets = {"battery": [], "human": [], "out": []}
-        for row in model_rows(plan, catalog, table, score_table):
+        for row in model_rows(plan, catalog, table, board):
             row["provider"] = pname        # before the gates: an exclusion is per lane
-            if row["aa"] is None:
-                borrowed = overrides.get(norm(row["model"].split("/")[-1]))
-                if borrowed:
-                    row["aa"], row["aa_basis"] = borrowed
-            bucket, why = classify(row, cost_max, cap_min, judged, oldest,
-                                   require_aa=bool(static.get("require_aa")))
+            bucket, why = classify(row, cost_max, cap_min, judged)
             row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
                        plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why,
                        cold_call_usd=cold_call(row))
@@ -1080,31 +894,16 @@ def cmd_select(args) -> int:
         for row in sorted(buckets["battery"], key=lambda r: r["effective_turn_usd"]):
             cold = cold_call(row)
             extra = f"  1.a ${cold:.5f}" if cold else ""
-            mark = "*" if row.get("aa_basis") else ""
-            force, term = fb_of(row["model"]), board_score(tb, row["model"])
             print(f"  run   {pname:13s} {row['model'].split('/')[-1][:26]:26s} "
-                  f"fb {(f'{force:4.1f}' if force is not None else '   -')} "
-                  f"tb {(f'{term:4.1f}' if term is not None else '   -')}  "
-                  f"uso ${row['effective_turn_usd']:.5f}  real ${row['real_turn_usd']:.6f}{extra}{mark}")
+                  f"tb {row['tb']:5.1f}  uso ${row['effective_turn_usd']:.5f}  "
+                  f"real ${row['real_turn_usd']:.6f}{extra}")
         for row in sorted(buckets["human"], key=lambda r: r["effective_turn_usd"]):
-            aa = "-" if row["aa"] is None else f"{row['aa']:.1f}"
-            force, term = fb_of(row["model"]), board_score(tb, row["model"])
+            score = "-" if row["tb"] is None else f"{row['tb']:.1f}"
             print(f"  ????  {pname:13s} {row['model'].split('/')[-1][:26]:26s} "
-                  f"fb {(f'{force:4.1f}' if force is not None else '   -')} "
-                  f"tb {(f'{term:4.1f}' if term is not None else '   -')}  "
-                  f"real ${row['real_turn_usd']:.6f}  AA {aa:>5}  {row['why']}")
+                  f"tb {score:>5}  real ${row['real_turn_usd']:.6f}  {row['why']}")
         print(f"  ({len(buckets['out'])} out)")
 
-    for row in rows:
-        if row.get("aa_basis"):
-            print(f"  * {row['model']}: AA {row['aa']:.1f} is the owner's, not AA's — "
-                  f"{row['aa_basis']}")
-
-    if fb or tb:
-        version = boards.get("forcebench", {}).get("version", "?")
-        print(f"  fb = Forcebench v{version}: 272 Salesforce tasks run against hidden tests")
-        print("  tb = Terminal-Bench 4.1: terminal tasks, model + agent, best run per model")
-        print("  both answer another question than AA's index; no gate reads either")
+    print("  tb = Terminal-Bench 4.1: terminal tasks, model + agent, best run per model")
 
     battery = [r for r in rows if r["bucket"] == "battery"]
     human = [r for r in rows if r["bucket"] == "human"]
@@ -1130,32 +929,10 @@ def cmd_select(args) -> int:
         print(f"\nwritten: {path.relative_to(REPO)}")
     return 0
 
-
-
-
-# --------------------------------------------------------------------------- measure: fold 2
-
-CORPUS = ("Line {i} of the reference corpus: the quick brown fox jumps over the lazy dog "
-          "while the engineer reviews patch number {i} and notes that the cache behaviour "
-          "of model {i} remains under observation.\n")
-ESSAY = ("Write a continuous 1500-word essay on the history of writing instruments, "
-         "from stylus to ballpoint. Plain prose, no lists, no headings. Do not stop early.")
-
-TOOLS = [
-    {"name": "get_weather", "description": "Current weather for a city", "param": "city"},
-    {"name": "get_time", "description": "Current local time for a city", "param": "city"},
-]
-TOOL_PROMPT = ("Call get_weather for Seville and get_time for Seville. "
-               "Use both tools in this single reply. Do not answer in prose.")
-
-
 def corpus(start: int, lines: int) -> str:
     """The reference text, from line `start`, `lines` lines long."""
     return "".join(CORPUS.format(i=i) for i in range(start, start + lines))
 
-# Fewer lanes than LANES on purpose: AA files "Qwen3.8 Max" under "max", and
-# stripping that would send the lookup to a different model.
-AA_LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync")
 CONTEXT_K = 60
 ANSWER_TOKENS = 1500
 
@@ -1177,30 +954,20 @@ def load_measured() -> dict:
             "speed": num("speed_tps"), "ttft": num("ttft_s"), "cache": num("cache_hit"),
             "prefill": num("prefill_ms_per_1k"), "cache_loop": num("cache_loop_hit"),
             "retention": num("retention_4x"), "errors": num("errors_10"),
-            "tools": num("tools_valid"), "override": num("intel_override"),
-            "cost_override": num("cost_override"),
+            "tools": num("tools_valid"), "cost_override": num("cost_override"),
         }
     return out
 
 
-def aa_of(ratings: dict, model_id: str, catalog_slug: str):
-    probes = probes_for(model_id, catalog_slug, AA_LANES)
-    for probe in probes:
-        if probe in ratings:
-            rec = ratings[probe]
-            return rec.get("intelligence"), rec.get("is_reasoning")
-    rec = by_build(ratings, probes)
-    return (rec.get("intelligence"), rec.get("is_reasoning")) if rec else (None, None)
-
-
-def fails_static(capability, cost, g):
+def fails_static(tb, cost, g):
     f = []
-    if capability is None or capability < g["capability_min"]:
-        f.append(f"capability {capability or 0:.1f} < {g['capability_min']:.1f}")
+    if tb is None:
+        f.append("not on Terminal-Bench")
+    elif tb < g["tbench_min"]:
+        f.append(f"tbench {tb:.1f} < {g['tbench_min']:.1f}")
     if cost is None or cost > g["cost_max"]:
         f.append(f"cost {cost or 0:.4f} > {g['cost_max']:.4f}")
     return f
-
 
 def at_context(m, tokens=CONTEXT_K * 1000):
     """Time to first token once the prefix is `tokens` long."""
@@ -1217,8 +984,8 @@ def turn_time(m):
     return ttft + ANSWER_TOKENS / m["speed"]
 
 
-def fails_measured(m, capability, cost, g):
-    f = fails_static(capability, cost, GATES["static"])
+def fails_measured(m, tb, cost, g):
+    f = fails_static(tb, cost, GATES["static"])
     if m["speed"] is None or m["speed"] < g["speed_min"]:
         f.append(f"speed {m['speed'] or 0:.0f} < {g['speed_min']:.0f}")
     if m["ttft"] is None or m["ttft"] > g["latency_max"]:
@@ -1275,27 +1042,17 @@ def unpriced(models: dict) -> list[str]:
 
 
 def phase_one(models: dict, catalog: dict) -> None:
-    """Static, and free: how much of the catalogue is worth measuring at all."""
+    """Static, and free: how much of the catalogue the board ranks well enough."""
     print("phase 1 - static (free):  " + "  ".join(f"{k}={v}" for k, v in GATES["static"].items()))
-    overrides = {m["catalog"]: m["override"] for m in models.values() if m["override"] is not None}
+    board = tbench()
+    # The catalogue is Command Code's list price; the plan sells that usage at a
+    # tenth, so the preview has to use the plan's money, not the list's.
+    leverage = float(plans()["providers"].get("command-code", {}).get("usd_per_usage_dollar", 1.0))
     worth = [slug for slug, row in catalog.items()
-             if not fails_static(row["capability"] if row["capability"] is not None
-                                 else overrides.get(slug), row["cost"], GATES["static"])]
+             if not fails_static(board_score(board, slug),
+                                 None if row["cost"] is None else row["cost"] * leverage,
+                                 GATES["static"])]
     print(f"  {len(catalog)} catalog rows -> {len(worth)} worth measuring")
-
-
-def capability_of(m: dict, catalog: dict, ratings: dict, overrides: dict):
-    """AA first, it is the only comparable scale; then the row's own override, then
-    the number the policy writes down, then whatever the catalogue claims."""
-    capability, _ = aa_of(ratings, m["id"], m["catalog"])
-    if capability is None:
-        capability = m["override"]
-    if capability is None:
-        hit = overrides.get(norm(m["id"].split("/")[-1]))
-        capability = hit[0] if hit else None
-    if capability is None:
-        capability = catalog.get(m["catalog"], {}).get("capability")
-    return capability
 
 
 def phase_two(models: dict, catalog: dict) -> list[str]:
@@ -1303,13 +1060,13 @@ def phase_two(models: dict, catalog: dict) -> list[str]:
     print("phase 2 - measured:       " + "  ".join(f"{k}={v}" for k, v in GATES["measured"].items()))
     print("phase 3 - fitness:        " + "  ".join(f"{k}={v}" for k, v in GATES["fitness"].items()))
     problems = []
-    ratings, overrides = scores(), capability_overrides()
+    board = tbench()
     for m in models.values():
         row = catalog.get(m["catalog"], {})
-        capability = capability_of(m, catalog, ratings, overrides)
+        tb = board_score(board, m["id"])
         # a model sold on another plan has its own price: the catalogue is Command Code's
         cost = m["cost_override"] if m["cost_override"] is not None else row.get("cost")
-        f2 = fails_measured(m, capability, cost, GATES["measured"])
+        f2 = fails_measured(m, tb, cost, GATES["measured"])
         f3 = fails_fitness(m, GATES["fitness"])
         admitted = m["id"] in ADMITTED
         verdict = "PASS" if not f2 and not f3 else "FAIL"
@@ -1317,7 +1074,7 @@ def phase_two(models: dict, catalog: dict) -> list[str]:
             shown = ""
             if all(m[k] is not None for k in ("speed", "ttft", "prefill")):
                 shown = (f"{m['speed']:.0f} t/s  {m['ttft']:.2f} s  "
-                         f"{m['prefill']:.1f} ms/1k  {turn_time(m):.1f} s  ${cost:.4f}")
+                         f"{m['prefill']:.1f} ms/1k  {turn_time(m):.1f} s  ${cost:.4f}  tb {tb or 0:.1f}")
             print(f"  {verdict:4s} {m['name'][:30]:30s} {shown:46s} {', '.join(f2 + f3)}")
             if f2 or f3:
                 problems.append(f"{m['name']} is admitted but misses: {', '.join(f2 + f3)}")
@@ -1325,7 +1082,6 @@ def phase_two(models: dict, catalog: dict) -> list[str]:
             print(f"  ENTER {m['name'][:32]:32s} clears every gate but is not admitted")
             problems.append(f"{m['name']} clears every gate but is not admitted")
     return problems
-
 
 def menu(models: dict) -> list[str]:
     """The policy, the measured table and the DSH config must name the same rows."""
@@ -1496,21 +1252,21 @@ def measure_route(model: str) -> dict:
     }
 
 
-def live(model: str, capability: float, cost: float) -> int:
+def live(model: str, tbench_score: float, cost: float) -> int:
     global KEY
     # Phase 1 first, and it is free: a row that fails it costs nothing to reject,
     # so it must not need a credential to be rejected.
-    static_fail = fails_static(capability, cost, GATES["static"])
+    static_fail = fails_static(tbench_score, cost, GATES["static"])
     if static_fail:
         print(f"{model}: fails phase 1 - {', '.join(static_fail)}. Nothing measured.")
         return 1
 
     KEY = api_key()
-    print(f"{model}: phase 1 clear (capability {capability:.1f}, ${cost:.4f}/turn)")
+    print(f"{model}: phase 1 clear (tbench {tbench_score:.1f}, ${cost:.4f}/turn)")
     values = measure_route(model)
-    row = {"id": model, "name": model, "override": capability, **values, "catalog": ""}
+    row = {"id": model, "name": model, **values, "catalog": ""}
 
-    f2 = fails_measured({**row, "cache": values["cache"]}, capability, cost, GATES["measured"])
+    f2 = fails_measured({**row, "cache": values["cache"]}, tbench_score, cost, GATES["measured"])
     f3 = fails_fitness(row, GATES["fitness"])
     print(f"\n  speed {values['speed']} tok/s   ttft {values['ttft']} s   cache {values['cache']:.0%}")
     print(f"  prefill {values['prefill']} ms/1k   loop cache {values['cache_loop']:.0%}   "
@@ -1521,7 +1277,7 @@ def live(model: str, capability: float, cost: float) -> int:
     print("\n  FIT")
     print(f"\n  {model},,,{values['speed']},{values['ttft']},{values['cache']:.3f},"
           f"{values['prefill']},{values['cache_loop']:.2f},{values['retention']},"
-          f"{values['errors']},{values['tools']:.2f},{capability}")
+          f"{values['errors']},{values['tools']:.2f},{tbench_score}")
     return 0
 
 
@@ -1531,9 +1287,9 @@ def cmd_measure(args) -> int:
     BASE, KEY_ENV = GATEWAYS[args.provider]
     if not args.model:
         return check()
-    if args.capability is None or args.cost is None:
-        raise SystemExit("--model needs --capability and --cost (the static phase)")
-    return live(args.model, args.capability, args.cost)
+    if args.tbench is None or args.cost is None:
+        raise SystemExit("--model needs --tbench and --cost (the static phase)")
+    return live(args.model, args.tbench, args.cost)
 
 
 # --------------------------------------------------------------------------- fold 3
@@ -1649,15 +1405,15 @@ PRICED = ("list_turn_usd", "factor", "effective_turn_usd", "real_turn_usd", "lev
 def priced_rows(table: dict) -> dict:
     """Fold 1 as the gates see it: no file written, no model called."""
     gates = load_policy()[0]["static"]
-    catalog, judged, score_table = catalogue(), judged_models(), scores()
+    catalog, judged, board = catalogue(), judged_models(), tbench()
     out = {}
     for provider, plan in plans()["providers"].items():
         if plan.get("active") is False:      # fold 1 never prices a prepared plan
             continue
-        for row in model_rows(plan, catalog, table, score_table):
+        for row in model_rows(plan, catalog, table, board):
             row["provider"] = provider
             bucket, why = classify(row, float(gates["cost_max"]),
-                                   float(gates["capability_min"]), judged)
+                                   float(gates["tbench_min"]), judged)
             out[(provider, row["model"])] = (row, bucket, why)
     return out
 
@@ -1756,7 +1512,7 @@ def main() -> int:
 
     r = sub.add_parser("refresh", help="re-read the providers and both catalogues")
     r.add_argument("--write", action="store_true", help="store what it parsed in data/")
-    r.add_argument("--only", help="plans,models,capability,forcebench,tbench (default: all)")
+    r.add_argument("--only", help="plans,models,tbench (default: all)")
     r.set_defaults(fn=cmd_refresh)
 
     pl = sub.add_parser("plan", help="what a subscription costs per token")
@@ -1772,7 +1528,7 @@ def main() -> int:
 
     m = sub.add_parser("measure", help="fold 2: the stored table against the gates")
     m.add_argument("--model")
-    m.add_argument("--capability", type=float)
+    m.add_argument("--tbench", type=float)
     m.add_argument("--cost", type=float)
     m.add_argument("--provider", default="command-code", choices=sorted(GATEWAYS))
     m.set_defaults(fn=cmd_measure)
