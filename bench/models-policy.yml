@@ -24,7 +24,12 @@ updated: 2026-11-15
 # on the AA scale by construction; the basis is what makes it an inference and
 # not a measurement.
 capability_overrides:
-  - {id: ornith-1-5-122b, score: 32.0, basis: "no AA row for the family; the maker's peer table puts it level with DeepSeek V4 Flash, which AA ranks 32,6"}
+  # Empty as of 2026-11-15. The one entry it held - ornith-1-5-122b at 32,0,
+  # anchored on the maker's own peer table - did not survive the only independent
+  # run that exists: Forcebench scores it 21,2 [16,7-26,0] on 272 executed
+  # Salesforce tasks, against 59,1 for DeepSeek V4.1 Flash on the same local
+  # quantized setup. A number the owner writes down can be withdrawn by evidence;
+  # that is what writing its basis down is for.
 
 criteria:
   # Thresholds are the envelope of the admitted set: no row may be worse than the
@@ -130,6 +135,8 @@ excluded:
   - { id: Qwen/Qwen3.7-Flash, provider: command-code, reason: "measured: 64 tok/s, 7.79 s to start" }
   - { id: moonshotai/Kimi-K3.1-Pro, provider: command-code, reason: "measured: 32 tok/s" }
   - { id: xiaomi/mimo-v2.6-pro, provider: command-code, reason: "measured: 26 tok/s, 8.4 s to start" }
+  # Capability, not coverage: the model is on three routes and priced at 0,00029 here.
+  - { id: ornith-1-5-122b, reason: "owner, 2026-11-15: Forcebench 21,2 [16,7-26,0] on 272 executed tasks, against 59,1 for DeepSeek V4.1 Flash on the same local quantized run; the maker's parity claim does not survive it" }
   - { id: deepseek/deepseek-v4.1-flash, provider: command-code, reason: "measured on this lane: 9-47 s to start" }
   - { id: Qwen/Qwen3.8-Flash, provider: command-code, reason: "measured: HTTP 524, the route does not answer" }
 

@@ -473,38 +473,95 @@ def build_capability(store: dict) -> dict:
     }
 
 
+FORCEBENCH_URL = "https://forcebench.ai/leaderboard.json"
+
+
+def build_forcebench(store: dict) -> dict:
+    """Forcebench: how often a model does real Salesforce work, executed and graded.
+
+    A different question from AA's index - Apex, Flow, LWC and SOQL that has to
+    pass hidden tests in a scratch org - so it is stored as its own scale and no
+    gate reads it. Best configuration per model, with its interval.
+    """
+    data = json.loads(fetch(FORCEBENCH_URL, timeout=120))
+    want = wanted_ids(store)
+    best: dict[str, dict] = {}
+    for entry in data.get("entries") or []:
+        mid = entry.get("model_id") or entry.get("model") or ""
+        overall = entry.get("overall") or {}
+        score = overall.get("score")
+        if score is None:
+            continue
+        key = norm(mid)
+        if key not in want and lane_stripped(key) not in want:
+            continue
+        if key in best and best[key]["score"] >= score:
+            continue
+        best[key] = {
+            "name": entry.get("model"), "model_id": mid, "score": score,
+            "ci_low": overall.get("ci_low"), "ci_high": overall.get("ci_high"),
+            "provider": entry.get("provider"), "effort": entry.get("effort"),
+            "open_weights": entry.get("open_weights"),
+        }
+    return {
+        "source": FORCEBENCH_URL, "benchmark": data.get("benchmark"),
+        "version": data.get("version"), "generated_at": data.get("generated_at"),
+        "domain": "Salesforce engineering: Apex, Flow, LWC, SOQL, packaging",
+        "tasks": len(data.get("tasks") or []),
+        "suites": [(s.get("id"), s.get("n_tasks")) for s in data.get("suites") or []],
+        "fetched": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "models": best,
+    }
+
+
 def cmd_refresh(args) -> int:
     store = plans()
-    refresh_plans(store, args.write)
+    only = {s.strip() for s in (args.only or "plans,models,capability,forcebench").split(",") if s.strip()}
+    data = read_json(MODELS_FILE)
 
-    try:
-        fresh = build_models(store)
-        gone = sum(1 for m in fresh["models"].values() if m["deprecated"])
-        reasons = sum(1 for m in fresh["models"].values() if m["reasoning"])
-        tools = sum(1 for m in fresh["models"].values() if m["tool_call"])
-        print(f"models.dev: {len(fresh['models'])} of our models, {gone} deprecated, "
-              f"{reasons} reason, {tools} call tools")
-        if args.write:
-            data = read_json(MODELS_FILE)
-            data["models.dev"] = fresh
-            write_json(MODELS_FILE, data)
-            print(f"written: {MODELS_FILE.relative_to(REPO)}")
-    except Exception as exc:  # noqa: BLE001
-        print(f"models.dev unreadable ({exc!r}). Stored rows kept.")
+    if "plans" in only:
+        refresh_plans(store, args.write)
 
-    try:
-        fresh = build_capability(store)
-        scored = sum(1 for m in fresh["models"].values() if m["intelligence"] is not None)
-        print(f"artificial analysis: {len(fresh['models'])} models, {scored} with a score")
-        if args.write:
-            data = read_json(MODELS_FILE)
-            data["capability"] = fresh
-            write_json(MODELS_FILE, data)
-            print(f"written: {MODELS_FILE.relative_to(REPO)}")
-    except Exception as exc:  # noqa: BLE001
-        print(f"artificial analysis unreadable ({exc!r}). Stored rows kept.")
+    if "models" in only:
+        try:
+            fresh = build_models(store)
+            gone = sum(1 for m in fresh["models"].values() if m["deprecated"])
+            reasons = sum(1 for m in fresh["models"].values() if m["reasoning"])
+            tools = sum(1 for m in fresh["models"].values() if m["tool_call"])
+            print(f"models.dev: {len(fresh['models'])} of our models, {gone} deprecated, "
+                  f"{reasons} reason, {tools} call tools")
+            if args.write:
+                data["models.dev"] = fresh
+                write_json(MODELS_FILE, data)
+                print(f"written: {MODELS_FILE.relative_to(REPO)}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"models.dev unreadable ({exc!r}). Stored rows kept.")
 
-    if args.write:
+    if "capability" in only:
+        try:
+            fresh = build_capability(store)
+            scored = sum(1 for m in fresh["models"].values() if m["intelligence"] is not None)
+            print(f"artificial analysis: {len(fresh['models'])} models, {scored} with a score")
+            if args.write:
+                data["capability"] = fresh
+                write_json(MODELS_FILE, data)
+                print(f"written: {MODELS_FILE.relative_to(REPO)}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"artificial analysis unreadable ({exc!r}). Stored rows kept.")
+
+    if "forcebench" in only:
+        try:
+            fresh = build_forcebench(store)
+            print(f"forcebench: {len(fresh['models'])} of our models, {fresh['tasks']} tasks, "
+                  f"v{fresh['version']} ({fresh['generated_at'][:10]})")
+            if args.write:
+                data["forcebench"] = fresh
+                write_json(MODELS_FILE, data)
+                print(f"written: {MODELS_FILE.relative_to(REPO)}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"forcebench unreadable ({exc!r}). Stored rows kept.")
+
+    if args.write and "plans" in only:
         store["updated"] = date.today().isoformat()
         store["refreshed_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
         write_json(PLANS_FILE, store)
@@ -512,6 +569,7 @@ def cmd_refresh(args) -> int:
     else:
         print("nothing written. run with --write to store these numbers.")
     return 0
+
 
 # --------------------------------------------------------------------------- plan: money
 
@@ -872,6 +930,21 @@ def cmd_select(args) -> int:
     catalog = catalogue()
     table, score_table, judged = identities(), scores(), judged_models()
     overrides = capability_overrides()
+    fb = read_json(MODELS_FILE).get("forcebench", {}).get("models", {})
+
+    def fb_of(model_id: str) -> float | None:
+        # Forcebench names the same model, sometimes with its build: same probes
+        # as the AA lookup, and the same rule about a suffix of digits.
+        bare = norm(model_id.split("/")[-1])
+        for probe in (bare, lane_stripped(bare)):
+            hit = fb.get(probe)
+            if hit:
+                return hit["score"] * 100
+            for key, rec in fb.items():
+                rest = key[len(probe):] if key.startswith(probe) else ""
+                if rest.isdigit():
+                    return rec["score"] * 100
+        return None
     admitted_ids = load_policy()[1]
     dates = [fact_of(table, i.split("/")[-1], "").get("release_date") for i in admitted_ids]
     oldest = min([d for d in dates if d], default=None)
@@ -905,17 +978,25 @@ def cmd_select(args) -> int:
             cold = cold_call(row)
             extra = f"  1.a ${cold:.5f}" if cold else ""
             mark = "*" if row.get("aa_basis") else ""
+            score = fb_of(row["model"])
             print(f"  run   {pname:13s} {row['model'][:28]:28s} "
+                  f"fb {(f'{score:5.1f}' if score is not None else '    -')}  "
                   f"uso ${row['effective_turn_usd']:.5f}  real ${row['real_turn_usd']:.6f}{extra}{mark}")
         for row in sorted(buckets["human"], key=lambda r: r["effective_turn_usd"]):
             aa = "-" if row["aa"] is None else f"{row['aa']:.1f}"
+            score = fb_of(row["model"])
             print(f"  ????  {pname:13s} {row['model'][:28]:28s} "
+                  f"fb {(f'{score:5.1f}' if score is not None else '    -')}  "
                   f"real ${row['real_turn_usd']:.6f}  AA {aa:>5}  {row['why']}")
         print(f"  ({len(buckets['out'])} out)")
 
     for row in rows:
         if row.get("aa_basis"):
             print(f"  * {row['model']}: AA {row['aa']:.1f} is the owner's, not AA's — {row['aa_basis']}")
+
+    if fb:
+        print(f"  fb = Forcebench v{read_json(MODELS_FILE)['forcebench']['version']}, 272 Salesforce "
+              f"tasks run against hidden tests — another question, not the AA scale")
 
     battery = [r for r in rows if r["bucket"] == "battery"]
     human = [r for r in rows if r["bucket"] == "human"]
@@ -1563,6 +1644,7 @@ def main() -> int:
 
     r = sub.add_parser("refresh", help="re-read the providers and both catalogues")
     r.add_argument("--write", action="store_true", help="store what it parsed in data/")
+    r.add_argument("--only", help="plans,models,capability,forcebench (default: all)")
     r.set_defaults(fn=cmd_refresh)
 
     pl = sub.add_parser("plan", help="what a subscription costs per token")
