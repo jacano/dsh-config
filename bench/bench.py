@@ -104,6 +104,23 @@ def by_build(table: dict, probes: list[str]) -> dict | None:
     return None
 
 
+def by_label(table: dict, model_id: str, catalog_slug: str) -> dict | None:
+    """Some boards write "Haiku 5.5" where we write "claude-haiku-5-5": the label
+    may drop the maker, or carry the build. Exact first, then the shorter name
+    inside the longer one, then bare digits."""
+    probes = probes_for(model_id, catalog_slug)
+    for probe in probes:
+        if probe in table:
+            return table[probe]
+    for probe in probes:
+        if not probe:
+            continue
+        for key, rec in table.items():
+            if key.endswith(probe) or probe.endswith(key):
+                return rec
+    return by_build(table, probes)
+
+
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -552,9 +569,76 @@ def build_forcebench(store: dict) -> dict:
     }
 
 
+TBENCH_URL = "https://www.tbench.ai/"
+
+
+def build_tbench(store: dict) -> dict:
+    """Terminal-Bench 4.1: does an agent finish real terminal work, and at what price.
+
+    The board ranks model+agent pairs, not models, so the agent is stored with the
+    number: "38.5 with Claude Code" is a different claim from "38.5 alone". The
+    payload is the page's own RSC state, so a layout change raises here and the
+    stored rows stay.
+    """
+    raw = fetch(TBENCH_URL, timeout=120)
+    chunks = re.findall(r'self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)', raw, re.S)
+    text = "".join(json.loads(c) for c in chunks)
+    at = text.find('"rows":[')
+    if at < 0:
+        raise ValueError("tbench payload changed: no rows array")
+    depth, start = 0, at + len('"rows":')
+    for j in range(start, len(text)):
+        if text[j] == "[":
+            depth += 1
+        elif text[j] == "]":
+            depth -= 1
+            if depth == 0:
+                rows = json.loads(text[start:j + 1])
+                break
+    else:
+        raise ValueError("tbench payload changed: rows array never closed")
+
+    want = wanted_ids(store)
+
+    def ours(key: str) -> bool:
+        """The board writes "Haiku 5.5" where we write "claude-haiku-5-5", and
+        "DeepSeek V4.1 Flash 1017" where we write "deepseek-v4-1-flash"."""
+        for w in want:
+            if key == w or key.endswith(w) or w.endswith(key):
+                return True
+            if key.startswith(w) and key[len(w):].isdigit():
+                return True
+        return False
+
+    best: dict[str, dict] = {}
+    for row in rows:
+        meta, metrics = row.get("metadata") or {}, row.get("metrics") or {}
+        label = (meta.get("model_display") or {}).get("label") or ""
+        key = norm(label)
+        if not key or not ours(key):
+            continue
+        score = metrics.get("accuracy")
+        if score is None or (key in best and best[key]["score"] >= score):
+            continue
+        best[key] = {
+            "label": label, "score": score,
+            "ci95": metrics.get("accuracy_ci95_half_width"),
+            "agent": (meta.get("agent_display") or {}).get("label"),
+            "effort": meta.get("reasoning_effort"), "date": meta.get("display_date"),
+            "cost_usd": metrics.get("total_cost_usd"),
+            "tokens": metrics.get("total_tokens"),
+        }
+    return {
+        "source": TBENCH_URL, "benchmark": "Terminal-Bench 4.1",
+        "fetched": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "models": best,
+    }
+
+
 def cmd_refresh(args) -> int:
     store = plans()
-    only = {s.strip() for s in (args.only or "plans,models,capability,forcebench").split(",")
+    only = {s.strip() for s in
+            (args.only or "plans,models,capability,forcebench,tbench").split(",")
             if s.strip()}
     data = read_json(MODELS_FILE)
 
@@ -587,6 +671,17 @@ def cmd_refresh(args) -> int:
                 print(f"written: {MODELS_FILE.relative_to(REPO)}")
         except Exception as exc:  # noqa: BLE001
             print(f"artificial analysis unreadable ({exc!r}). Stored rows kept.")
+
+    if "tbench" in only:
+        try:
+            fresh = build_tbench(store)
+            print(f"terminal-bench: {len(fresh['models'])} of our models")
+            if args.write:
+                data["tbench"] = fresh
+                write_json(MODELS_FILE, data)
+                print(f"written: {MODELS_FILE.relative_to(REPO)}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"terminal-bench unreadable ({exc!r}). Stored rows kept.")
 
     if "forcebench" in only:
         try:
@@ -942,21 +1037,17 @@ def cmd_select(args) -> int:
     catalog = catalogue()
     table, score_table, judged = identities(), scores(), judged_models()
     overrides = capability_overrides()
-    fb = read_json(MODELS_FILE).get("forcebench", {}).get("models", {})
+    boards = read_json(MODELS_FILE)
+    fb = boards.get("forcebench", {}).get("models", {})
+    tb = boards.get("tbench", {}).get("models", {})
+
+    def board_score(table: dict, model_id: str) -> float | None:
+        hit = by_label(table, model_id, "")
+        return None if hit is None else hit["score"]
 
     def fb_of(model_id: str) -> float | None:
-        # Forcebench names the same model, sometimes with its build: same probes
-        # as the AA lookup, and the same rule about a suffix of digits.
-        bare = norm(model_id.split("/")[-1])
-        for probe in (bare, lane_stripped(bare)):
-            hit = fb.get(probe)
-            if hit:
-                return hit["score"] * 100
-            for key, rec in fb.items():
-                rest = key[len(probe):] if key.startswith(probe) else ""
-                if rest.isdigit():
-                    return rec["score"] * 100
-        return None
+        score = board_score(fb, model_id)
+        return None if score is None else score * 100
     dates = [fact_of(table, i.split("/")[-1], "").get("release_date") for i in admitted_ids]
     oldest = min([d for d in dates if d], default=None)
 
@@ -990,15 +1081,17 @@ def cmd_select(args) -> int:
             cold = cold_call(row)
             extra = f"  1.a ${cold:.5f}" if cold else ""
             mark = "*" if row.get("aa_basis") else ""
-            score = fb_of(row["model"])
-            print(f"  run   {pname:13s} {row['model'][:28]:28s} "
-                  f"fb {(f'{score:5.1f}' if score is not None else '    -')}  "
+            force, term = fb_of(row["model"]), board_score(tb, row["model"])
+            print(f"  run   {pname:13s} {row['model'].split('/')[-1][:26]:26s} "
+                  f"fb {(f'{force:4.1f}' if force is not None else '   -')} "
+                  f"tb {(f'{term:4.1f}' if term is not None else '   -')}  "
                   f"uso ${row['effective_turn_usd']:.5f}  real ${row['real_turn_usd']:.6f}{extra}{mark}")
         for row in sorted(buckets["human"], key=lambda r: r["effective_turn_usd"]):
             aa = "-" if row["aa"] is None else f"{row['aa']:.1f}"
-            score = fb_of(row["model"])
-            print(f"  ????  {pname:13s} {row['model'][:28]:28s} "
-                  f"fb {(f'{score:5.1f}' if score is not None else '    -')}  "
+            force, term = fb_of(row["model"]), board_score(tb, row["model"])
+            print(f"  ????  {pname:13s} {row['model'].split('/')[-1][:26]:26s} "
+                  f"fb {(f'{force:4.1f}' if force is not None else '   -')} "
+                  f"tb {(f'{term:4.1f}' if term is not None else '   -')}  "
                   f"real ${row['real_turn_usd']:.6f}  AA {aa:>5}  {row['why']}")
         print(f"  ({len(buckets['out'])} out)")
 
@@ -1007,10 +1100,11 @@ def cmd_select(args) -> int:
             print(f"  * {row['model']}: AA {row['aa']:.1f} is the owner's, not AA's — "
                   f"{row['aa_basis']}")
 
-    if fb:
-        version = read_json(MODELS_FILE)["forcebench"]["version"]
-        print(f"  fb = Forcebench v{version}, 272 Salesforce tasks run against hidden tests "
-              f"— another question, not the AA scale")
+    if fb or tb:
+        version = boards.get("forcebench", {}).get("version", "?")
+        print(f"  fb = Forcebench v{version}: 272 Salesforce tasks run against hidden tests")
+        print("  tb = Terminal-Bench 4.1: terminal tasks, model + agent, best run per model")
+        print("  both answer another question than AA's index; no gate reads either")
 
     battery = [r for r in rows if r["bucket"] == "battery"]
     human = [r for r in rows if r["bucket"] == "human"]
@@ -1662,7 +1756,7 @@ def main() -> int:
 
     r = sub.add_parser("refresh", help="re-read the providers and both catalogues")
     r.add_argument("--write", action="store_true", help="store what it parsed in data/")
-    r.add_argument("--only", help="plans,models,capability,forcebench (default: all)")
+    r.add_argument("--only", help="plans,models,capability,forcebench,tbench (default: all)")
     r.set_defaults(fn=cmd_refresh)
 
     pl = sub.add_parser("plan", help="what a subscription costs per token")

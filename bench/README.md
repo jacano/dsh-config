@@ -16,7 +16,7 @@ python bench/bench.py test               # models.dev cannot move a price
 | | |
 | --- | --- |
 | `data/plans.json` | the plans, what they publish, and the catalogue they price from |
-| `data/models.json` | what a model is (models.dev), how good it is (AA), and how often it does real Salesforce work (Forcebench) |
+| `data/models.json` | what a model is (models.dev), how good it is (AA), and what it does in two executed benchmarks (Forcebench, Terminal-Bench) |
 | `models-policy.yml` | the gates, what is admitted, what is excluded and why |
 | `models.csv` | the measured rows, medians of three rounds |
 
@@ -93,12 +93,19 @@ What fold 1 will not do:
   [`models-policy.yml`](models-policy.yml), and a reason there can be scoped to one
   provider, because a measurement on one route says nothing about another.
 
-**Two capability axes, one gate.** AA's index answers "how good in general" and is
-what `capability_min` is scaled to. Forcebench answers a narrower question — 272
-Salesforce tasks (Apex, Flow, LWC, SOQL) executed against hidden tests, with error
-bars — and is printed next to it as `fb`. It is not the same scale and no gate reads
-it: the two correlate at 0,87 where they overlap, which is enough to be a second
-opinion and nowhere near enough to be a substitute.
+**Three capability axes, one gate.** AA's index answers "how good in general" and
+is what `capability_min` is scaled to. The other two answer narrower questions and
+are printed beside it:
+
+- `fb` — Forcebench: 272 Salesforce tasks (Apex, Flow, LWC, SOQL) executed against
+  hidden tests in a scratch org, with error bars. Correlates 0,87 with AA where
+  they overlap: a second opinion, nowhere near a substitute.
+- `tb` — Terminal-Bench 4.1: terminal work, ranked per model **and agent** ("38,5
+  with Claude Code" is a different claim from "38,5 alone"), best run per model.
+
+Neither is the same scale and no gate reads either. They are there to be read next
+to AA when a decision is close, and to catch the case that motivated them: a model
+whose maker claimed parity that an executed benchmark did not confirm.
 
 A model with no AA score is a question, not a verdict — unless the policy says it
 only buys what AA can rank, which it does (`require_aa: 1`). Then the row is out
