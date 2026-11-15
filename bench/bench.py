@@ -9,20 +9,20 @@
     python bench/bench.py select             # fold 1: what is worth calling at all
     python bench/bench.py measure            # fold 2: the stored table against the gates
     python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
-    python bench/bench.py test               # models.dev cannot move a price
 
 Three questions, in the order they cost money:
 
   plan     what a plan really charges per million tokens: the fee, the model's
            multiplier, the promo inside its window, and the peak share of the
            week. Free, calls no model.
-  select   fold 1: price, identity (models.dev), Terminal-Bench, then the policy.
+  select   fold 1: price, Terminal-Bench, then the policy.
            Free, calls no model.
   measure  fold 2: speed, latency, cache, prefill, retention, errors, tool calls.
            fold 3: agentic.py's task — a real bug, a real repository, pytest.
 
-data/plans.json   the plans, what they publish, and the catalogue they price from
-data/models.json  what a model is, and how good it is
+data/plans.json    the plans, what they publish, and the catalogue they price from
+data/tbench.json   the board: what each model does on Terminal-Bench, and through
+                   which agent
 
 Nothing here edits the DSH configuration; that is a separate change in ../dsh/.
 """
@@ -30,9 +30,7 @@ Nothing here edits the DSH configuration; that is a separate change in ../dsh/.
 from __future__ import annotations
 
 import argparse
-import copy
 import csv
-import inspect
 import json
 import re
 import shutil
@@ -49,7 +47,7 @@ BENCH = Path(__file__).resolve().parent
 REPO = BENCH.parent
 DATA = BENCH / "data"
 PLANS_FILE = DATA / "plans.json"
-MODELS_FILE = DATA / "models.json"
+TBENCH_FILE = DATA / "tbench.json"
 POLICY = BENCH / "models-policy.yml"
 MEASURED = BENCH / "models.csv"
 CONFIG = REPO / "dsh" / "cordis.patch.yml"
@@ -61,7 +59,6 @@ FX = 6.714             # CNY per USD, the rate a Chinese price list is read at
 DAYS = 30.0            # a month, for the windows
 LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
 UA = {"User-Agent": "curl/8.5.0"}
-MODELS_URL = "https://models.dev/api.json"
 GATEWAYS = {
     "command-code": ("https://api.commandcode.ai/provider/v1", "COMMANDCODE_API_KEY"),
     "opendesign": ("https://amr-link.open-design.ai/v1", "OPENDESIGN_API_KEY"),
@@ -167,13 +164,9 @@ def catalogue() -> dict:
             for slug, row in plans()["catalog"].items()}
 
 
-def identities() -> dict:
-    return read_json(MODELS_FILE)["models.dev"]["models"]
-
-
 def tbench() -> dict:
     """The board: model + agent, one row per model, the best run it got."""
-    return read_json(MODELS_FILE)["tbench"]["models"]
+    return read_json(TBENCH_FILE)["models"]
 
 
 def load_policy() -> tuple[dict, set]:
@@ -364,94 +357,6 @@ def wanted_ids(store: dict) -> set[str]:
     return {n for n in names if n}
 
 
-def lane_stripped(key: str) -> str:
-    base = key
-    for lane in LANES:
-        base = base.replace(lane, "")
-    return base
-
-
-def build_models(store: dict) -> dict:
-    body = json.loads(fetch(MODELS_URL, timeout=180))
-    want = wanted_ids(store)
-    rows, seen = {}, set()
-
-    for provider, data in body.items():
-        for mid, meta in (data.get("models") or {}).items():
-            bare = norm(mid.split("/")[-1])
-            if bare not in want and lane_stripped(bare) not in want:
-                continue
-            canonical = meta.get("canonical_model_id")
-            replacement, cross_generation = None, False
-            if canonical:
-                bare_canonical = norm(canonical.split("/")[-1])
-                if bare_canonical != bare:
-                    replacement = canonical
-                    # "v4.1-flash" -> "v4.1-flash-1017" is a newer build of the
-                    # same model; "v4-flash" -> "v4.1-flash-1017" is a successor.
-                    cross_generation = not bare_canonical.startswith(bare)
-            deprecated = meta.get("status") == "deprecated"
-            prev = rows.get(bare)
-            if prev:
-                # any provider saying deprecated is enough; the vendor knows first.
-                prev["deprecated"] = deprecated or prev["deprecated"]
-                if replacement and (cross_generation or not prev["cross_generation"]):
-                    prev["superseded_by"] = replacement
-                    prev["cross_generation"] = cross_generation
-                deprecated = prev["deprecated"]
-                replacement = prev["superseded_by"]
-                cross_generation = prev["cross_generation"]
-                if provider != "commandcode":
-                    continue
-            seen.add(bare)
-            rows[bare] = {
-                "deprecated": deprecated,
-                "superseded_by": replacement,
-                "cross_generation": cross_generation,
-                "id": mid,
-                "provider": provider,
-                "name": meta.get("name"),
-                "reasoning": meta.get("reasoning"),
-                "tool_call": meta.get("tool_call"),
-                "context": (meta.get("limit") or {}).get("context"),
-                "cost": meta.get("cost"),
-                "modalities": meta.get("modalities"),
-                "release_date": meta.get("release_date"),
-            }
-
-    # A deprecated row usually names its successor. The provider serves "latest",
-    # so the honest reading is the successor's facts, not dropping the model.
-    index = {mid: meta for data in body.values() for mid, meta in (data.get("models") or {}).items()}
-    for rec in rows.values():
-        by = rec.get("superseded_by")
-        if not by or rec.get("cross_generation"):
-            continue
-        target = index.get(by)
-        if target is None:
-            continue
-        rec["resolved_to"] = by
-        rec["reasoning"] = target.get("reasoning")
-        rec["tool_call"] = target.get("tool_call")
-        rec["cost"] = target.get("cost")
-        rec["deprecated"] = False        # the chain ends somewhere alive
-
-    # Now that the successor chain is resolved, keep only what a reader uses: the
-    # merge's working fields (cross_generation, resolved_to) are not evidence, and
-    # modalities was never asked for.
-    # What is read anywhere: the two gates, the price the test guards, the name
-    # the CSV falls back to, and the join/repair fields.
-    keep = {"deprecated", "superseded_by", "id", "provider", "name", "reasoning",
-            "tool_call", "cost"}
-    rows = {k: {f: v for f, v in rec.items() if f in keep} for k, rec in rows.items()}
-
-    return {
-        "source": MODELS_URL,
-        "fetched": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "updated": date.today().isoformat(),
-        "models": rows,
-    }
-
-
 TBENCH_URL = "https://www.tbench.ai/"
 
 
@@ -520,28 +425,10 @@ def build_tbench(store: dict) -> dict:
 
 def cmd_refresh(args) -> int:
     store = plans()
-    only = {s.strip() for s in
-            (args.only or "plans,models,tbench").split(",")
-            if s.strip()}
-    data = read_json(MODELS_FILE)
+    only = {s.strip() for s in (args.only or "plans,tbench").split(",") if s.strip()}
 
     if "plans" in only:
         refresh_plans(store, args.write)
-
-    if "models" in only:
-        try:
-            fresh = build_models(store)
-            gone = sum(1 for m in fresh["models"].values() if m["deprecated"])
-            reasons = sum(1 for m in fresh["models"].values() if m["reasoning"])
-            tools = sum(1 for m in fresh["models"].values() if m["tool_call"])
-            print(f"models.dev: {len(fresh['models'])} of our models, {gone} deprecated, "
-                  f"{reasons} reason, {tools} call tools")
-            if args.write:
-                data["models.dev"] = fresh
-                write_json(MODELS_FILE, data)
-                print(f"written: {MODELS_FILE.relative_to(REPO)}")
-        except Exception as exc:  # noqa: BLE001
-            print(f"models.dev unreadable ({exc!r}). Stored rows kept.")
 
 
     if "tbench" in only:
@@ -549,9 +436,8 @@ def cmd_refresh(args) -> int:
             fresh = build_tbench(store)
             print(f"terminal-bench: {len(fresh['models'])} of our models")
             if args.write:
-                data["tbench"] = fresh
-                write_json(MODELS_FILE, data)
-                print(f"written: {MODELS_FILE.relative_to(REPO)}")
+                write_json(TBENCH_FILE, fresh)
+                print(f"written: {TBENCH_FILE.relative_to(REPO)}")
         except Exception as exc:  # noqa: BLE001
             print(f"terminal-bench unreadable ({exc!r}). Stored rows kept.")
 
@@ -744,42 +630,17 @@ def judged_models() -> list[tuple[str, str | None]]:
     return out
 
 
-def gaps(row: dict) -> list[str]:
-    """The facts a decision needs and this row does not have."""
-    missing = []
-    if row["reasoning"] is None:
-        missing.append("reasoning")
-    if row["tool_call"] is None:
-        missing.append("tools")
-    if row["tb"] is None:
-        missing.append("tbench")
-    return missing
-
-
 def is_excluded(judged, model: str, provider: str) -> bool:
     key = norm(model.split("/")[-1])
     return any(k == key and (p is None or p == provider) for k, p in judged)
 
 
-def fact_of(table: dict, model_id: str, catalog_slug: str) -> dict:
-    """A serving lane is the same model: match it to its base row."""
-    probes = probes_for(model_id, catalog_slug)
-    for probe in probes:
-        if probe in table:
-            return table[probe]
-    for k, rec in table.items():
-        if any(p and (k.startswith(p[:12]) or p.startswith(k[:12])) for p in probes):
-            return rec
-    return {}
-
-
-def model_rows(plan: dict, catalog: dict, table: dict, board: dict) -> list[dict]:
+def model_rows(plan: dict, catalog: dict, board: dict) -> list[dict]:
     entries = ([{"id": slug, "catalog": slug} for slug in catalog]
                if plan["models"] == "catalog" else plan["models"])
     out = []
     for m in entries:
         cat = catalog.get(m.get("catalog") or "", {})
-        fact = fact_of(table, m["id"], m.get("catalog") or "")
         ranked = by_label(board, m["id"], m.get("catalog") or "")
         bare = m["id"].split("/")[-1]
         listed = m["list_turn_usd"] if "list_turn_usd" in m else cat.get("cost")
@@ -789,39 +650,15 @@ def model_rows(plan: dict, catalog: dict, table: dict, board: dict) -> list[dict
         out.append({
             "model": m["id"],
             "real_turn_usd": usage * leverage if usage is not None else None,
-            "name": cat.get("name") or fact.get("name") or m["id"],
+            "name": cat.get("name") or m["id"],
             "list_turn_usd": listed,
             "factor": factor,
             "effective_turn_usd": usage,
             "cache_write_usd_per_m": (plan.get("cache_write_usd_per_m") or {}).get(bare),
             "leverage": leverage,
-            "reasoning": fact.get("reasoning"),
-            "tool_call": fact.get("tool_call"),
             "tb": (ranked or {}).get("score"),
-            # What models.dev says the same turn costs, next to what the shop
-            # charges. A cross-check for a human, never an input: no gate reads
-            # this column, and `bench.py test` fails if one ever does.
-            "crosscheck_turn_usd": crosscheck_turn(fact.get("cost")),
         })
     return out
-
-
-def crosscheck_turn(cost: dict | None) -> float | None:
-    """A turn of 89k cached, 1k fresh and 1.5k written, at models.dev prices.
-
-    Not a price of anything this fold buys: models.dev is a third party with its
-    own lane and its own mix. This exists so a reader can see the shop's figure
-    next to somebody else's, and it stops there.
-    """
-    if not cost:
-        return None
-    try:
-        cached = float(cost.get("cache_read") or cost.get("input") or 0)
-        fresh = float(cost.get("input") or 0)
-        out = float(cost.get("output") or 0)
-    except (TypeError, ValueError):
-        return None
-    return (89_000 * cached + 1_000 * fresh + 1_500 * out) / 1_000_000
 
 
 CTX = 60_000          # the context a turn is priced at
@@ -851,16 +688,6 @@ def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, s
         return "out", f"cost {row['real_turn_usd']:.6f} > {cost_max:.6f}"
     if cost == 0:
         return "out", "free: not of interest"
-    if row["reasoning"] is False:
-        return "out", "models.dev: does not reason"
-    if row["tool_call"] is False:
-        return "out", "models.dev: no tool calling"
-    if row["reasoning"] is None and row["tool_call"] is None:
-        return "human", "models.dev has no row: reasoning and tools unknown"
-    if row["reasoning"] is None:
-        return "human", "reasoning unreported"
-    if row["tool_call"] is None:
-        return "human", "tool support unreported"
     if row["tb"] < cap_min:
         return "out", f"tbench {row['tb']:.1f} < {cap_min:.1f}"
     return "battery", ""
@@ -872,7 +699,7 @@ def cmd_select(args) -> int:
     static = gates["static"]
     cost_max, cap_min = float(static["cost_max"]), float(static["tbench_min"])
     catalog, board = catalogue(), tbench()
-    table, judged = identities(), judged_models()
+    judged = judged_models()
 
     print(f"fold 1 · price <= ${cost_max:.4f}/turn · Terminal-Bench >= {cap_min:.1f}\n")
     rows = []
@@ -886,7 +713,7 @@ def cmd_select(args) -> int:
         print(f"{pname}  [{plan['plan']} {money}{credits}]")
 
         buckets = {"battery": [], "human": [], "out": []}
-        for row in model_rows(plan, catalog, table, board):
+        for row in model_rows(plan, catalog, board):
             row["provider"] = pname        # before the gates: an exclusion is per lane
             bucket, why = classify(row, cost_max, cap_min, judged)
             row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
@@ -913,14 +740,6 @@ def cmd_select(args) -> int:
     human = [r for r in rows if r["bucket"] == "human"]
     print(f"\n{len(rows)} models: {len(battery)} to the battery, {len(human)} need a human, "
           f"{len(rows) - len(battery) - len(human)} out.\n")
-
-    gap_rows = [r for r in rows if r["bucket"] != "out" and gaps(r)]
-    if gap_rows:
-        print("PARA TI — falta un dato, y eso no lo decide el programa:")
-        for r in sorted(gap_rows, key=lambda x: x["effective_turn_usd"] or 0):
-            print(f"  {r['provider']:13s} {r['model'][:30]:30s} "
-                  f"real ${r['real_turn_usd']:.6f}  falta: {', '.join(gaps(r))}")
-        print()
 
     if human:
         print("waiting on a decision:")
@@ -1400,123 +1219,15 @@ def cmd_agentic(args) -> int:
     return 0 if wins == args.rounds else 1
 
 
-# --------------------------------------------------------------------------- the cost test
-
-COLUMN = "crosscheck_turn_usd"
-PRICED = ("list_turn_usd", "factor", "effective_turn_usd", "real_turn_usd", "leverage")
-
-
-def priced_rows(table: dict) -> dict:
-    """Fold 1 as the gates see it: no file written, no model called."""
-    gates = load_policy()[0]["static"]
-    catalog, judged, board = catalogue(), judged_models(), tbench()
-    out = {}
-    for provider, plan in plans()["providers"].items():
-        if plan.get("active") is False:      # fold 1 never prices a prepared plan
-            continue
-        for row in model_rows(plan, catalog, table, board):
-            row["provider"] = provider
-            bucket, why = classify(row, float(gates["cost_max"]),
-                                   float(gates["tbench_min"]), judged)
-            out[(provider, row["model"])] = (row, bucket, why)
-    return out
-
-
-def rewrite(node, fn):
-    """Scale every number in a cost block, tiers included."""
-    if isinstance(node, dict):
-        return {k: rewrite(v, fn) for k, v in node.items()}
-    if isinstance(node, list):
-        return [rewrite(v, fn) for v in node]
-    if isinstance(node, (int, float)) and not isinstance(node, bool):
-        return fn(node)
-    return node
-
-
-def mutate(table: dict, fn) -> dict:
-    """Rewrite every models.dev price. `None` drops the block entirely."""
-    out = copy.deepcopy(table)
-    for rec in out.values():
-        if fn is None:
-            rec["cost"] = None
-        elif isinstance(rec.get("cost"), dict):
-            rec["cost"] = rewrite(rec["cost"], fn)
-    return out
-
-
-def same_price(base: dict, other: dict, label: str) -> int:
-    problems = []
-    for key, (row, bucket, why) in base.items():
-        alt_row, alt_bucket, alt_why = other[key]
-        for field in PRICED:
-            if row[field] != alt_row[field]:
-                problems.append(f"{key[0]}/{key[1]} {field}: {row[field]} -> {alt_row[field]}")
-        if (bucket, why) != (alt_bucket, alt_why):
-            problems.append(f"{key[0]}/{key[1]} verdict: {bucket!r} -> {alt_bucket!r}")
-    print(f"  {'ok  ' if not problems else 'FAIL'} {label:22s} {len(base)} rows, "
-          f"{len(problems)} movements")
-    for line in problems[:8]:
-        print(f"         {line}")
-    return len(problems)
-
-
-def cmd_test(args) -> int:
-    table = identities()
-    base = priced_rows(table)
-    if not base:
-        print("FAIL: no rows priced, nothing to prove")
-        return 1
-    failures = 0
-
-    print(f"price independence ({len(base)} rows):")
-    scaled = priced_rows(mutate(table, lambda v: v * 1000))
-    failures += same_price(base, scaled, "cost x1000")
-    failures += same_price(base, priced_rows(mutate(table, lambda v: 0.0)), "cost zeroed")
-    failures += same_price(base, priced_rows(mutate(table, None)), "cost removed")
-
-    moved = sum(1 for k, (row, _, _) in base.items() if row[COLUMN] != scaled[k][0][COLUMN])
-    print(f"  {'ok  ' if moved else 'FAIL'} the mutation landed     {moved} cross-check figures moved")
-    failures += 0 if moved else 1
-
-    print("\nsignal dependence:")
-    muted = copy.deepcopy(table)
-    for rec in muted.values():
-        rec["reasoning"] = False
-    off = priced_rows(muted)
-    changed = [k for k in base if base[k][1] != off[k][1]]
-    good = changed and all(off[k][1] == "out" and "does not reason" in off[k][2] for k in changed)
-    print(f"  {'ok  ' if good else 'FAIL'} reasoning off          "
-          f"{len(changed)} verdicts moved, as they should")
-    failures += 0 if good else 1
-    no_money = sum(1 for k in base if base[k][0]["real_turn_usd"] != off[k][0]["real_turn_usd"])
-    print(f"  {'ok  ' if not no_money else 'FAIL'} and no price moved either  "
-          f"{no_money} priced columns changed")
-    failures += 0 if not no_money else 1
-
-    print("\nstructure:")
-    users = sorted(name for name, fn in inspect.getmembers(sys.modules[__name__], inspect.isfunction)
-                   if name != "cmd_test" and COLUMN in inspect.getsource(fn))
-    ok = users == ["model_rows"]
-    print(f"  {'ok  ' if ok else 'FAIL'} only model_rows writes it  {', '.join(users) or 'nobody'}")
-    failures += 0 if ok else 1
-    decision = inspect.getsource(classify)
-    ok = "crosscheck" not in decision and COLUMN not in decision
-    print(f"  {'ok  ' if ok else 'FAIL'} classify never looks at it")
-    failures += 0 if ok else 1
-
-    print(f"\n{'OK: models.dev is identity, never price' if not failures else 'FAIL: ' + str(failures)}")
-    return 0 if not failures else 1
-
-
 # --------------------------------------------------------------------------- main
 
 def main() -> int:
     p = argparse.ArgumentParser(prog="bench.py", description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    r = sub.add_parser("refresh", help="re-read the providers and both catalogues")
+    r = sub.add_parser("refresh", help="re-read the providers and the board")
     r.add_argument("--write", action="store_true", help="store what it parsed in data/")
-    r.add_argument("--only", help="plans,models,tbench (default: all)")
+    r.add_argument("--only", help="plans,tbench (default: both)")
     r.set_defaults(fn=cmd_refresh)
 
     pl = sub.add_parser("plan", help="what a subscription costs per token")
@@ -1542,9 +1253,6 @@ def main() -> int:
     a.add_argument("--model", required=True)
     a.add_argument("--rounds", type=int, default=3)
     a.set_defaults(fn=cmd_agentic)
-
-    t = sub.add_parser("test", help="models.dev cannot move a price")
-    t.set_defaults(fn=cmd_test)
 
     args = p.parse_args()
     return args.fn(args)

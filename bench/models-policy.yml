@@ -11,9 +11,8 @@
 # only part that spends tokens.
 #
 # Nothing here trusts the shop. Capability comes from Terminal-Bench 4.1, which
-# runs the tasks and grades whether they got done; identity and tool support from
-# models.dev; prices from each provider's own published catalogue. A provider
-# grading its own product is not evidence.
+# runs the tasks and grades whether they got done; prices come from each provider's
+# own published catalogue. A provider grading its own product is not evidence.
 
 version: 1
 updated: 2026-11-15
@@ -27,7 +26,7 @@ criteria:
   # index to Terminal-Bench's resolution rate. One scale replaced another, so the
   # number moved with it (30,0 -> 38,0) and the two are not comparable: exactly
   # the mistake this file is supposed to prevent.
-  method: "price, reasoning and tools, then the agentic fold; synthetic metrics inform, they do not veto"
+  method: "price and Terminal-Bench, then the agentic fold; synthetic metrics inform, they do not veto"
 
   phases:
     static:
@@ -39,11 +38,7 @@ criteria:
       # the only capability scale here. A model the board does not rank is not
       # bought - a purchase rule, not a verdict about the model.
       #
-      # models.dev answers "what is it": whether it reasons, whether it calls
-      # tools, its context and window, its canonical id across providers. It
-      # carries no score and is not asked for one.
-      #
-      # The provider is asked for neither: a shop grades its own product.
+      # The provider is not asked: a shop grades its own product.
       #
       # The floor is the envelope of what the menu runs on: DeepSeek V4.1 Flash
       # resolves 38,5 %, and nothing enters under it.
@@ -53,10 +48,6 @@ criteria:
       # flatters prepaid routes and punishes the generous plans, which is the
       # opposite of what the wallet says.
       cost_max: 0.0006
-      # Reasoning and tool calling are not knobs here: fold 1 refuses a row that
-      # does neither, and a row nobody has described waits for the owner instead
-      # of being guessed at. Writing them as flags invited the reader to think
-      # they could be turned off, so they are not written.
 
     measured:
       # These are floors for "broken", not targets for "good". A real agent run

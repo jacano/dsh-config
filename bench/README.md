@@ -10,13 +10,12 @@ python bench/bench.py plan               # what a subscription costs per token
 python bench/bench.py select             # fold 1: what is worth calling at all
 python bench/bench.py measure            # fold 2: the stored table against the gates
 python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
-python bench/bench.py test               # models.dev cannot move a price
 ```
 
 | | |
 | --- | --- |
 | `data/plans.json` | the plans, what they publish, and the catalogue they price from |
-| `data/models.json` | what a model is (models.dev) and what it does on Terminal-Bench |
+| `data/tbench.json` | the board: what each model does on Terminal-Bench |
 | `models-policy.yml` | the gates, what is admitted, what is excluded and why |
 | `models.csv` | the measured rows, medians of three rounds |
 
@@ -30,7 +29,7 @@ prices   every model a provider sells, in every lane, with that plan's discount
    │     or credit multiplier — and what the plan costs per token once the blend,
    │     the promo and the window are folded in          (bench.py plan)
    ↓
-fold 1   price → identity (models.dev: reason, tools) → Terminal-Bench → policy
+fold 1   price → Terminal-Bench → policy
    │     free, calls no model                            (bench.py select)
    ↓
 fold 2   speed, latency, cache, prefill, retention, errors, tool calls
@@ -93,20 +92,18 @@ What fold 1 will not do:
   [`models-policy.yml`](models-policy.yml), and a reason there can be scoped to one
   provider, because a measurement on one route says nothing about another.
 
-**One capability axis.** Terminal-Bench 4.1 (`tb`) is the only scale here: it runs
-terminal tasks and grades whether they got done, and it ranks model **and agent**
-— "38,5 with Claude Code" is a different claim from "38,5 alone", which is why the
-agent is stored with the number. `tbench_min` is the floor, and a model the board
-does not rank is not bought.
+**One scale, and nothing else about the model.** Terminal-Bench 4.1 (`tb`) is the
+only thing fold 1 knows about a model beyond its price: it runs terminal tasks and
+grades whether they got done, and it ranks model **and agent** — "38,5 with Claude
+Code" is a different claim from "38,5 alone", which is why the agent is stored with
+the number. `tbench_min` is the floor.
 
-One number, and only one, decides. A second capability scale is tempting and was
-dropped on purpose: not because it was wrong, but because a number that gates
-nothing ends up being quoted as if it did. What is left is the scale the policy
-names, printed on every row.
-
-A model the board does not rank is out, with that reason printed on the row: a
-purchase rule, not a judgement about the model. A row that is *old and unranked*
-is the same case and needs no second rule.
+The filter asks two questions and no more: what does it cost, and does the board
+rank it. A model the board does not rank is out, with that reason printed on the
+row — a purchase rule, not a judgement about the model. Everything else a model
+*could* be described by (does it reason, does it call tools, how much context) was
+removed on 2026-11-15: it gated nothing, and a number that gates nothing ends up
+being quoted as if it did.
 
 Missing data is never a reason to *exclude a model*, and the program enforces it: an
 entry in `excluded:` whose reason is a gap is ignored with a warning, so the row
@@ -156,22 +153,12 @@ numbers meaningless; that mistake was made once.
 | --- | --- | --- |
 | What does the plan cost, and what does it give? | `commandcode.ai/pricing`, `open-design.ai` | `data/plans.json` |
 | What does a token cost on that provider? | Command Code: its own catalogue. OpenDesign and OpenCode: their own price lists | `data/plans.json` |
-| Does it reason? Does it call tools? Context? | models.dev, a third party | `data/models.json` |
-| Can it do the work? | Terminal-Bench 4.1, executed and graded | `data/models.json` |
+| Can it do the work? | Terminal-Bench 4.1, executed and graded | `data/tbench.json` |
 | How does it behave on the wire? | measured here | `models.csv` |
 
 The provider is never asked to grade itself. Prices do come from the provider,
-because nobody else can know them — but the *capability* and the *shape* of a
-model come from catalogues that are not selling anything.
-
-**models.dev never prices anything.** The `cost` block it carries is copied into
-the shortlist as `crosscheck_turn_usd`, so a reader can put the shop's figure next
-to a third party's; models.dev quotes the peak lane (0,30 / 1,20 / 0,007), so that
-column runs about twice the catalogue's off-peak one and is the price of nothing.
-No gate reads it, and `python bench/bench.py test` keeps it that way: it
-multiplies those prices by a thousand, zeroes them and deletes them, then requires
-every priced column and every verdict to stay put — and, so the test cannot pass by
-looking at nothing, that turning a *signal* off does move verdicts.
+because nobody else can know them; whether the work gets done comes from a board
+that runs it and grades the result. Two sources, and neither one is the seller.
 
 ## Adding a model or a provider
 

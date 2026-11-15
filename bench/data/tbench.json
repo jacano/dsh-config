@@ -1,0 +1,427 @@
+{
+ "source": "https://www.tbench.ai/",
+ "benchmark": "Terminal-Bench 4.1",
+ "fetched": "2026-11-15T23:05:00+01:00",
+ "models": {
+  "opus55": {
+   "label": "Opus 5.5",
+   "score": 65.76,
+   "ci95": 3.11,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Sep 22, 2026",
+   "cost_usd": 4718.65,
+   "tokens": 8034082467
+  },
+  "fable52": {
+   "label": "Fable 5.2",
+   "score": 65.76,
+   "ci95": 2.85,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Nov 9, 2026",
+   "cost_usd": 16492.76,
+   "tokens": 15726404102
+  },
+  "sonnet55": {
+   "label": "Sonnet 5.5",
+   "score": 63.94,
+   "ci95": 3,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Sep 28, 2026",
+   "cost_usd": 7333.64,
+   "tokens": 19413047384
+  },
+  "gpt61sol": {
+   "label": "GPT-6.1 Sol",
+   "score": 60.91,
+   "ci95": 2.97,
+   "agent": "Codex",
+   "effort": "max",
+   "date": "Sep 29, 2026",
+   "cost_usd": 634.24,
+   "tokens": 1459936514
+  },
+  "gpt6astra": {
+   "label": "GPT-6 Astra",
+   "score": 60.3,
+   "ci95": 2.82,
+   "agent": "Codex",
+   "effort": "max",
+   "date": "Sep 3, 2026",
+   "cost_usd": 3267.18,
+   "tokens": 1529778322
+  },
+  "kimik31pro": {
+   "label": "Kimi K3.1 Pro",
+   "score": 59.7,
+   "ci95": 4.18,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Oct 24, 2026",
+   "cost_usd": 1086.66,
+   "tokens": 3163165614
+  },
+  "fable51": {
+   "label": "Fable 5.1",
+   "score": 57.58,
+   "ci95": 3.31,
+   "agent": "Claude Code",
+   "effort": "xhigh",
+   "date": "Sep 1, 2026",
+   "cost_usd": 4872.04,
+   "tokens": 2343414000
+  },
+  "gemini4argon": {
+   "label": "Gemini 4 Argon",
+   "score": 55.45,
+   "ci95": 2.85,
+   "agent": "Antigravity CLI",
+   "effort": "high",
+   "date": "Sep 30, 2026",
+   "cost_usd": 1108.98,
+   "tokens": 2779705514
+  },
+  "opus5": {
+   "label": "Opus 5",
+   "score": 53.33,
+   "ci95": 3.09,
+   "agent": "Claude Code",
+   "effort": "xhigh",
+   "date": "Jul 24, 2026",
+   "cost_usd": 6086.22,
+   "tokens": 6897141993
+  },
+  "gpt61terra": {
+   "label": "GPT-6.1 Terra",
+   "score": 53.33,
+   "ci95": 3.09,
+   "agent": "Codex",
+   "effort": "max",
+   "date": "Oct 26, 2026",
+   "cost_usd": 874.44,
+   "tokens": 8481798574
+  },
+  "gpt6sol": {
+   "label": "GPT-6 Sol",
+   "score": 50.3,
+   "ci95": 3.23,
+   "agent": "Codex",
+   "effort": "max",
+   "date": "Sep 22, 2026",
+   "cost_usd": 1451.32,
+   "tokens": 4977940044
+  },
+  "fable5": {
+   "label": "Fable 5",
+   "score": 44.85,
+   "ci95": 3.83,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Jun 9, 2026",
+   "cost_usd": 7265.01,
+   "tokens": 3785220369
+  },
+  "glm53": {
+   "label": "GLM-5.3",
+   "score": 41.21,
+   "ci95": 3.28,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Aug 14, 2026",
+   "cost_usd": 2727.63,
+   "tokens": 8677039373
+  },
+  "haiku55": {
+   "label": "Haiku 5.5",
+   "score": 40,
+   "ci95": 3.61,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Oct 7, 2026",
+   "cost_usd": 952.47,
+   "tokens": 12076550775
+  },
+  "grok47": {
+   "label": "Grok 4.7",
+   "score": 38.79,
+   "ci95": 3.59,
+   "agent": "Grok Build",
+   "effort": "xhigh",
+   "date": "Sep 21, 2026",
+   "cost_usd": 3683.287146,
+   "tokens": 5485862389
+  },
+  "gpt56sol": {
+   "label": "GPT-5.6 Sol",
+   "score": 38.48,
+   "ci95": 3.83,
+   "agent": "Codex",
+   "effort": "max",
+   "date": "Jun 26, 2026",
+   "cost_usd": 2541.7,
+   "tokens": 4409948969
+  },
+  "deepseekv41flash1017": {
+   "label": "DeepSeek V4.1 Flash 1017",
+   "score": 38.48,
+   "ci95": 3.76,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Oct 17, 2026",
+   "cost_usd": 184.89,
+   "tokens": 8187123046
+  },
+  "hy4": {
+   "label": "Hy4",
+   "score": 37.88,
+   "ci95": 3.51,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Nov 4, 2026",
+   "cost_usd": 347.6,
+   "tokens": 5345903946
+  },
+  "glm53flash": {
+   "label": "GLM-5.3-Flash",
+   "score": 36.97,
+   "ci95": 3.64,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Aug 26, 2026",
+   "cost_usd": 374.72,
+   "tokens": 8180504468
+  },
+  "museember": {
+   "label": "Muse Ember",
+   "score": 30.61,
+   "ci95": 3.8,
+   "agent": "Muse Code",
+   "effort": "xhigh",
+   "date": "Nov 9, 2026",
+   "cost_usd": 157.18,
+   "tokens": 8131161565
+  },
+  "mistrallarge4": {
+   "label": "Mistral Large 4",
+   "score": 27.58,
+   "ci95": 3.87,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Oct 6, 2026",
+   "cost_usd": 718.4,
+   "tokens": 5768673528
+  },
+  "qwen38max0902": {
+   "label": "Qwen3.8-Max-0902",
+   "score": 26.97,
+   "ci95": 3.87,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Sep 2, 2026",
+   "cost_usd": 4635.67,
+   "tokens": 2957967711
+  },
+  "mimov26pro": {
+   "label": "MiMo V2.6 Pro",
+   "score": 26.97,
+   "ci95": 3.61,
+   "agent": "mini-swe-agent",
+   "effort": "none",
+   "date": "Sep 22, 2026",
+   "cost_usd": 282.32,
+   "tokens": 7789265216
+  },
+  "opus48": {
+   "label": "Opus 4.8",
+   "score": 23.64,
+   "ci95": 3.59,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "May 28, 2026",
+   "cost_usd": 6481.26,
+   "tokens": 6415823126
+  },
+  "kimik3": {
+   "label": "Kimi K3",
+   "score": 23.03,
+   "ci95": 3.73,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Jul 16, 2026",
+   "cost_usd": 1919.83,
+   "tokens": 4923348457
+  },
+  "gpt56terra": {
+   "label": "GPT-5.6 Terra",
+   "score": 21.52,
+   "ci95": 3.25,
+   "agent": "Codex",
+   "effort": "max",
+   "date": "Jun 26, 2026",
+   "cost_usd": 1733.52,
+   "tokens": 5683805798
+  },
+  "grok46": {
+   "label": "Grok 4.6",
+   "score": 19.7,
+   "ci95": 3.09,
+   "agent": "Grok Build",
+   "effort": "high",
+   "date": "Aug 12, 2026",
+   "cost_usd": 3591.58,
+   "tokens": 4001923428
+  },
+  "gemini38flash": {
+   "label": "Gemini 3.8 Flash",
+   "score": 18.18,
+   "ci95": 3.36,
+   "agent": "mini-SWE-agent",
+   "effort": "high",
+   "date": "Sep 2, 2026",
+   "cost_usd": 1828.77,
+   "tokens": 17189729495
+  },
+  "gpt56luna": {
+   "label": "GPT-5.6 Luna",
+   "score": 17.58,
+   "ci95": 2.91,
+   "agent": "Codex",
+   "effort": "max",
+   "date": "Jun 26, 2026",
+   "cost_usd": 346.67,
+   "tokens": 11557463640
+  },
+  "mimov26flash": {
+   "label": "MiMo V2.6 Flash",
+   "score": 16.06,
+   "ci95": 3.36,
+   "agent": "mini-swe-agent",
+   "effort": "none",
+   "date": "Sep 22, 2026",
+   "cost_usd": 194.6,
+   "tokens": 9904029742
+  },
+  "gpt6luna": {
+   "label": "GPT-6 Luna",
+   "score": 15.15,
+   "ci95": 2.66,
+   "agent": "Codex",
+   "effort": "max",
+   "date": "Sep 22, 2026",
+   "cost_usd": 72.14,
+   "tokens": 3909124893
+  },
+  "musespark13": {
+   "label": "Muse Spark 1.3",
+   "score": 14.85,
+   "ci95": 3,
+   "agent": "Muse Code",
+   "effort": "xhigh",
+   "date": "Sep 2, 2026",
+   "cost_usd": 0,
+   "tokens": 9010923518
+  },
+  "inklingsmall2": {
+   "label": "Inkling Small 2",
+   "score": 13.03,
+   "ci95": 2.85,
+   "agent": "mini-swe-agent",
+   "effort": "xhigh",
+   "date": "Nov 5, 2026",
+   "cost_usd": 963.65,
+   "tokens": 27469901900
+  },
+  "gemini37flash": {
+   "label": "Gemini 3.7 Flash",
+   "score": 12.42,
+   "ci95": 2.52,
+   "agent": "mini-SWE-agent",
+   "effort": "high",
+   "date": "Aug 13, 2026",
+   "cost_usd": 1261.87,
+   "tokens": 11137189802
+  },
+  "grok45": {
+   "label": "Grok 4.5",
+   "score": 12.42,
+   "ci95": 2.62,
+   "agent": "Grok Build",
+   "effort": "high",
+   "date": "Jul 16, 2026",
+   "cost_usd": 2094.11,
+   "tokens": 3402536479
+  },
+  "sonnet5": {
+   "label": "Sonnet 5",
+   "score": 12.12,
+   "ci95": 3,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Jun 30, 2026",
+   "cost_usd": 9603.86,
+   "tokens": 21562180742
+  },
+  "minimaxm3": {
+   "label": "MiniMax M3",
+   "score": 7.58,
+   "ci95": 2.75,
+   "agent": "mini-swe-agent",
+   "effort": "none",
+   "date": "Jun 1, 2026",
+   "cost_usd": 1149.33,
+   "tokens": 16498936190
+  },
+  "deepseekv4pro0813": {
+   "label": "DeepSeek V4 Pro 0813",
+   "score": 6.67,
+   "ci95": 2.52,
+   "agent": "Claude Code",
+   "effort": "max",
+   "date": "Aug 13, 2026",
+   "cost_usd": 727.02,
+   "tokens": 3830219168
+  },
+  "gpt54mini": {
+   "label": "GPT-5.4 Mini",
+   "score": 1.82,
+   "ci95": 1.26,
+   "agent": "Codex",
+   "effort": "xhigh",
+   "date": "Mar 17, 2026",
+   "cost_usd": 671.57,
+   "tokens": 4185553052
+  },
+  "inklingsmall": {
+   "label": "Inkling Small",
+   "score": 0.91,
+   "ci95": 0.94,
+   "agent": "mini-swe-agent",
+   "effort": "none",
+   "date": "Jul 30, 2026",
+   "cost_usd": 49.55,
+   "tokens": 373378039
+  },
+  "nemotron35supervl": {
+   "label": "Nemotron 3.5 Super VL",
+   "score": 0.3,
+   "ci95": 0.59,
+   "agent": "mini-swe-agent",
+   "effort": "none",
+   "date": "Oct 15, 2026",
+   "cost_usd": 167.29,
+   "tokens": 3349579857
+  },
+  "inkling": {
+   "label": "Inkling",
+   "score": 0,
+   "ci95": 0,
+   "agent": "mini-swe-agent",
+   "effort": "none",
+   "date": "Jul 17, 2026",
+   "cost_usd": 1011.52,
+   "tokens": 1389283126
+  }
+ }
+}
