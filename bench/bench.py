@@ -614,7 +614,7 @@ def plan_rows(day: date, want: str) -> list[dict]:
 
 
 def cmd_plan(args) -> int:
-    day = date.fromisoformat(args.today) if args.today else date.today()
+    day = args.today or date.today()
     got = plan_rows(day, args.model)
     if not got:
         print(f"no plan serves {args.model}; try an id from data/plans.json")
@@ -1046,6 +1046,13 @@ def check() -> int:
     models, catalog = load_measured(), catalogue()
     problems = []
 
+    # A measured row with no price is invisible to the gates: it fails static for
+    # a cost of nothing and never says so, because it is not admitted either.
+    for m in models.values():
+        if m["cost_override"] is None and not m["catalog"]:
+            problems.append(f"{m['id']} is measured but has no price: add a "
+                            f"cost_override, or the catalog_slug it is sold under")
+
     print("phase 1 - static (free):  " + "  ".join(f"{k}={v}" for k, v in GATES["static"].items()))
     overrides = {m["catalog"]: m["override"] for m in models.values() if m["override"] is not None}
     survivors = []
@@ -1105,9 +1112,12 @@ def check() -> int:
 
 
 def api_key() -> str:
+    if not CREDS.exists():
+        raise SystemExit(f"no {CREDS}. A live run needs {KEY_ENV} there; every free "
+                         f"subcommand works without it.")
     m = re.search(KEY_ENV + r':\s*"([^"]+)"', CREDS.read_text(encoding="utf-8"))
     if not m:
-        raise SystemExit(f"no {KEY_ENV} in ~/.dsh/.credentials.yaml")
+        raise SystemExit(f"no {KEY_ENV} in {CREDS}")
     return m.group(1)
 
 
@@ -1243,13 +1253,14 @@ def measure_route(model: str) -> dict:
 
 def live(model: str, capability: float, cost: float) -> int:
     global KEY
-    KEY = api_key()
-
+    # Phase 1 first, and it is free: a row that fails it costs nothing to reject,
+    # so it must not need a credential to be rejected.
     static_fail = fails_static(capability, cost, GATES["static"])
     if static_fail:
         print(f"{model}: fails phase 1 - {', '.join(static_fail)}. Nothing measured.")
         return 1
 
+    KEY = api_key()
     print(f"{model}: phase 1 clear (capability {capability:.1f}, ${cost:.4f}/turn)")
     values = measure_route(model)
     row = {"id": model, "name": model, "override": capability, **values, "catalog": ""}
@@ -1501,7 +1512,8 @@ def main() -> int:
     r.set_defaults(fn=cmd_refresh)
 
     pl = sub.add_parser("plan", help="what a subscription costs per token")
-    pl.add_argument("--today", help="a date, for the promos of that day")
+    pl.add_argument("--today", type=date.fromisoformat,
+                   help="a date (YYYY-MM-DD), for the promos of that day")
     pl.add_argument("--model", default="deepseek-v4-1-flash")
     pl.add_argument("--write", action="store_true", help="save a snapshot")
     pl.set_defaults(fn=cmd_plan)
