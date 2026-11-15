@@ -642,18 +642,17 @@ def cold_call(row: dict) -> float | None:
 
 
 def classify(row: dict, cost_max: float, cap_min: float) -> tuple[str, str]:
-    # The board first: it is one dict lookup, it decides more than anything else
-    # here, and a model it does not rank has no business being priced, described
-    # or asked about.
+    # The board, both questions at once and first: is it ranked, and does it clear
+    # the floor. A model that fails either has no business being priced.
     if row["tb"] is None:
         return "out", "not on Terminal-Bench, and this policy buys only what it ranks"
+    if row["tb"] < cap_min:
+        return "out", f"tbench {row['tb']:.1f} < {cap_min:.1f}"
     cost = row["effective_turn_usd"]
     if cost is None or row["real_turn_usd"] is None:
         return "human", "no price on record"
     if row["real_turn_usd"] > cost_max:
         return "out", f"cost {row['real_turn_usd']:.6f} > {cost_max:.6f}"
-    if row["tb"] < cap_min:
-        return "out", f"tbench {row['tb']:.1f} < {cap_min:.1f}"
     return "battery", ""
 
 
@@ -664,7 +663,7 @@ def cmd_select(args) -> int:
     cost_max, cap_min = float(static["cost_max"]), float(static["tbench_min"])
     catalog, board = catalogue(), tbench()
 
-    print(f"fold 1 · price <= ${cost_max:.4f}/turn · Terminal-Bench >= {cap_min:.1f}\n")
+    print(f"fold 1 · Terminal-Bench >= {cap_min:.1f} · price <= ${cost_max:.4f}/turn\n")
     rows = []
     for pname, plan in store["providers"].items():
         if plan.get("active") is False:
