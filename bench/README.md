@@ -98,6 +98,10 @@ only buys what AA can rank, which it does (`require_aa: 1`). Then the row is out
 with that reason written on it: a purchase rule, not a judgement about the model.
 Set the flag to 0 and the questions come back.
 
+A model AA does not rank can still be bought, if the owner writes the number down
+in `capability_overrides:` with its basis. The row prints with a `*` and the basis
+under the table, so a borrowed score never passes for a measured one.
+
 Missing data is never a reason to *exclude a model*, and the program enforces it: an
 entry in `excluded:` whose reason is a gap is ignored with a warning, so the row
 surfaces as a question instead of disappearing. A datum that is absent cannot be a

@@ -142,6 +142,23 @@ def load_policy() -> tuple[dict, set]:
             admitted.add(m.group(1))
     return gates, admitted
 
+
+def capability_overrides() -> dict[str, tuple[float, str]]:
+    """Scores the sources cannot give, written down by the owner with a basis."""
+    out: dict[str, tuple[float, str]] = {}
+    inside = False
+    for line in POLICY.read_text(encoding="utf-8").splitlines():
+        if line.startswith("capability_overrides:"):
+            inside = True
+            continue
+        if inside and line and not line.startswith((" ", "#")):
+            break
+        m = re.match(r"\s*-?\s*\{id:\s*([^,]+),\s*score:\s*([\d.]+)", line)
+        if inside and m:
+            basis = re.search(r'basis:\s*"([^"]*)"', line)
+            out[norm(m.group(1))] = (float(m.group(2)), basis.group(1) if basis else "")
+    return out
+
 # --------------------------------------------------------------------------- refresh
 
 MONTHS = {name: i for i, name in enumerate(
@@ -854,6 +871,7 @@ def cmd_select(args) -> int:
     cap_min = float(gates["capability_min"])
     catalog = catalogue()
     table, score_table, judged = identities(), scores(), judged_models()
+    overrides = capability_overrides()
     admitted_ids = load_policy()[1]
     dates = [fact_of(table, i.split("/")[-1], "").get("release_date") for i in admitted_ids]
     oldest = min([d for d in dates if d], default=None)
@@ -871,6 +889,10 @@ def cmd_select(args) -> int:
         buckets = {"battery": [], "human": [], "out": []}
         for row in model_rows(plan, catalog, table, score_table):
             row["provider"] = pname        # before the gates: an exclusion is per lane
+            if row["aa"] is None:
+                borrowed = overrides.get(norm(row["model"].split("/")[-1]))
+                if borrowed:
+                    row["aa"], row["aa_basis"] = borrowed
             bucket, why = classify(row, cost_max, cap_min, judged, oldest,
                                    require_aa=bool(gates.get("require_aa")))
             row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
@@ -882,13 +904,18 @@ def cmd_select(args) -> int:
         for row in sorted(buckets["battery"], key=lambda r: r["effective_turn_usd"]):
             cold = cold_call(row)
             extra = f"  1.a ${cold:.5f}" if cold else ""
+            mark = "*" if row.get("aa_basis") else ""
             print(f"  run   {pname:13s} {row['model'][:28]:28s} "
-                  f"uso ${row['effective_turn_usd']:.5f}  real ${row['real_turn_usd']:.6f}{extra}")
+                  f"uso ${row['effective_turn_usd']:.5f}  real ${row['real_turn_usd']:.6f}{extra}{mark}")
         for row in sorted(buckets["human"], key=lambda r: r["effective_turn_usd"]):
             aa = "-" if row["aa"] is None else f"{row['aa']:.1f}"
             print(f"  ????  {pname:13s} {row['model'][:28]:28s} "
                   f"real ${row['real_turn_usd']:.6f}  AA {aa:>5}  {row['why']}")
         print(f"  ({len(buckets['out'])} out)")
+
+    for row in rows:
+        if row.get("aa_basis"):
+            print(f"  * {row['model']}: AA {row['aa']:.1f} is the owner's, not AA's — {row['aa_basis']}")
 
     battery = [r for r in rows if r["bucket"] == "battery"]
     human = [r for r in rows if r["bucket"] == "human"]
@@ -1094,8 +1121,12 @@ def check() -> int:
         # AA first: it is the only comparable scale. The measured override is the
         # bridge for a row AA has not scored.
         capability, _ = aa_of(RATINGS, m["id"], m["catalog"])
+        if capability is None and m["override"] is not None:
+            capability = m["override"]
+        if capability is None and norm(m["id"].split("/")[-1]) in capability_overrides():
+            capability = capability_overrides()[norm(m["id"].split("/")[-1])][0]
         if capability is None:
-            capability = m["override"] if m["override"] is not None else row.get("capability")
+            capability = row.get("capability")
         # a model sold on another plan has its own price: the catalogue is Command Code's
         cost = m["cost_override"] if m["cost_override"] is not None else row.get("cost")
         f2 = fails_measured(m, capability, cost, GATES["measured"])

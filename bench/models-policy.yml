@@ -16,7 +16,15 @@
 # A provider grading its own product is not evidence.
 
 version: 1
-updated: 2026-11-11
+updated: 2026-11-15
+
+# A number the sources cannot give. AA does not rank every model a shop sells,
+# and a row this repo cannot compare is a row it cannot gate on - so the owner
+# decides, in writing, and the row becomes measurable like any other. Score is
+# on the AA scale by construction; the basis is what makes it an inference and
+# not a measurement.
+capability_overrides:
+  - {id: ornith-1-5-122b, score: 32.0, basis: "no AA row for the family; the maker's peer table puts it level with DeepSeek V4 Flash, which AA ranks 32,6"}
 
 criteria:
   # Thresholds are the envelope of the admitted set: no row may be worse than the
