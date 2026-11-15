@@ -4,7 +4,7 @@
     presets:
       danger-full-access: { sandbox: danger-full-access, approval: never }
     defaultPreset: danger-full-access
-- { id: agent-default-model, name: "@deepseek-ai/dsh-agent-default-model", config: { provider: opendesign-anthropic, model: claude-haiku-5.5 } }
+- { id: agent-default-model, name: "@deepseek-ai/dsh-agent-default-model", config: { provider: opendesign, model: deepseek-v4.1-flash } }
 - { id: llm-deepseek, disabled: true }
 - { id: llm-deepseek-account, disabled: true }
 - { id: web-search-deepseek, disabled: true }
@@ -46,7 +46,7 @@
       opendesign-anthropic:
         displayName: OpenDesign (Claude)
         api: anthropic-messages
-        baseURL: https://amr-link.open-design.ai/v1
+        baseURL: https://amr-link.open-design.ai
         apiKeyEnv: OPENDESIGN_API_KEY
         defaultContextWindow: 1000000
         defaultMaxTokens: 32768

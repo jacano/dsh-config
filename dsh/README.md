@@ -108,9 +108,10 @@ Claude does not speak Chat Completions on this provider: every `claude-*` id in
 answers 400 to `thinking.type.enabled` and wants adaptive thinking plus
 `output_config.effort`.
 
-The default model is `deepseek/deepseek-v4.1-flash-fast`: the owner's pick, and the
-safe one — cheapest on a cold cache, stable across measurement rounds, and on the
-completions route, so an Anthropic outage leaves a working model behind. Each label
+The default model is `deepseek-v4.1-flash` on OpenDesign: 0,000060 a turn and
+105 t/s, the cheapest route the menu has. It sits on the completions route, so an
+Anthropic outage leaves a working model behind, and it is the last thing standing
+now that the Command Code subscription has lapsed. Each label
 is the `name` the provider's catalog returns for that id, copied verbatim,
 parentheses included.
 
