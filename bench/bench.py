@@ -77,6 +77,33 @@ def norm(s) -> str:
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
 
 
+def probes_for(model_id: str, catalog_slug: str, lanes=LANES) -> list[str]:
+    """The keys a model may be filed under: its bare name, its lane, its build."""
+    probes = []
+    for raw in (catalog_slug, model_id.split("/")[-1], model_id):
+        if not raw:
+            continue
+        probes.append(norm(raw))
+        base = raw
+        for lane in lanes:
+            base = base.replace(f"-{lane}", "")
+        probes.append(norm(base))
+    return probes
+
+
+def by_build(table: dict, probes: list[str]) -> dict | None:
+    """A source may name a build, not a lane: "x-1017" is the model with a number
+    glued on. Only bare digits count, or "flash" would reach "flash-fast"."""
+    for probe in probes:
+        if not probe:
+            continue
+        for key, rec in table.items():
+            rest = key[len(probe):] if key.startswith(probe) else ""
+            if rest.isdigit():
+                return rec
+    return None
+
+
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -90,6 +117,12 @@ def fetch(url: str, headers: dict | None = None, timeout: int = 120) -> str:
     req = Request(url, headers={**UA, **(headers or {})})
     with urlopen(req, timeout=timeout) as resp:
         return resp.read().decode("utf-8", "replace")
+
+
+def snapshot(name: str) -> Path:
+    """A dated artefact under snapshots/, which git does not track."""
+    SNAPSHOTS.mkdir(parents=True, exist_ok=True)
+    return SNAPSHOTS / name
 
 
 def text_of(html: str) -> str:
@@ -516,7 +549,8 @@ def build_forcebench(store: dict) -> dict:
 
 def cmd_refresh(args) -> int:
     store = plans()
-    only = {s.strip() for s in (args.only or "plans,models,capability,forcebench").split(",") if s.strip()}
+    only = {s.strip() for s in (args.only or "plans,models,capability,forcebench").split(",")
+            if s.strip()}
     data = read_json(MODELS_FILE)
 
     if "plans" in only:
@@ -772,15 +806,7 @@ def is_excluded(judged, model: str, provider: str) -> bool:
 
 def fact_of(table: dict, model_id: str, catalog_slug: str) -> dict:
     """A serving lane is the same model: match it to its base row."""
-    probes = []
-    for raw in (catalog_slug, model_id.split("/")[-1], model_id):
-        if not raw:
-            continue
-        probes.append(norm(raw))
-        base = raw
-        for lane in LANES:
-            base = base.replace(f"-{lane}", "")
-        probes.append(norm(base))
+    probes = probes_for(model_id, catalog_slug)
     for probe in probes:
         if probe in table:
             return table[probe]
@@ -791,26 +817,11 @@ def fact_of(table: dict, model_id: str, catalog_slug: str) -> dict:
 
 
 def score_of(table: dict, model_id: str, catalog_slug: str) -> dict:
-    probes = []
-    for raw in (catalog_slug, model_id.split("/")[-1], model_id):
-        if not raw:
-            continue
-        probes.append(norm(raw))
-        base = raw
-        for lane in LANES:
-            base = base.replace(f"-{lane}", "")
-        probes.append(norm(base))
+    probes = probes_for(model_id, catalog_slug)
     for probe in probes:
         if probe in table:
             return table[probe]
-    for probe in probes:
-        if not probe:
-            continue
-        for key, rec in table.items():
-            rest = key[len(probe):] if key.startswith(probe) else ""
-            if rest.isdigit():
-                return rec
-    return {}
+    return by_build(table, probes) or {}
 
 
 def model_rows(plan: dict, catalog: dict, table: dict, scores_table: dict) -> list[dict]:
@@ -924,9 +935,9 @@ def classify(row: dict, cost_max: float, cap_min: float, judged,
 
 def cmd_select(args) -> int:
     store = plans()
-    gates = load_policy()[0]["static"]
-    cost_max = float(gates["cost_max"])
-    cap_min = float(gates["capability_min"])
+    gates, admitted_ids = load_policy()
+    static = gates["static"]
+    cost_max, cap_min = float(static["cost_max"]), float(static["capability_min"])
     catalog = catalogue()
     table, score_table, judged = identities(), scores(), judged_models()
     overrides = capability_overrides()
@@ -945,7 +956,6 @@ def cmd_select(args) -> int:
                 if rest.isdigit():
                     return rec["score"] * 100
         return None
-    admitted_ids = load_policy()[1]
     dates = [fact_of(table, i.split("/")[-1], "").get("release_date") for i in admitted_ids]
     oldest = min([d for d in dates if d], default=None)
 
@@ -955,7 +965,8 @@ def cmd_select(args) -> int:
         if plan.get("active") is False:
             print(f"\n{pname}  [prepared, not enabled] {plan.get('note', '')[:90]}")
             continue
-        money = f"${plan['fee_usd']:.0f}/{plan.get('billing', 'mo')}" if plan.get("fee_usd") else "prepaid"
+        money = (f"${plan['fee_usd']:.0f}/{plan.get('billing', 'mo')}"
+                 if plan.get("fee_usd") else "prepaid")
         credits = f" + ${plan['credits_usd']:.0f} credits" if plan.get("credits_usd") else ""
         print(f"{pname}  [{plan['plan']} {money}{credits}]")
 
@@ -967,7 +978,7 @@ def cmd_select(args) -> int:
                 if borrowed:
                     row["aa"], row["aa_basis"] = borrowed
             bucket, why = classify(row, cost_max, cap_min, judged, oldest,
-                                   require_aa=bool(gates.get("require_aa")))
+                                   require_aa=bool(static.get("require_aa")))
             row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
                        plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why,
                        cold_call_usd=cold_call(row))
@@ -992,11 +1003,13 @@ def cmd_select(args) -> int:
 
     for row in rows:
         if row.get("aa_basis"):
-            print(f"  * {row['model']}: AA {row['aa']:.1f} is the owner's, not AA's — {row['aa_basis']}")
+            print(f"  * {row['model']}: AA {row['aa']:.1f} is the owner's, not AA's — "
+                  f"{row['aa_basis']}")
 
     if fb:
-        print(f"  fb = Forcebench v{read_json(MODELS_FILE)['forcebench']['version']}, 272 Salesforce "
-              f"tasks run against hidden tests — another question, not the AA scale")
+        version = read_json(MODELS_FILE)["forcebench"]["version"]
+        print(f"  fb = Forcebench v{version}, 272 Salesforce tasks run against hidden tests "
+              f"— another question, not the AA scale")
 
     battery = [r for r in rows if r["bucket"] == "battery"]
     human = [r for r in rows if r["bucket"] == "human"]
@@ -1014,7 +1027,8 @@ def cmd_select(args) -> int:
     if human:
         print("waiting on a decision:")
         for r in sorted(human, key=lambda x: x["effective_turn_usd"] or 0):
-            print(f"  {r['provider']:13s} {r['model']:30s} real ${r['real_turn_usd']:.6f}  {r['why']}")
+            print(f"  {r['provider']:13s} {r['model']:30s} "
+                  f"real ${r['real_turn_usd']:.6f}  {r['why']}")
 
     if args.write:
         path = snapshot(f"shortlist-{date.today().isoformat()}.csv")
@@ -1026,9 +1040,7 @@ def cmd_select(args) -> int:
     return 0
 
 
-def snapshot(name: str) -> Path:
-    SNAPSHOTS.mkdir(parents=True, exist_ok=True)
-    return SNAPSHOTS / name
+
 
 # --------------------------------------------------------------------------- measure: fold 2
 
@@ -1045,6 +1057,13 @@ TOOLS = [
 TOOL_PROMPT = ("Call get_weather for Seville and get_time for Seville. "
                "Use both tools in this single reply. Do not answer in prose.")
 
+
+def corpus(start: int, lines: int) -> str:
+    """The reference text, from line `start`, `lines` lines long."""
+    return "".join(CORPUS.format(i=i) for i in range(start, start + lines))
+
+# Fewer lanes than LANES on purpose: AA files "Qwen3.8 Max" under "max", and
+# stripping that would send the lookup to a different model.
 AA_LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync")
 CONTEXT_K = 60
 ANSWER_TOKENS = 1500
@@ -1074,30 +1093,13 @@ def load_measured() -> dict:
 
 
 def aa_of(ratings: dict, model_id: str, catalog_slug: str):
-    probes = []
-    for raw in (catalog_slug, model_id.split("/")[-1], model_id):
-        if not raw:
-            continue
-        probes.append(norm(raw))
-        base = raw
-        for lane in AA_LANES:
-            base = base.replace(f"-{lane}", "")
-        probes.append(norm(base))
+    probes = probes_for(model_id, catalog_slug, AA_LANES)
     for probe in probes:
         if probe in ratings:
             rec = ratings[probe]
             return rec.get("intelligence"), rec.get("is_reasoning")
-    # AA names a build, not a lane: "deepseek-v4.1-flash-1017" is the model with
-    # a build number glued on. A suffix of bare digits is that and nothing else;
-    # "deepseekv41flash" must not reach "deepseekv41flashfast".
-    for probe in probes:
-        if not probe:
-            continue
-        for key, rec in ratings.items():
-            rest = key[len(probe):] if key.startswith(probe) else ""
-            if rest.isdigit():
-                return rec.get("intelligence"), rec.get("is_reasoning")
-    return None, None
+    rec = by_build(ratings, probes)
+    return (rec.get("intelligence"), rec.get("is_reasoning")) if rec else (None, None)
 
 
 def fails_static(capability, cost, g):
@@ -1124,8 +1126,8 @@ def turn_time(m):
     return ttft + ANSWER_TOKENS / m["speed"]
 
 
-def fails_measured(m, capability, cost, g, include_static=True):
-    f = fails_static(capability, cost, GATES["static"]) if include_static else []
+def fails_measured(m, capability, cost, g):
+    f = fails_static(capability, cost, GATES["static"])
     if m["speed"] is None or m["speed"] < g["speed_min"]:
         f.append(f"speed {m['speed'] or 0:.0f} < {g['speed_min']:.0f}")
     if m["ttft"] is None or m["ttft"] > g["latency_max"]:
@@ -1196,7 +1198,7 @@ def check() -> int:
     print("phase 2 - measured:       " + "  ".join(f"{k}={v}" for k, v in GATES["measured"].items()))
     print("phase 3 - fitness:        " + "  ".join(f"{k}={v}" for k, v in GATES["fitness"].items()))
 
-    RATINGS = scores()
+    RATINGS, OVERRIDES = scores(), capability_overrides()
     for m in models.values():
         row = catalog.get(m["catalog"], {})
         # AA first: it is the only comparable scale. The measured override is the
@@ -1204,8 +1206,8 @@ def check() -> int:
         capability, _ = aa_of(RATINGS, m["id"], m["catalog"])
         if capability is None and m["override"] is not None:
             capability = m["override"]
-        if capability is None and norm(m["id"].split("/")[-1]) in capability_overrides():
-            capability = capability_overrides()[norm(m["id"].split("/")[-1])][0]
+        if capability is None and OVERRIDES.get(norm(m["id"].split("/")[-1])):
+            capability = OVERRIDES[norm(m["id"].split("/")[-1])][0]
         if capability is None:
             capability = row.get("capability")
         # a model sold on another plan has its own price: the catalogue is Command Code's
@@ -1299,7 +1301,7 @@ def usage_tokens(data: dict) -> tuple[int, int]:
 
 def measure_route(model: str) -> dict:
     print(f"\n=== {model} ===")
-    prefix = "".join(CORPUS.format(i=i) for i in range(900))  # ~36k tokens
+    prefix = corpus(0, 900)  # ~36k tokens
 
     speeds = []
     for _ in range(3):
@@ -1318,13 +1320,13 @@ def measure_route(model: str) -> dict:
     points = []
     for lines in (120, 480, 1400):
         start = time.perf_counter()
-        call(model, "".join(CORPUS.format(i=i + 9000) for i in range(lines)) + f"\nnonce {time.time_ns()}", 16)
+        call(model, corpus(9000, lines) + f"\nnonce {time.time_ns()}", 16)
         points.append(time.perf_counter() - start)
     # A negative slope means the 60k call came back faster than the 5k one:
     # queue noise, not a negative cost. Clamp it, or the gate reads nonsense.
     slope = max(0.0, (points[2] - points[0]) / ((1400 - 120) * 40) * 1_000_000)
 
-    fixed = "".join(CORPUS.format(i=i + 20000) for i in range(480))
+    fixed = corpus(20000, 480)
     loop_hits = 0
     for turn in range(5):
         data = call(model, fixed + "\n\nReply with OK.", 16, cache=True)
@@ -1332,13 +1334,13 @@ def measure_route(model: str) -> dict:
     loop_rate = loop_hits / 3
 
     solo_start = time.perf_counter()
-    data = call(model, "".join(CORPUS.format(i=i + 30000) for i in range(120)) + "\n\nWrite 200 words.", 200)
+    data = call(model, corpus(30000, 120) + "\n\nWrite 200 words.", 200)
     solo = usage_tokens(data)[0] / (time.perf_counter() - solo_start)
 
     total = []
 
     def one():
-        d = call(model, "".join(CORPUS.format(i=i + 40000) for i in range(120)) + "\n\nWrite 200 words.", 200)
+        d = call(model, corpus(40000, 120) + "\n\nWrite 200 words.", 200)
         total.append(usage_tokens(d)[0])
     start = time.perf_counter()
     with ThreadPoolExecutor(max_workers=4) as pool:
@@ -1615,10 +1617,12 @@ def cmd_test(args) -> int:
     off = priced_rows(muted)
     changed = [k for k in base if base[k][1] != off[k][1]]
     good = changed and all(off[k][1] == "out" and "does not reason" in off[k][2] for k in changed)
-    print(f"  {'ok  ' if good else 'FAIL'} reasoning off          {len(changed)} verdicts moved, as they should")
+    print(f"  {'ok  ' if good else 'FAIL'} reasoning off          "
+          f"{len(changed)} verdicts moved, as they should")
     failures += 0 if good else 1
     no_money = sum(1 for k in base if base[k][0]["real_turn_usd"] != off[k][0]["real_turn_usd"])
-    print(f"  {'ok  ' if not no_money else 'FAIL'} and no price moved either  {no_money} priced columns changed")
+    print(f"  {'ok  ' if not no_money else 'FAIL'} and no price moved either  "
+          f"{no_money} priced columns changed")
     failures += 0 if not no_money else 1
 
     print("\nstructure:")

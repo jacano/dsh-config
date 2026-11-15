@@ -60,8 +60,10 @@ criteria:
       # flatters prepaid routes and punishes the generous plans, which is the
       # opposite of what the wallet says.
       cost_max: 0.0006
-      require_reasoning: true
-      require_tool_call: true
+      # Reasoning and tool calling are not knobs here: fold 1 refuses a row that
+      # does neither, and a row nobody has described waits for the owner instead
+      # of being guessed at. Writing them as flags invited the reader to think
+      # they could be turned off, so they are not written.
       # Only rows AA can rank are worth buying here. Not because an unranked
       # model is bad - AA covers a subset, and its silence is not a verdict on
       # capability - but because a number this repo cannot compare is a number

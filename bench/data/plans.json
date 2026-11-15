@@ -1,14 +1,7 @@
 {
  "updated": "2026-11-15",
  "refreshed_at": "2026-11-15T21:39:03+01:00",
- "about": "Plans a provider sells, the prices it publishes, and the catalogue Command Code prices its own models from. One file, three sections.",
- "fx_cny_usd": 6.714,
- "turn": {
-  "tokens": 91500,
-  "cache": 89000,
-  "input": 1000,
-  "output": 1500
- },
+ "about": "Plans a provider sells, the prices it publishes, and the catalogue Command Code prices its own models from. One file, three sections. The turn (91.500 tokens) and the exchange rate are constants in bench.py, where they are commented; they are not repeated here.",
  "catalog": {
   "claude-fable-5-2": {
    "name": "Claude Fable 5.2",
