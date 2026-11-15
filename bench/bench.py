@@ -187,9 +187,6 @@ def load_policy() -> tuple[dict, set]:
         if line.startswith("admitted:"):
             section, phase = "admitted", None
             continue
-        if line.startswith("excluded:"):
-            section = "excluded"
-            continue
         m = re.match(r"^  - id:\s*(\S+)", line)
         if m and section == "admitted":
             admitted.add(m.group(1))
@@ -606,35 +603,6 @@ GAP_WORDS = re.compile(r"no (capability|data|score|ficha)|unmeasured|unranked|si
                        re.IGNORECASE)
 
 
-def judged_models() -> list[tuple[str, str | None]]:
-    """(model, provider or None) the policy has already judged.
-
-    A reason earned on one lane says nothing about another: the same model is a
-    different route somewhere else, with its own speed and its own failures.
-    """
-    text = POLICY.read_text(encoding="utf-8")
-    block = text.split("excluded:", 1)[-1]
-    out = []
-    for line in block.splitlines():
-        m = re.search(r"- \{\s*id:\s*([^,}]+)", line)
-        if not m:
-            continue
-        # A missing datum is never a reason to exclude: that call belongs to the
-        # owner. If somebody writes one here anyway, ignore it and let the row
-        # surface as a question instead of disappearing.
-        if GAP_WORDS.search(line):
-            print(f"  ignoring an exclusion based on missing data: {m.group(1).strip()}")
-            continue
-        prov = re.search(r"provider:\s*([a-z-]+)", line)
-        out.append((norm(m.group(1).split("/")[-1]), prov.group(1) if prov else None))
-    return out
-
-
-def is_excluded(judged, model: str, provider: str) -> bool:
-    key = norm(model.split("/")[-1])
-    return any(k == key and (p is None or p == provider) for k, p in judged)
-
-
 def model_rows(plan: dict, catalog: dict, board: dict) -> list[dict]:
     entries = ([{"id": slug, "catalog": slug} for slug in catalog]
                if plan["models"] == "catalog" else plan["models"])
@@ -673,9 +641,7 @@ def cold_call(row: dict) -> float | None:
     return usage * float(row.get("leverage", 1.0))
 
 
-def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, str]:
-    if is_excluded(judged, row["model"], row["provider"]):
-        return "out", "excluded in the policy"
+def classify(row: dict, cost_max: float, cap_min: float) -> tuple[str, str]:
     # The board first: it is one dict lookup, it decides more than anything else
     # here, and a model it does not rank has no business being priced, described
     # or asked about.
@@ -697,7 +663,6 @@ def cmd_select(args) -> int:
     static = gates["static"]
     cost_max, cap_min = float(static["cost_max"]), float(static["tbench_min"])
     catalog, board = catalogue(), tbench()
-    judged = judged_models()
 
     print(f"fold 1 · price <= ${cost_max:.4f}/turn · Terminal-Bench >= {cap_min:.1f}\n")
     rows = []
@@ -713,7 +678,7 @@ def cmd_select(args) -> int:
         buckets = {"battery": [], "human": [], "out": []}
         for row in model_rows(plan, catalog, board):
             row["provider"] = pname        # before the gates: an exclusion is per lane
-            bucket, why = classify(row, cost_max, cap_min, judged)
+            bucket, why = classify(row, cost_max, cap_min)
             row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
                        plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why,
                        cold_call_usd=cold_call(row))

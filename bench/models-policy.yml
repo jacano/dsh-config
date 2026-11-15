@@ -100,16 +100,3 @@ admitted:
 # Measured and rejected. The numbers here are as of the drop date and stay put
 # on purpose: they are the reason, not the current state. Live numbers for any
 # of these models are in models.csv when they were measured.
-excluded:
-  # Only what a gate cannot work out by itself. Everything else is decided by
-  # `tbench_min` and `cost_max` on every run, and writing it here again is a
-  # snapshot of yesterday pretending to be a decision: 24 of the 26 entries this
-  # list held were exactly that, and were removed on 2026-11-15.
-  #
-  # `provider:` scopes a reason to the lane it was measured on. The same model is
-  # a different route elsewhere, and an exclusion earned on one says nothing
-  # about the other.
-  #
-  # What is left changes the outcome, and none of it is about capability:
-  - { id: deepseek/deepseek-v4.1-flash, provider: command-code, reason: "measured on this lane: 9-47 s to start. Same model as the fast lane, which starts in 1.4 s and costs 0,000245 a turn" }
-  - { id: claude-haiku-5-5, provider: open-design, reason: "same model, dearer route: 0,000317 a turn against 0,000174 on Command Code. No reason to buy it twice" }
