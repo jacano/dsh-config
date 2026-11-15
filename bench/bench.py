@@ -534,7 +534,8 @@ def plan_rows(day: date, want: str) -> list[dict]:
             usable, bound = plan_caps(plan, monthly)
             offer = live_promo(plan, m["id"], day)
             hourly = blend_of(row) if (moves or "list_turn_usd" not in m) else 1.0
-            unit = float(listed) * float(m.get("factor", 1.0)) * (offer or 1.0) * hourly
+            unit = float(listed) * float(m.get("billed_factor") or m.get("factor", 1.0)) \
+                * (offer or 1.0) * hourly
             per_turn = unit if not usable else float(plan["fee_usd"]) / usable * unit
             out.append({
                 "plan": f"{provider} {plan['plan']}",
@@ -612,7 +613,7 @@ def model_rows(plan: dict, catalog: dict, board: dict) -> list[dict]:
         ranked = by_label(board, m["id"], m.get("catalog") or "")
         bare = m["id"].split("/")[-1]
         listed = m["list_turn_usd"] if "list_turn_usd" in m else cat.get("cost")
-        factor = float(m.get("factor", 1.0))
+        factor = float(m.get("billed_factor") or m.get("factor", 1.0))
         leverage = float(plan.get("usd_per_usage_dollar", 1.0))
         usage = listed * factor if listed is not None else None
         out.append({

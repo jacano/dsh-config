@@ -1618,7 +1618,9 @@
      "id": "claude-haiku-5-5",
      "factor": 4.0,
      "list_turn_usd": 0.00174,
-     "open_design_name": "claude-haiku-5.5"
+     "open_design_name": "claude-haiku-5.5",
+     "billed_factor": 2.0,
+     "billed_note": "console, 2026-11-16: 2.888 in / 16 out billed 0,0006 credits against a list of 0,0003, so the plan charges x2. The page's multiplier table still says 4x; refresh keeps writing 4 into `factor`, and `billed_factor` is what the cost uses."
     },
     {
      "id": "gpt-6-luna",
