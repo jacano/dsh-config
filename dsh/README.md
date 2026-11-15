@@ -55,17 +55,18 @@ shows five groups:
 | **Command Code (Claude)** | Claude Haiku 5.5 | Anthropic | Admitted: 146 t/s, 0,000174 a turn. |
 | **OpenDesign** | DeepSeek V4.1 Flash | OpenAI | Admitted: 105 t/s, 35,6 ms/1k, 0,000060 a turn. |
 | **OpenDesign (Claude)** | Claude Haiku 5.5 | Anthropic | Admitted: 149 t/s, 0,000158 a turn. |
-| **OpenGateway** | DeepSeek V4.1 Flash Eco | OpenAI | Admitted: 121 t/s, 49,2 ms/1k, 0,000527 a turn. |
+| **OpenGateway** | DeepSeek V4.1 Flash Eco | OpenAI | **Exception, only here.** Not in the benchmark: no plan, no measured row, not in `admitted:`. |
 
 The two Command Code rows are unreachable while that subscription is lapsed
 (2026-11-16: every call answers *insufficient credits*, the key is fine). They stay
 in the menu so renewing is one copy away; until then the default is OpenDesign's.
 
-All five are admitted by `bench/models.csv` and `admitted:` in
-`bench/models-policy.yml`; `python bench/bench.py measure` prints them and fails if
-the menu and the policy drift apart. Claude models go through an
-`anthropic-messages` route because that is the protocol their gateways document;
-everything else is OpenAI-compatible.
+Four of the five are admitted by `bench/models.csv` and `admitted:` in
+`bench/models-policy.yml`, and `python bench/bench.py measure` fails if those two
+drift apart. OpenGateway is deliberately outside that check: a spare route the owner
+keeps in the menu only, so the benchmark neither prices it nor measures it. Claude
+models go through an `anthropic-messages` route because that is the protocol their
+gateways document; everything else is OpenAI-compatible.
 
 The group name says which models are behind it; the protocol lives in each node's
 `api:` field, where it belongs.

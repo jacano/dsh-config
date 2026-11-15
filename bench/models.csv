@@ -3,5 +3,4 @@ deepseek/deepseek-v4.1-flash-fast,deepseek-v4-1-flash-fast,DeepSeek V4.1 Flash F
 claude-haiku-5-5,claude-haiku-5-5,Claude Haiku 5.5,146,1.48,1.000,17.8,1.00,0.88,0,1.00,0.0001740,3
 deepseek-v4.1-flash,,DeepSeek V4.1 Flash (OpenDesign),105,2.45,1.000,35.6,1.00,0.76,0,1.00,0.0000599,1
 opendesign/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco (OpenDesign),59,2.37,1.000,76.6,1.00,0.94,0,1.00,0.0000324,1
-deepseek/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco,121,2.50,1.000,49.2,1.00,0.98,0,1.00,0.0005270,1
 claude-haiku-5.5,,Claude Haiku 5.5 (OpenDesign),149,1.5,1.000,24.4,1.00,0.93,0,1.00,0.000158,1
