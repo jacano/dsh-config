@@ -807,7 +807,7 @@ def cold_call(row: dict) -> float | None:
 
 
 def classify(row: dict, cost_max: float, cap_min: float, judged,
-             oldest: str | None = None) -> tuple[str, str]:
+             oldest: str | None = None, require_aa: bool = False) -> tuple[str, str]:
     if is_excluded(judged, row["model"], row["provider"]):
         return "out", "excluded in the policy"
     cost = row["effective_turn_usd"]
@@ -830,9 +830,14 @@ def classify(row: dict, cost_max: float, cap_min: float, judged,
     if row["tool_call"] is None:
         return "human", "tool support unreported"
     if row["aa"] is None:
-        # An unranked model is a question, not a verdict — unless it was already
-        # old when the menu's oldest row shipped. Then nobody is going to score it
-        # and waiting is just noise.
+        # The policy may refuse to buy what it cannot compare. That is a purchase
+        # rule, not a judgement about the model: AA covers a subset, and a row it
+        # has not scored is not assumed bad.
+        if require_aa:
+            return "out", "policy: AA does not rank it, and this policy buys ranked rows only"
+        # Otherwise an unranked model is a question, not a verdict — unless it was
+        # already old when the menu's oldest row shipped. Then nobody is going to
+        # score it and waiting is just noise.
         released = row.get("release_date")
         if oldest and released and released < oldest:
             return "out", f"no score and released {released}, before the menu's oldest ({oldest})"
@@ -866,7 +871,8 @@ def cmd_select(args) -> int:
         buckets = {"battery": [], "human": [], "out": []}
         for row in model_rows(plan, catalog, table, score_table):
             row["provider"] = pname        # before the gates: an exclusion is per lane
-            bucket, why = classify(row, cost_max, cap_min, judged, oldest)
+            bucket, why = classify(row, cost_max, cap_min, judged, oldest,
+                                   require_aa=bool(gates.get("require_aa")))
             row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
                        plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why,
                        cold_call_usd=cold_call(row))

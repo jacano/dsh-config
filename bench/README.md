@@ -93,13 +93,16 @@ What fold 1 will not do:
   [`models-policy.yml`](models-policy.yml), and a reason there can be scoped to one
   provider, because a measurement on one route says nothing about another.
 
-A model with no AA score and no models.dev row is neither rejected nor accepted:
-it is printed as a question. That is the difference between a measurement and a
-decision, and the second one is not this script's to make.
+A model with no AA score is a question, not a verdict — unless the policy says it
+only buys what AA can rank, which it does (`require_aa: 1`). Then the row is out
+with that reason written on it: a purchase rule, not a judgement about the model.
+Set the flag to 0 and the questions come back.
 
-Missing data is never a reason to exclude, and the program enforces it: an entry in
-`excluded:` whose reason is a gap is ignored with a warning, so the row surfaces as
-a question instead of disappearing. A datum that is absent cannot be a verdict.
+Missing data is never a reason to *exclude a model*, and the program enforces it: an
+entry in `excluded:` whose reason is a gap is ignored with a warning, so the row
+surfaces as a question instead of disappearing. A datum that is absent cannot be a
+verdict. Refusing to buy what cannot be compared is a different thing, and it is
+written as a gate (`require_aa`), not as a verdict on the model.
 
 ## measure — fold 2
 

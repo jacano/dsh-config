@@ -49,6 +49,11 @@ criteria:
       cost_max: 0.0006
       require_reasoning: true
       require_tool_call: true
+      # Only rows AA can rank are worth buying here. Not because an unranked
+      # model is bad - AA covers a subset, and its silence is not a verdict on
+      # capability - but because a number this repo cannot compare is a number
+      # it cannot gate on, and the floor above is an AA number.
+      require_aa: 1
 
     measured:
       # These are floors for "broken", not targets for "good". A real agent run
