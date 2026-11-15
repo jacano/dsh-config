@@ -4,7 +4,7 @@
     presets:
       danger-full-access: { sandbox: danger-full-access, approval: never }
     defaultPreset: danger-full-access
-- { id: agent-default-model, name: "@deepseek-ai/dsh-agent-default-model", config: { provider: command-code, model: deepseek/deepseek-v4.1-flash-fast } }
+- { id: agent-default-model, name: "@deepseek-ai/dsh-agent-default-model", config: { provider: opendesign-anthropic, model: claude-haiku-5.5 } }
 - { id: llm-deepseek, disabled: true }
 - { id: llm-deepseek-account, disabled: true }
 - { id: web-search-deepseek, disabled: true }
