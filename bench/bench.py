@@ -714,6 +714,22 @@ def cmd_select(args) -> int:
         print(f"\nwritten: {path.relative_to(REPO)}")
     return 0
 
+# --------------------------------------------------------------------------- measure: fold 2
+
+CORPUS = ("Line {i} of the reference corpus: the quick brown fox jumps over the lazy dog "
+          "while the engineer reviews patch number {i} and notes that the cache behaviour "
+          "of model {i} remains under observation.\n")
+ESSAY = ("Write a continuous 1500-word essay on the history of writing instruments, "
+         "from stylus to ballpoint. Plain prose, no lists, no headings. Do not stop early.")
+
+TOOLS = [
+    {"name": "get_weather", "description": "Current weather for a city", "param": "city"},
+    {"name": "get_time", "description": "Current local time for a city", "param": "city"},
+]
+TOOL_PROMPT = ("Call get_weather for Seville and get_time for Seville. "
+               "Use both tools in this single reply. Do not answer in prose.")
+
+
 def corpus(start: int, lines: int) -> str:
     """The reference text, from line `start`, `lines` lines long."""
     return "".join(CORPUS.format(i=i) for i in range(start, start + lines))
@@ -1060,9 +1076,9 @@ def live(model: str, tbench_score: float, cost: float) -> int:
         print(f"\n  NOT FIT: {', '.join(f2 + f3)}")
         return 1
     print("\n  FIT")
-    print(f"\n  {model},,,{values['speed']},{values['ttft']},{values['cache']:.3f},"
+    print(f"\n  {model},,{model},{values['speed']},{values['ttft']},{values['cache']:.3f},"
           f"{values['prefill']},{values['cache_loop']:.2f},{values['retention']},"
-          f"{values['errors']},{values['tools']:.2f},{tbench_score}")
+          f"{values['errors']},{values['tools']:.2f},{cost},{1}")
     return 0
 
 
