@@ -119,10 +119,15 @@ def fetch(url: str, headers: dict | None = None, timeout: int = 120) -> str:
         return resp.read().decode("utf-8", "replace")
 
 
-def snapshot(name: str) -> Path:
-    """A dated artefact under snapshots/, which git does not track."""
+def snapshot(name: str, rows: list[dict]) -> Path:
+    """Write a dated CSV under snapshots/, which git does not track."""
     SNAPSHOTS.mkdir(parents=True, exist_ok=True)
-    return SNAPSHOTS / name
+    path = SNAPSHOTS / name
+    with open(path, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+    return path
 
 
 def text_of(html: str) -> str:
@@ -748,11 +753,7 @@ def cmd_plan(args) -> int:
     print("  tokens/¥ = what 1 CNY buys at that plan's blended marginal price")
 
     if args.write:
-        path = snapshot(f"plan-cost-{day.isoformat()}.csv")
-        with open(path, "w", newline="", encoding="utf-8") as fh:
-            w = csv.DictWriter(fh, fieldnames=list(got[0].keys()))
-            w.writeheader()
-            w.writerows(got)
+        path = snapshot(f"plan-cost-{day.isoformat()}.csv", got)
         print(f"\nwritten: {path.relative_to(REPO)}")
     return 0
 
@@ -1031,11 +1032,7 @@ def cmd_select(args) -> int:
                   f"real ${r['real_turn_usd']:.6f}  {r['why']}")
 
     if args.write:
-        path = snapshot(f"shortlist-{date.today().isoformat()}.csv")
-        with open(path, "w", newline="", encoding="utf-8") as fh:
-            w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
-            w.writeheader()
-            w.writerows(rows)
+        path = snapshot(f"shortlist-{date.today().isoformat()}.csv", rows)
         print(f"\nwritten: {path.relative_to(REPO)}")
     return 0
 
@@ -1175,41 +1172,47 @@ def config_ids() -> set[str]:
     return set(re.findall(r"^\s+- (?:\{\s*)?id:\s*([^,\s}]+)", block, re.M))
 
 
-def check() -> int:
-    models, catalog = load_measured(), catalogue()
-    problems = []
+def unpriced(models: dict) -> list[str]:
+    """A measured row without a price is invisible to the gates: it fails static
+    for a cost of nothing and never says so, because it is not admitted either."""
+    return [f"{m['id']} is measured but has no price: add a cost_override, or the "
+            f"catalog_slug it is sold under"
+            for m in models.values() if m["cost_override"] is None and not m["catalog"]]
 
-    # A measured row with no price is invisible to the gates: it fails static for
-    # a cost of nothing and never says so, because it is not admitted either.
-    for m in models.values():
-        if m["cost_override"] is None and not m["catalog"]:
-            problems.append(f"{m['id']} is measured but has no price: add a "
-                            f"cost_override, or the catalog_slug it is sold under")
 
+def phase_one(models: dict, catalog: dict) -> None:
+    """Static, and free: how much of the catalogue is worth measuring at all."""
     print("phase 1 - static (free):  " + "  ".join(f"{k}={v}" for k, v in GATES["static"].items()))
     overrides = {m["catalog"]: m["override"] for m in models.values() if m["override"] is not None}
-    survivors = []
-    for slug, row in catalog.items():
-        capability = row["capability"] if row["capability"] is not None else overrides.get(slug)
-        if not fails_static(capability, row["cost"], GATES["static"]):
-            survivors.append(slug)
-    print(f"  {len(catalog)} catalog rows -> {len(survivors)} worth measuring")
+    worth = [slug for slug, row in catalog.items()
+             if not fails_static(row["capability"] if row["capability"] is not None
+                                 else overrides.get(slug), row["cost"], GATES["static"])]
+    print(f"  {len(catalog)} catalog rows -> {len(worth)} worth measuring")
 
+
+def capability_of(m: dict, catalog: dict, ratings: dict, overrides: dict):
+    """AA first, it is the only comparable scale; then the row's own override, then
+    the number the policy writes down, then whatever the catalogue claims."""
+    capability, _ = aa_of(ratings, m["id"], m["catalog"])
+    if capability is None:
+        capability = m["override"]
+    if capability is None:
+        hit = overrides.get(norm(m["id"].split("/")[-1]))
+        capability = hit[0] if hit else None
+    if capability is None:
+        capability = catalog.get(m["catalog"], {}).get("capability")
+    return capability
+
+
+def phase_two(models: dict, catalog: dict) -> list[str]:
+    """Measured and fitness, row by row, against the admitted set."""
     print("phase 2 - measured:       " + "  ".join(f"{k}={v}" for k, v in GATES["measured"].items()))
     print("phase 3 - fitness:        " + "  ".join(f"{k}={v}" for k, v in GATES["fitness"].items()))
-
-    RATINGS, OVERRIDES = scores(), capability_overrides()
+    problems = []
+    ratings, overrides = scores(), capability_overrides()
     for m in models.values():
         row = catalog.get(m["catalog"], {})
-        # AA first: it is the only comparable scale. The measured override is the
-        # bridge for a row AA has not scored.
-        capability, _ = aa_of(RATINGS, m["id"], m["catalog"])
-        if capability is None and m["override"] is not None:
-            capability = m["override"]
-        if capability is None and OVERRIDES.get(norm(m["id"].split("/")[-1])):
-            capability = OVERRIDES[norm(m["id"].split("/")[-1])][0]
-        if capability is None:
-            capability = row.get("capability")
+        capability = capability_of(m, catalog, ratings, overrides)
         # a model sold on another plan has its own price: the catalogue is Command Code's
         cost = m["cost_override"] if m["cost_override"] is not None else row.get("cost")
         f2 = fails_measured(m, capability, cost, GATES["measured"])
@@ -1217,35 +1220,46 @@ def check() -> int:
         admitted = m["id"] in ADMITTED
         verdict = "PASS" if not f2 and not f3 else "FAIL"
         if admitted:
-            shown = (f"{m['speed']:.0f} t/s  {m['ttft']:.2f} s  "
-                     f"{m['prefill']:.1f} ms/1k  {turn_time(m):.1f} s  ${cost:.4f}") if all(
-                         m[k] is not None for k in ("speed", "ttft", "prefill")) else ""
+            shown = ""
+            if all(m[k] is not None for k in ("speed", "ttft", "prefill")):
+                shown = (f"{m['speed']:.0f} t/s  {m['ttft']:.2f} s  "
+                         f"{m['prefill']:.1f} ms/1k  {turn_time(m):.1f} s  ${cost:.4f}")
             print(f"  {verdict:4s} {m['name'][:30]:30s} {shown:46s} {', '.join(f2 + f3)}")
             if f2 or f3:
                 problems.append(f"{m['name']} is admitted but misses: {', '.join(f2 + f3)}")
         elif not f2 and not f3:
             print(f"  ENTER {m['name'][:32]:32s} clears every gate but is not admitted")
             problems.append(f"{m['name']} clears every gate but is not admitted")
+    return problems
 
-    for admitted_id in ADMITTED:
-        if admitted_id not in models:
-            problems.append(f"{admitted_id} is admitted but has no row in models.csv")
 
+def menu(models: dict) -> list[str]:
+    """The policy, the measured table and the DSH config must name the same rows."""
+    problems = [f"{i} is admitted but has no row in models.csv"
+                for i in ADMITTED if i not in models]
     configured = config_ids()
-    for missing in ADMITTED - configured:
-        problems.append(f"{missing} is in the policy but not in dsh/cordis.patch.yml")
-    # Only rows this repo has measured are governed here. An id the benchmark
-    # has never measured is the owner's arrangement, not this file's business.
-    for extra in configured - ADMITTED:
-        if extra in models:
-            problems.append(f"{extra} is configured but not admitted")
+    problems += [f"{i} is in the policy but not in dsh/cordis.patch.yml"
+                 for i in ADMITTED - configured]
+    # Only rows this repo has measured are governed here. An id the benchmark has
+    # never measured is the owner's arrangement, not this file's business.
+    problems += [f"{i} is configured but not admitted"
+                 for i in configured - ADMITTED if i in models]
+    return problems
+
+
+def check() -> int:
+    models, catalog = load_measured(), catalogue()
+    problems = unpriced(models)
+    phase_one(models, catalog)
+    problems += phase_two(models, catalog)
+    problems += menu(models)
     if not problems:
         print(f"\nOK: {len(ADMITTED)} rows clear all three phases, and the menu matches the policy")
-    else:
-        print("\nFAIL:")
-        for p in problems:
-            print(f"  - {p}")
-    return 1 if problems else 0
+        return 0
+    print("\nFAIL:")
+    for problem in problems:
+        print(f"  - {problem}")
+    return 1
 
 
 def api_key() -> str:
