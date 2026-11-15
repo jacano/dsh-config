@@ -142,7 +142,7 @@ excluded:
   - { id: jev-1-14-0, reason: "owner: same model as jev" }
   - { id: Qwen/Qwen3.8-Omni-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
   - { id: deepseek-v4-pro, reason: "owner, 2026-11-12: April build, two generations behind the 4.1 line, and twice the real cost of the Flash. Its own successor (v4-pro-0813) is not offered here" }
-  - { id: hy4-preview, reason: "owner, 2026-11-12: superseded by Hy4 (2026-11-04), half the price. Neither provider serves the released one, so this is wanted, not rejected" }
+  - { id: hy4-preview, reason: "owner, 2026-11-12: superseded by Hy4 (2026-11-04), half the price. Checked again 2026-11-15: the released Hy4 resolves 37,9 on Terminal-Bench, under the 38,0 floor, and its only route (opencode-go, still 401) costs 0,00139 a turn against a 0,0006 gate. Two independent reasons, so it is not the floor alone keeping it out" }
   - { id: tencent-hy3, reason: "owner, 2026-11-12: an old model with no row anywhere. Not worth the tokens" }
   - { id: claude-haiku-5-5, provider: open-design, reason: "owner, 2026-11-12: same model as the Command Code row at $0.000317 of real money against $0.000174. No reason to buy it twice" }
   - { id: stepfun/Step-3.5-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
