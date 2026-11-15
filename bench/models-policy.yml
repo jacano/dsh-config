@@ -101,42 +101,15 @@ admitted:
 # on purpose: they are the reason, not the current state. Live numbers for any
 # of these models are in models.csv when they were measured.
 excluded:
-  # Only what a gate cannot work out by itself. A row that is merely too dear is
-  # left to cost_max, which recomputes the price on every run: writing it here
-  # again is a snapshot of yesterday pretending to be a decision.
+  # Only what a gate cannot work out by itself. Everything else is decided by
+  # `tbench_min` and `cost_max` on every run, and writing it here again is a
+  # snapshot of yesterday pretending to be a decision: 24 of the 26 entries this
+  # list held were exactly that, and were removed on 2026-11-15.
   #
   # `provider:` scopes a reason to the lane it was measured on. The same model is
   # a different route elsewhere, and an exclusion earned on one says nothing
   # about the other.
-  - { id: meta/muse-ember, provider: command-code, reason: "measured: 36.3 ms/1k prefill, 67% cache, 0.37 retention" }
-  - { id: meta/muse-spark-1.3-contributor, provider: command-code, reason: "measured: 115.2 ms/1k prefill, 33% cache" }
-  - { id: meta/muse-spark-1.2-contributor, provider: command-code, reason: "measured: 60.2 ms/1k prefill" }
-  - { id: z-ai/glm-5.3-flash, provider: command-code, reason: "measured: 74 tok/s, below the 95 gate" }
-  - { id: glm-5.3-flash, provider: open-design, reason: "owner, 2026-11-11: slow on this lane too; it is the same model on another route" }
-  - { id: Qwen/Qwen3.7-Flash, provider: command-code, reason: "measured: 64 tok/s, 7.79 s to start" }
-  - { id: moonshotai/Kimi-K3.1-Pro, provider: command-code, reason: "measured: 32 tok/s" }
-  - { id: xiaomi/mimo-v2.6-pro, provider: command-code, reason: "measured: 26 tok/s, 8.4 s to start" }
-  # Capability, not coverage: the model is on three routes and priced at 0,00029 here.
-  - { id: ornith-1-5-122b, reason: "not on Terminal-Bench, so this policy will not buy it; the maker's parity claim was never confirmed by an executed benchmark" }
-  - { id: deepseek/deepseek-v4.1-flash, provider: command-code, reason: "measured on this lane: 9-47 s to start" }
-  - { id: Qwen/Qwen3.8-Flash, provider: command-code, reason: "measured: HTTP 524, the route does not answer" }
-
-  # Access, not preference: the plan refuses the call.
-  - { id: meta/muse-wonder-1.0, reason: "403 MODEL_NOT_IN_PLAN" }
-  - { id: claude-opus-5-5, reason: "403 MODEL_NOT_IN_PLAN" }
-  - { id: claude-fable-5-2, reason: "403 MODEL_NOT_IN_PLAN" }
-  - { id: gpt-6.1-sol, reason: "403 MODEL_NOT_IN_PLAN" }
-  - { id: google/gemini-4-argon, reason: "403 MODEL_NOT_IN_PLAN" }
-
-  # The owner's call.
-  - { id: jev, reason: "owner: a decision model, not a coding one" }
-  - { id: jev-1-14-0, reason: "owner: same model as jev" }
-  - { id: Qwen/Qwen3.8-Omni-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
-  - { id: deepseek-v4-pro, reason: "owner, 2026-11-12: April build, two generations behind the 4.1 line, and twice the real cost of the Flash. Its own successor (v4-pro-0813) is not offered here" }
-  - { id: hy4-preview, reason: "owner, 2026-11-12: superseded by Hy4 (2026-11-04), half the price. Checked again 2026-11-15: the released Hy4 resolves 37,9 on Terminal-Bench, under the 38,0 floor, and its only route (opencode-go, still 401) costs 0,00139 a turn against a 0,0006 gate. Two independent reasons, so it is not the floor alone keeping it out" }
-  - { id: tencent-hy3, reason: "owner, 2026-11-12: an old model with no row anywhere. Not worth the tokens" }
-  - { id: claude-haiku-5-5, provider: open-design, reason: "owner, 2026-11-12: same model as the Command Code row at $0.000317 of real money against $0.000174. No reason to buy it twice" }
-  - { id: stepfun/Step-3.5-Flash, reason: "owner, 2026-11-11: not powerful enough to bother testing" }
-
-  - { id: deepseek-v4-flash, reason: "owner, 2026-11-11: superseded by V4.1, which is already in the menu" }
-  - { id: deepseek-v4-flash-vision-exp, reason: "owner, 2026-11-11: V4 vision experiment, superseded by the V4.1 line" }
+  #
+  # What is left changes the outcome, and none of it is about capability:
+  - { id: deepseek/deepseek-v4.1-flash, provider: command-code, reason: "measured on this lane: 9-47 s to start. Same model as the fast lane, which starts in 1.4 s and costs 0,000245 a turn" }
+  - { id: claude-haiku-5-5, provider: open-design, reason: "same model, dearer route: 0,000317 a turn against 0,000174 on Command Code. No reason to buy it twice" }

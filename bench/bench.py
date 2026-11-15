@@ -686,8 +686,6 @@ def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, s
         return "human", "no price on record"
     if row["real_turn_usd"] > cost_max:
         return "out", f"cost {row['real_turn_usd']:.6f} > {cost_max:.6f}"
-    if cost == 0:
-        return "out", "free: not of interest"
     if row["tb"] < cap_min:
         return "out", f"tbench {row['tb']:.1f} < {cap_min:.1f}"
     return "battery", ""
