@@ -728,6 +728,13 @@ def score_of(table: dict, model_id: str, catalog_slug: str) -> dict:
     for probe in probes:
         if probe in table:
             return table[probe]
+    for probe in probes:
+        if not probe:
+            continue
+        for key, rec in table.items():
+            rest = key[len(probe):] if key.startswith(probe) else ""
+            if rest.isdigit():
+                return rec
     return {}
 
 
@@ -966,6 +973,16 @@ def aa_of(ratings: dict, model_id: str, catalog_slug: str):
         if probe in ratings:
             rec = ratings[probe]
             return rec.get("intelligence"), rec.get("is_reasoning")
+    # AA names a build, not a lane: "deepseek-v4.1-flash-1017" is the model with
+    # a build number glued on. A suffix of bare digits is that and nothing else;
+    # "deepseekv41flash" must not reach "deepseekv41flashfast".
+    for probe in probes:
+        if not probe:
+            continue
+        for key, rec in ratings.items():
+            rest = key[len(probe):] if key.startswith(probe) else ""
+            if rest.isdigit():
+                return rec.get("intelligence"), rec.get("is_reasoning")
     return None, None
 
 
