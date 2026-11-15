@@ -1,0 +1,4003 @@
+{
+ "about": "What a model is (models.dev) and how good it is (Artificial Analysis). Two sources, two questions, one file.",
+ "models.dev": {
+  "source": "https://models.dev/api.json",
+  "fetched": "2026-11-12T16:01:21+01:00",
+  "updated": "2026-11-12",
+  "models": {
+   "minimaxm3": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "MiniMaxAI/MiniMax-M3",
+    "provider": "commandcode",
+    "name": "MiniMax-M3",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.3,
+     "output": 1.2,
+     "cache_read": 0.06
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-01"
+   },
+   "deepseekv41flash": {
+    "deprecated": false,
+    "superseded_by": "deepseek/deepseek-v4.1-flash-1017",
+    "cross_generation": false,
+    "id": "deepseek/deepseek-v4.1-flash",
+    "provider": "commandcode",
+    "name": "DeepSeek V4.1 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.3,
+     "output": 1.2,
+     "cache_read": 0.007
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-17",
+    "resolved_to": "deepseek/deepseek-v4.1-flash-1017"
+   },
+   "kimik3": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "moonshotai/Kimi-K3",
+    "provider": "commandcode",
+    "name": "Kimi K3",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 3,
+     "output": 15,
+     "cache_read": 0.3
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-16"
+   },
+   "kimik27code": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "moonshotai/Kimi-K2.7-Code",
+    "provider": "commandcode",
+    "name": "Kimi K2.7 Code",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 256000,
+    "cost": {
+     "input": 0.95,
+     "output": 4,
+     "cache_read": 0.19
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-12"
+   },
+   "qwen3827b": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "Qwen/Qwen3.8-27B",
+    "provider": "commandcode",
+    "name": "Qwen3.8 27B",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262144,
+    "cost": {
+     "input": 0.4,
+     "output": 3,
+     "cache_read": 0.04
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-14"
+   },
+   "glm53": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "zai-org/GLM-5.3",
+    "provider": "commandcode",
+    "name": "GLM-5.3",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 1.4,
+     "output": 4.4,
+     "cache_read": 0.26
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-14"
+   },
+   "glm53flash": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "z-ai/glm-5.3-flash",
+    "provider": "commandcode",
+    "name": "GLM-5.3-Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.15,
+     "output": 0.5,
+     "cache_read": 0.03
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-26"
+   },
+   "minimaxm25": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "MiniMaxAI/MiniMax-M2.5",
+    "provider": "commandcode",
+    "name": "MiniMax-M2.5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 200000,
+    "cost": {
+     "input": 0.3,
+     "output": 1.2,
+     "cache_read": 0.03
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-02-12"
+   },
+   "claudeopus47": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-opus-4-7",
+    "provider": "commandcode",
+    "name": "Claude Opus 4.7",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 5,
+     "output": 25,
+     "cache_read": 0.5,
+     "cache_write": 6.25
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-16"
+   },
+   "claudesonnet46": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-sonnet-4-6",
+    "provider": "commandcode",
+    "name": "Claude Sonnet 4.6",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 3,
+     "output": 15,
+     "cache_read": 0.3,
+     "cache_write": 3.75
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-02-17"
+   },
+   "claudehaiku45": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "anthropic/claude-haiku-4-5",
+    "provider": "anyapi",
+    "name": "Claude Haiku 4.5 (latest)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 200000,
+    "cost": null,
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2025-10-15"
+   },
+   "deepseekv4pro": {
+    "deprecated": false,
+    "superseded_by": "deepseek/deepseek-v4-pro-0813",
+    "cross_generation": false,
+    "id": "deepseek/deepseek-v4-pro",
+    "provider": "commandcode",
+    "name": "DeepSeek V4 Pro",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.66,
+     "output": 1.98,
+     "cache_read": 0.022
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-13",
+    "resolved_to": "deepseek/deepseek-v4-pro-0813"
+   },
+   "deepseekv4flash": {
+    "deprecated": true,
+    "superseded_by": "deepseek/deepseek-v4.1-flash",
+    "cross_generation": true,
+    "id": "deepseek/deepseek-v4-flash",
+    "provider": "commandcode",
+    "name": "DeepSeek V4 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.15,
+     "output": 0.6,
+     "cache_read": 0.003
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-24"
+   },
+   "gpt54": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-5.4",
+    "provider": "commandcode",
+    "name": "GPT-5.4",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 400000,
+    "cost": {
+     "input": 2.5,
+     "output": 15,
+     "cache_read": 0.25,
+     "cache_write": 0
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-03-05"
+   },
+   "kimik25": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "kimi-k2.5",
+    "provider": "tencent-coding-plan",
+    "name": "Kimi-K2.5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262144,
+    "cost": {
+     "input": 0,
+     "output": 0,
+     "cache_read": 0,
+     "cache_write": 0
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-01-27"
+   },
+   "glm5": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "glm-5",
+    "provider": "tencent-coding-plan",
+    "name": "GLM-5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 202752,
+    "cost": {
+     "input": 0,
+     "output": 0,
+     "cache_read": 0,
+     "cache_write": 0
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-02-12"
+   },
+   "glm52": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "zai-org/GLM-5.2",
+    "provider": "commandcode",
+    "name": "GLM-5.2",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 1.4,
+     "output": 4.4,
+     "cache_read": 0.26
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-13"
+   },
+   "kimik31pro": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "runware/kimi-k3.1-pro",
+    "provider": "llmgateway-providers",
+    "name": "Kimi K3.1 Pro (runware)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 950000,
+    "cost": {
+     "input": 2,
+     "output": 10,
+     "cache_read": 0.2
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-23"
+   },
+   "gemini31flashlite": {
+    "deprecated": false,
+    "superseded_by": "google/gemini-3.1-flash-lite-preview",
+    "cross_generation": false,
+    "id": "google/gemini-3.1-flash-lite",
+    "provider": "commandcode",
+    "name": "Gemini 3.1 Flash Lite",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.25,
+     "output": 1.5,
+     "cache_read": 0.025,
+     "input_audio": 0.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "audio",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-03-03",
+    "resolved_to": "google/gemini-3.1-flash-lite-preview"
+   },
+   "gemini35flashlite": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "google/gemini-3.5-flash-lite",
+    "provider": "commandcode",
+    "name": "Gemini 3.5 Flash Lite",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.3,
+     "output": 2.5,
+     "cache_read": 0.03
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "audio",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-21"
+   },
+   "gemini36flash": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "google/gemini-3.6-flash",
+    "provider": "commandcode",
+    "name": "Gemini 3.6 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 1.5,
+     "output": 7.5,
+     "cache_read": 0.15
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "audio",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-21"
+   },
+   "gemini35flash": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "google/gemini-3.5-flash",
+    "provider": "commandcode",
+    "name": "Gemini 3.5 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 1.5,
+     "output": 9,
+     "cache_read": 0.15
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "audio",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-05-19"
+   },
+   "gemini38flash": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "google/gemini-3.8-flash",
+    "provider": "commandcode",
+    "name": "Gemini 3.8 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 1.5,
+     "output": 7.5,
+     "cache_read": 0.15
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "audio",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-02"
+   },
+   "gemini4argon": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "google/gemini-4-argon",
+    "provider": "commandcode",
+    "name": "Gemini 4 Argon",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 2,
+     "output": 10,
+     "cache_read": 0.1
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "audio",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-13"
+   },
+   "gemini37flash": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "google/gemini-3.7-flash",
+    "provider": "commandcode",
+    "name": "Gemini 3.7 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 1.5,
+     "output": 7.5,
+     "cache_read": 0.15,
+     "cache_write": 0.08334
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "audio",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-13"
+   },
+   "gpt56luna": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-5.6-luna",
+    "provider": "commandcode",
+    "name": "GPT-5.6 Luna",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 0.2,
+     "output": 1.2,
+     "cache_read": 0.02,
+     "cache_write": 0.25,
+     "tiers": [
+      {
+       "input": 0.4,
+       "output": 1.8,
+       "cache_read": 0.04,
+       "cache_write": 0.5,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 0.4,
+      "output": 1.8,
+      "cache_read": 0.04,
+      "cache_write": 0.5
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-09"
+   },
+   "gpt54mini": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-5.4-mini",
+    "provider": "commandcode",
+    "name": "GPT-5.4 mini",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 400000,
+    "cost": {
+     "input": 0.75,
+     "output": 4.5,
+     "cache_read": 0.075,
+     "cache_write": 0
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-03-17"
+   },
+   "gpt6astra": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-6-astra",
+    "provider": "commandcode",
+    "name": "GPT-6 Astra",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 10,
+     "output": 50,
+     "cache_read": 1,
+     "cache_write": 12.5,
+     "tiers": [
+      {
+       "input": 20,
+       "output": 75,
+       "cache_read": 2,
+       "cache_write": 25,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 20,
+      "output": 75,
+      "cache_read": 2,
+      "cache_write": 25
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-04"
+   },
+   "gpt56sol": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-5.6-sol",
+    "provider": "commandcode",
+    "name": "GPT-5.6 Sol",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 5,
+     "output": 30,
+     "cache_read": 0.5,
+     "cache_write": 6.25,
+     "tiers": [
+      {
+       "input": 10,
+       "output": 45,
+       "cache_read": 1,
+       "cache_write": 12.5,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 10,
+      "output": 45,
+      "cache_read": 1,
+      "cache_write": 12.5
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-09"
+   },
+   "gpt56terra": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-5.6-terra",
+    "provider": "commandcode",
+    "name": "GPT-5.6 Terra",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 2,
+     "output": 12,
+     "cache_read": 0.2,
+     "cache_write": 2.5,
+     "tiers": [
+      {
+       "input": 4,
+       "output": 18,
+       "cache_read": 0.4,
+       "cache_write": 5,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 4,
+      "output": 18,
+      "cache_read": 0.4,
+      "cache_write": 5
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-09"
+   },
+   "gpt53codex": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-5.3-codex",
+    "provider": "commandcode",
+    "name": "GPT-5.3 Codex",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 400000,
+    "cost": {
+     "input": 2,
+     "output": 8,
+     "cache_read": 0.5,
+     "cache_write": 0
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-02-05"
+   },
+   "gpt6sol": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-6-sol",
+    "provider": "commandcode",
+    "name": "GPT-6 Sol",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 2,
+     "output": 10,
+     "cache_read": 0.2,
+     "cache_write": 2.5,
+     "tiers": [
+      {
+       "input": 4,
+       "output": 15,
+       "cache_read": 0.4,
+       "cache_write": 5,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 4,
+      "output": 15,
+      "cache_read": 0.4,
+      "cache_write": 5
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-22"
+   },
+   "gpt6luna": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-6-luna",
+    "provider": "commandcode",
+    "name": "GPT-6 Luna",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 0.1,
+     "output": 0.5,
+     "cache_read": 0.01,
+     "cache_write": 0.125,
+     "tiers": [
+      {
+       "input": 0.2,
+       "output": 0.75,
+       "cache_read": 0.02,
+       "cache_write": 0.25,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 0.2,
+      "output": 0.75,
+      "cache_read": 0.02,
+      "cache_write": 0.25
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-22"
+   },
+   "gpt61sol": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-6.1-sol",
+    "provider": "commandcode",
+    "name": "GPT-6.1 Sol",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 2,
+     "output": 10,
+     "cache_read": 0.1,
+     "cache_write": 2.5,
+     "tiers": [
+      {
+       "input": 4,
+       "output": 15,
+       "cache_read": 0.2,
+       "cache_write": 5,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 4,
+      "output": 15,
+      "cache_read": 0.2,
+      "cache_write": 5
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-29"
+   },
+   "gpt55": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-5.5",
+    "provider": "commandcode",
+    "name": "GPT-5.5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 400000,
+    "cost": {
+     "input": 5,
+     "output": 30,
+     "cache_read": 0.5,
+     "cache_write": 0
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-23"
+   },
+   "gpt61terra": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "gpt-6.1-terra",
+    "provider": "commandcode",
+    "name": "GPT-6.1 Terra",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 1,
+     "output": 5,
+     "cache_read": 0.05,
+     "cache_write": 1.25,
+     "tiers": [
+      {
+       "input": 2,
+       "output": 7.5,
+       "cache_read": 0.1,
+       "cache_write": 2.5,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 2,
+      "output": 7.5,
+      "cache_read": 0.1,
+      "cache_write": 2.5
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-26"
+   },
+   "glm51": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "zai/glm-5.1",
+    "provider": "llmgateway-providers",
+    "name": "GLM-5.1 (Z AI)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 200000,
+    "cost": {
+     "input": 1.4,
+     "output": 4.4,
+     "cache_read": 0.26
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-07"
+   },
+   "minimaxm31flash": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "together-ai/minimax-m3.1-flash",
+    "provider": "llmgateway-providers",
+    "name": "MiniMax M3.1 Flash (Together AI)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.15,
+     "output": 0.6,
+     "cache_read": 0.015
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-19"
+   },
+   "grok47": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "xai/grok-4.7",
+    "provider": "commandcode",
+    "name": "Grok 4.7",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 500000,
+    "cost": {
+     "input": 2,
+     "output": 6,
+     "cache_read": 0.5,
+     "tiers": [
+      {
+       "input": 4,
+       "output": 12,
+       "cache_read": 1,
+       "tier": {
+        "type": "context",
+        "size": 200000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 4,
+      "output": 12,
+      "cache_read": 1
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-21"
+   },
+   "grok46": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "xai/grok-4.6",
+    "provider": "commandcode",
+    "name": "Grok 4.6",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 500000,
+    "cost": {
+     "input": 2,
+     "output": 6,
+     "cache_read": 0.5,
+     "tiers": [
+      {
+       "input": 4,
+       "output": 12,
+       "cache_read": 1,
+       "tier": {
+        "type": "context",
+        "size": 200000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 4,
+      "output": 12,
+      "cache_read": 1
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-12"
+   },
+   "mimov26pro": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "deepinfra/mimo-v2.6-pro",
+    "provider": "llmgateway-providers",
+    "name": "MiMo V2.6 Pro (DeepInfra)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.435,
+     "output": 0.87,
+     "cache_read": 0.0036
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "audio",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-22"
+   },
+   "mimov26flash": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "deepinfra/mimo-v2.6-flash",
+    "provider": "llmgateway-providers",
+    "name": "MiMo V2.6 Flash (DeepInfra)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.14,
+     "output": 0.28,
+     "cache_read": 0.0028
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "audio",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-22"
+   },
+   "kimik3fast": {
+    "deprecated": true,
+    "superseded_by": "moonshotai/kimi-k3",
+    "cross_generation": true,
+    "id": "fireworks/kimi-k3-fast",
+    "provider": "llmgateway-providers",
+    "name": "Kimi K3 Fast (Fireworks AI)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1040384,
+    "cost": {
+     "input": 4.5,
+     "output": 22.5,
+     "cache_read": 0.45
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-16"
+   },
+   "fuguultra": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "sakana/fugu-ultra",
+    "provider": "commandcode",
+    "name": "Fugu Ultra",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 5,
+     "output": 30,
+     "cache_read": 0.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-15"
+   },
+   "claudesonnet5": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-sonnet-5",
+    "provider": "commandcode",
+    "name": "Claude Sonnet 5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 2,
+     "output": 10,
+     "cache_read": 0.2,
+     "cache_write": 2.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-30"
+   },
+   "claudeopus5": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-opus-5",
+    "provider": "commandcode",
+    "name": "Claude Opus 5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 5,
+     "output": 25,
+     "cache_read": 0.5,
+     "cache_write": 6.25
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-24"
+   },
+   "claudesonnet55": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-sonnet-5-5",
+    "provider": "commandcode",
+    "name": "Claude Sonnet 5.5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 2,
+     "output": 10,
+     "cache_read": 0.1,
+     "cache_write": 2.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-28"
+   },
+   "claudeopus48": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-opus-4-8",
+    "provider": "commandcode",
+    "name": "Claude Opus 4.8",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 5,
+     "output": 25,
+     "cache_read": 0.5,
+     "cache_write": 6.25
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-05-28"
+   },
+   "claudeopus55": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-opus-5-5",
+    "provider": "commandcode",
+    "name": "Claude Opus 5.5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 4,
+     "output": 20,
+     "cache_read": 0.2,
+     "cache_write": 5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-22"
+   },
+   "claudefable5": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-fable-5",
+    "provider": "commandcode",
+    "name": "Claude Fable 5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 10,
+     "output": 50,
+     "cache_read": 1,
+     "cache_write": 12.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-09"
+   },
+   "claudefable51": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-fable-5-1",
+    "provider": "commandcode",
+    "name": "Claude Fable 5.1",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 10,
+     "output": 50,
+     "cache_read": 0.25,
+     "cache_write": 12.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-01"
+   },
+   "mistrallarge4": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "mistral/mistral-large-4",
+    "provider": "commandcode",
+    "name": "Mistral Large 4",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 524288,
+    "cost": {
+     "input": 1.36,
+     "output": 4.18,
+     "cache_read": 0.14
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-06"
+   },
+   "grok45": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "xai/grok-4.5",
+    "provider": "commandcode",
+    "name": "Grok 4.5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 500000,
+    "cost": {
+     "input": 2,
+     "output": 6,
+     "cache_read": 0.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-08"
+   },
+   "minimaxm27": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "MiniMaxAI/MiniMax-M2.7",
+    "provider": "commandcode",
+    "name": "MiniMax-M2.7",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 200000,
+    "cost": {
+     "input": 0.3,
+     "output": 1.2,
+     "cache_read": 0.06
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-03-18"
+   },
+   "claudefable52": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "anthropic/claude-fable-5-2",
+    "provider": "llmgateway-providers",
+    "name": "Claude Fable 5.2 (Anthropic)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 8,
+     "output": 40,
+     "cache_read": 0.2,
+     "cache_write": 10
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-11-09"
+   },
+   "claudehaiku55": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "claude-haiku-5-5",
+    "provider": "commandcode",
+    "name": "Claude Haiku 5.5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.1,
+     "output": 0.5,
+     "cache_read": 0.01,
+     "cache_write": 0.125,
+     "tiers": [
+      {
+       "input": 0.5,
+       "output": 2.5,
+       "cache_read": 0.05,
+       "cache_write": 0.625,
+       "tier": {
+        "type": "context",
+        "size": 100000
+       }
+      }
+     ]
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-07"
+   },
+   "musespark13contributor": {
+    "deprecated": false,
+    "superseded_by": "meta/muse-spark-1.3",
+    "cross_generation": true,
+    "id": "meta/muse-spark-1.3-contributor",
+    "provider": "commandcode",
+    "name": "Muse Spark 1.3 (Contributor)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.1,
+     "output": 0.2,
+     "cache_read": 0.002
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf",
+      "audio"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-02"
+   },
+   "musespark12contributor": {
+    "deprecated": false,
+    "superseded_by": "meta/muse-spark-1.2",
+    "cross_generation": true,
+    "id": "meta/muse-spark-1.2-contributor",
+    "provider": "commandcode",
+    "name": "Muse Spark 1.2 (Contributor)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.1,
+     "output": 0.2,
+     "cache_read": 0.002
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf",
+      "audio"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-05"
+   },
+   "qwen38flash": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "Qwen/Qwen3.8-Flash",
+    "provider": "commandcode",
+    "name": "Qwen3.8 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.16,
+     "output": 0.47,
+     "cache_read": 0.016
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-26"
+   },
+   "kimik26": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "canopywave/kimi-k2.6",
+    "provider": "llmgateway-providers",
+    "name": "Kimi K2.6 (CanopyWave)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262144,
+    "cost": {
+     "input": 0.95,
+     "output": 4,
+     "cache_read": 0.16
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-20"
+   },
+   "glm52fast": {
+    "deprecated": true,
+    "superseded_by": "zhipuai/glm-5.2",
+    "cross_generation": true,
+    "id": "zai-org/GLM-5.2-Fast",
+    "provider": "commandcode",
+    "name": "GLM-5.2-Fast",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 3,
+     "output": 10.25,
+     "cache_read": 0.5
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-13"
+   },
+   "glm53fast": {
+    "deprecated": false,
+    "superseded_by": "zhipuai/glm-5.3",
+    "cross_generation": true,
+    "id": "scx-ai-gp/glm-5.3-fast",
+    "provider": "llmgateway-providers",
+    "name": "GLM 5.3 Fast (SCX.ai)",
+    "reasoning": false,
+    "tool_call": false,
+    "context": 1000000,
+    "cost": {
+     "input": 2.8,
+     "output": 8.8,
+     "cache_read": 0.56
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-14"
+   },
+   "qwen38max": {
+    "deprecated": false,
+    "superseded_by": "alibaba/qwen3.8-max-preview",
+    "cross_generation": false,
+    "id": "Qwen/Qwen3.8-Max",
+    "provider": "commandcode",
+    "name": "Qwen3.8 Max",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 2,
+     "output": 6,
+     "cache_read": 0.25,
+     "cache_write": 2.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-03"
+   },
+   "musespark12": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "meta/muse-spark-1.2",
+    "provider": "commandcode",
+    "name": "Muse Spark 1.2",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 1.25,
+     "output": 4.25,
+     "cache_read": 0.15
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf",
+      "audio"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-05"
+   },
+   "musespark11": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "meta/muse-spark-1.1",
+    "provider": "commandcode",
+    "name": "Muse Spark 1.1",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 1.25,
+     "output": 4.25,
+     "cache_read": 0.15
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-08"
+   },
+   "musespark13": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "meta/muse-spark-1.3",
+    "provider": "commandcode",
+    "name": "Muse Spark 1.3",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 1.25,
+     "output": 4.25,
+     "cache_read": 0.15
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf",
+      "audio"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-02"
+   },
+   "musewonder10": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "meta/muse-wonder-1.0",
+    "provider": "commandcode",
+    "name": "Muse Wonder",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 4,
+     "output": 20,
+     "cache_read": 0.2
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf",
+      "audio"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-12"
+   },
+   "qwen37flash": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "alibaba/qwen3.7-flash",
+    "provider": "llmgateway-providers",
+    "name": "Qwen3.7 Flash (Alibaba Cloud)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 983616,
+    "cost": {
+     "input": 0.03,
+     "output": 0.13,
+     "cache_read": 0.006,
+     "cache_write": 0.0375
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-15"
+   },
+   "qwen36plus": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "alibaba/qwen3.6-plus",
+    "provider": "llmgateway-providers",
+    "name": "Qwen3.6 Plus (Alibaba Cloud)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 983616,
+    "cost": {
+     "input": 0.5,
+     "output": 3,
+     "cache_read": 0.05,
+     "cache_write": 0.625,
+     "tiers": [
+      {
+       "input": 2,
+       "output": 6,
+       "cache_read": 0.2,
+       "cache_write": 2.5,
+       "tier": {
+        "type": "context",
+        "size": 256000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 2,
+      "output": 6,
+      "cache_read": 0.2,
+      "cache_write": 2.5
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-02"
+   },
+   "qwen38omniflash": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "Qwen/Qwen3.8-Omni-Flash",
+    "provider": "commandcode",
+    "name": "Qwen3.8 Omni Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.15,
+     "output": 0.47,
+     "cache_read": 0.016
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "audio",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-17"
+   },
+   "qwen37max": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "alibaba/qwen3.7-max",
+    "provider": "llmgateway-providers",
+    "name": "Qwen3.7 Max (Alibaba Cloud)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 983616,
+    "cost": {
+     "input": 2.5,
+     "output": 7.5,
+     "cache_read": 0.5,
+     "cache_write": 3.125
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-05-21"
+   },
+   "qwen37plus": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "alibaba/qwen3.7-plus",
+    "provider": "llmgateway-providers",
+    "name": "Qwen3.7 Plus (Alibaba Cloud)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 983616,
+    "cost": {
+     "input": 0.4,
+     "output": 1.6,
+     "cache_read": 0.08,
+     "cache_write": 0.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-02"
+   },
+   "kimik27codehighspeed": {
+    "deprecated": false,
+    "superseded_by": "moonshotai/kimi-k2.7-code",
+    "cross_generation": true,
+    "id": "moonshotai/Kimi-K2.7-Code-Highspeed",
+    "provider": "commandcode",
+    "name": "Kimi K2.7 Code Highspeed",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262000,
+    "cost": {
+     "input": 1.9,
+     "output": 8,
+     "cache_read": 0.38
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-12"
+   },
+   "step37flash": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "stepfun/Step-3.7-Flash",
+    "provider": "commandcode",
+    "name": "Step 3.7 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 256000,
+    "cost": {
+     "input": 0.2,
+     "output": 1.15,
+     "cache_read": 0.04
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-05-29"
+   },
+   "hy3": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "novita/hy3",
+    "provider": "llmgateway-providers",
+    "name": "Hy3 (NovitaAI)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262144,
+    "cost": {
+     "input": 0.14,
+     "output": 0.58,
+     "cache_read": 0.035
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-06"
+   },
+   "glm53flashx": {
+    "deprecated": false,
+    "superseded_by": "zhipuai/glm-5.3-flash",
+    "cross_generation": true,
+    "id": "z-ai/glm-5.3-flashx",
+    "provider": "commandcode",
+    "name": "GLM-5.3-FlashX",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.37,
+     "output": 1.25,
+     "cache_read": 0.075
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-26"
+   },
+   "hy4preview": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "tencent/hy4-preview",
+    "provider": "commandcode",
+    "name": "Hy4 preview",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1024000,
+    "cost": {
+     "input": 0.834,
+     "output": 2.501,
+     "cache_read": 0.042
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-28"
+   },
+   "step5preview": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "stepfun/Step-5-Preview",
+    "provider": "commandcode",
+    "name": "Step 5 Preview",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 1,
+     "output": 2.7,
+     "cache_read": 0.05
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-16"
+   },
+   "mimov26proultraspeed": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "mimo-v2-6-pro-ultraspeed",
+    "provider": "empiriolabs",
+    "name": "MiMo V2.6 Pro UltraSpeed",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 4.35,
+     "output": 8.7,
+     "cache_read": 4.35
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "audio",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-21"
+   },
+   "step35flash": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "stepfun/Step-3.5-Flash",
+    "provider": "commandcode",
+    "name": "Step 3.5 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 256000,
+    "cost": {
+     "input": 0.09,
+     "output": 0.3,
+     "cache_read": 0.02
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-01-29"
+   },
+   "qwen38max0902": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "Qwen/Qwen3.8-Max-0902",
+    "provider": "commandcode",
+    "name": "Qwen3.8 Max 0902",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 2,
+     "output": 6,
+     "cache_read": 0.25
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-02"
+   },
+   "mimov25": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "mimo-v2.5",
+    "provider": "xiaomi-token-plan-sgp",
+    "name": "MiMo-V2.5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0,
+     "output": 0,
+     "cache_read": 0
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "audio",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-22"
+   },
+   "mimov25pro": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "mimo-v2.5-pro",
+    "provider": "xiaomi-token-plan-sgp",
+    "name": "MiMo-V2.5-Pro",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0,
+     "output": 0,
+     "cache_read": 0
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-22"
+   },
+   "nemotron3ultra550ba55b": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "nvidia/nemotron-3-ultra-550b-a55b",
+    "provider": "commandcode",
+    "name": "Nemotron 3 Ultra 550B A55B",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.6,
+     "output": 2.4,
+     "cache_read": 0.12
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-04"
+   },
+   "nemotron35supervl": {
+    "deprecated": false,
+    "superseded_by": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+    "cross_generation": false,
+    "id": "nvidia/nemotron-3.5-super-vl",
+    "provider": "kilo",
+    "name": "NVIDIA: Nemotron 3.5 Super VL",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0,
+     "output": 0
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-15",
+    "resolved_to": "nvidia/nemotron-3.5-super-vl-120b-a12b"
+   },
+   "longcat20": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "meituan/longcat-2.0",
+    "provider": "kilo",
+    "name": "Meituan: LongCat 2.0",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048756,
+    "cost": {
+     "input": 0.75,
+     "output": 3,
+     "cache_read": 0.015
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-30"
+   },
+   "deepseekv4flashvisionexp": {
+    "deprecated": true,
+    "superseded_by": "deepseek/deepseek-v4.1-flash-1017",
+    "cross_generation": true,
+    "id": "deepseek/deepseek-v4-flash-vision-exp",
+    "provider": "commandcode",
+    "name": "DeepSeek V4 Flash Vision Exp",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.15,
+     "output": 0.6,
+     "cache_read": 0.003
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-21"
+   },
+   "musesparkopen": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "meta/muse-spark-open",
+    "provider": "kilo",
+    "name": "Muse Spark Open",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 1.25,
+     "output": 4.25,
+     "cache_read": 0.15
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf",
+      "audio"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-15"
+   },
+   "museember": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "meta/muse-ember",
+    "provider": "kilo",
+    "name": "Meta: Muse Ember",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.1,
+     "output": 0.5,
+     "cache_read": 0.004
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf",
+      "audio"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-11-09"
+   },
+   "ling31flash": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "inclusionai/ling-3.1-flash",
+    "provider": "kilo",
+    "name": "inclusionAI: Ling 3.1 Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.3,
+     "output": 0.9,
+     "cache_read": 0.06
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-29"
+   },
+   "deepseekv4flashlatest": {
+    "deprecated": false,
+    "superseded_by": "deepseek/deepseek-v4-flash-0731",
+    "cross_generation": true,
+    "id": "~deepseek/deepseek-v4-flash-latest",
+    "provider": "kilo",
+    "name": "DeepSeek: DeepSeek V4 Flash Latest",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.0434,
+     "output": 0.3,
+     "cache_read": 0.035
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-01"
+   },
+   "qwen38maxprime": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "qwen/qwen3.8-max-prime",
+    "provider": "kilo",
+    "name": "Qwen 3.8 Max Prime",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 4,
+     "output": 12,
+     "cache_read": 0.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-23"
+   },
+   "inkling": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "thinkingmachines/inkling",
+    "provider": "commandcode",
+    "name": "Inkling",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 256000,
+    "cost": {
+     "input": 1,
+     "output": 4.05,
+     "cache_read": 0.17
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "audio"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-15"
+   },
+   "inklingsmall": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "thinkingmachines/inkling-small",
+    "provider": "commandcode",
+    "name": "Inkling Small",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.5,
+     "output": 1.2,
+     "cache_read": 0.1
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "audio"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-30"
+   },
+   "gemini31flashlitepreview": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "google/gemini-3.1-flash-lite-preview",
+    "provider": "kilo",
+    "name": "Gemini 3.1 Flash Lite Preview",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.125,
+     "output": 0.75,
+     "reasoning": 0.75,
+     "cache_read": 0.0125,
+     "cache_write": 0.041667
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "audio",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-03-03"
+   },
+   "hy4": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "tencent/hy4",
+    "provider": "kilo",
+    "name": "Tencent: Hy4",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0.834,
+     "output": 2.501,
+     "cache_read": 0.042
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-11-04"
+   },
+   "hy3preview": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "tencent/hy3-preview",
+    "provider": "kilo",
+    "name": "Hy3 preview",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262144,
+    "cost": {
+     "input": 0.18,
+     "output": 0.6,
+     "cache_read": 0.06
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-20"
+   },
+   "qwen36maxpreview": {
+    "deprecated": true,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "bailian/qwen3.6-max-preview",
+    "provider": "ofox",
+    "name": "Qwen3.6 Max Preview",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262144,
+    "cost": {
+     "input": 2.15,
+     "output": 12.86,
+     "cache_read": 0.2,
+     "cache_write": 1.17
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-20"
+   },
+   "glm53flashfast": {
+    "deprecated": false,
+    "superseded_by": "zhipuai/glm-5.3-flash",
+    "cross_generation": true,
+    "id": "glm-5.3-flash:fast",
+    "provider": "inco",
+    "name": "GLM-5.3-Flash",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.3,
+     "output": 1,
+     "cache_read": 0.06
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "video",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-08-26"
+   },
+   "deepseekv41flashfast": {
+    "deprecated": false,
+    "superseded_by": "deepseek/deepseek-v4.1-flash",
+    "cross_generation": true,
+    "id": "deepseek/deepseek-v4.1-flash-fast",
+    "provider": "commandcode",
+    "name": "DeepSeek V4.1 Flash Fast",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.16,
+     "output": 0.58,
+     "cache_read": 0.016
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-10"
+   },
+   "deepseekv4profast": {
+    "deprecated": false,
+    "superseded_by": "deepseek/deepseek-v4-pro",
+    "cross_generation": true,
+    "id": "deepseek-v4-pro-fast",
+    "provider": "wally",
+    "name": "DeepSeek V4 Pro Fast",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 1.91,
+     "output": 3.83,
+     "cache_read": 0.16
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-24"
+   },
+   "claudeopus5fast": {
+    "deprecated": true,
+    "superseded_by": "anthropic/claude-opus-5",
+    "cross_generation": true,
+    "id": "claude-opus-5-fast",
+    "provider": "pioneer",
+    "name": "Claude Opus 5",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 10,
+     "output": 50,
+     "cache_read": 1,
+     "cache_write": 12.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-24"
+   },
+   "beamfree": {
+    "deprecated": false,
+    "superseded_by": "reflection/beam-1.0-501b-a23b",
+    "cross_generation": true,
+    "id": "beam-free",
+    "provider": "opencode-go",
+    "name": "Beam Free",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1048576,
+    "cost": {
+     "input": 0,
+     "output": 0,
+     "cache_read": 0
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-05"
+   },
+   "longcat25previewfree": {
+    "deprecated": true,
+    "superseded_by": "meituan/longcat-2.5-preview",
+    "cross_generation": true,
+    "id": "longcat-2.5-preview-free",
+    "provider": "opencode-go",
+    "name": "LongCat 2.5 Preview Free",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0,
+     "output": 0,
+     "cache_read": 0
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-25"
+   },
+   "longcat25free": {
+    "deprecated": false,
+    "superseded_by": "meituan/longcat-2.5",
+    "cross_generation": true,
+    "id": "longcat-2.5-free",
+    "provider": "opencode-go",
+    "name": "LongCat 2.5 Free",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0,
+     "output": 0,
+     "cache_read": 0
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-11-02"
+   },
+   "icemancontributorfree": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "iceman-contributor-free",
+    "provider": "opencode-go",
+    "name": "Iceman Contributor Free",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262144,
+    "cost": {
+     "input": 0,
+     "output": 0,
+     "cache_read": 0
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-24"
+   },
+   "ornith15122b": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "ornith-ai/ornith-1.5-122b",
+    "provider": "nano-gpt",
+    "name": "Ornith 1.5 122B",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262144,
+    "cost": {
+     "input": 0.26,
+     "output": 2.08,
+     "cache_read": 0.07
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-20"
+   },
+   "deepseekv4flashfast": {
+    "deprecated": false,
+    "superseded_by": "deepseek/deepseek-v4-flash",
+    "cross_generation": true,
+    "id": "deepseek/deepseek-v4-flash-fast",
+    "provider": "commandcode",
+    "name": "DeepSeek V4 Flash Fast",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.28,
+     "output": 0.56,
+     "cache_read": 0.07
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-24"
+   },
+   "kimik26fast": {
+    "deprecated": true,
+    "superseded_by": "moonshotai/kimi-k2.6",
+    "cross_generation": true,
+    "id": "kimi-k2.6-fast",
+    "provider": "greenpt",
+    "name": "Kimi K2.6 Fast",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262144,
+    "cost": {
+     "input": 1.655,
+     "output": 8.778
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-20"
+   },
+   "kimik27codefast": {
+    "deprecated": true,
+    "superseded_by": "moonshotai/kimi-k2.7-code",
+    "cross_generation": true,
+    "id": "kimi-k2.7-code-fast",
+    "provider": "neuralwatt",
+    "name": "Kimi K2.7 Code Fast",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 262128,
+    "cost": {
+     "input": 0.95,
+     "output": 4,
+     "cache_read": 0.095
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-06-12"
+   },
+   "claudeopus55fast": {
+    "deprecated": false,
+    "superseded_by": "anthropic/claude-opus-5-5",
+    "cross_generation": true,
+    "id": "claude-opus-5-5-fast",
+    "provider": "venice",
+    "name": "Claude Opus 5.5 Fast",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 8,
+     "output": 40,
+     "cache_read": 0.4,
+     "cache_write": 10
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-22"
+   },
+   "claudeopus48fast": {
+    "deprecated": true,
+    "superseded_by": "anthropic/claude-opus-4-8",
+    "cross_generation": true,
+    "id": "claude-opus-4-8-fast",
+    "provider": "venice",
+    "name": "Claude Opus 4.8 Fast",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 10,
+     "output": 50,
+     "cache_read": 1,
+     "cache_write": 12.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-05-28"
+   },
+   "claudefable52fast": {
+    "deprecated": false,
+    "superseded_by": "anthropic/claude-fable-5-2",
+    "cross_generation": true,
+    "id": "anthropic/claude-fable-5.2-fast",
+    "provider": "vercel",
+    "name": "Claude Fable 5.2 (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 16,
+     "output": 80,
+     "cache_read": 0.4,
+     "cache_write": 20
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-11-09"
+   },
+   "ling31flash1019": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "inclusionai/ling-3.1-flash-1019",
+    "provider": "vercel",
+    "name": "Ling 3.1 Flash 1019",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 0.3,
+     "output": 0.9,
+     "cache_read": 0.06
+    },
+    "modalities": {
+     "input": [
+      "text"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-30"
+   },
+   "gpt54minifast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-5.4-mini",
+    "cross_generation": true,
+    "id": "openai/gpt-5.4-mini-fast",
+    "provider": "vercel",
+    "name": "GPT 5.4 Mini (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 400000,
+    "cost": {
+     "input": 1.5,
+     "output": 9,
+     "cache_read": 0.15
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-03-17"
+   },
+   "gpt56terrafast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-5.6-terra",
+    "cross_generation": true,
+    "id": "openai/gpt-5.6-terra-fast",
+    "provider": "vercel",
+    "name": "GPT 5.6 Terra (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 4,
+     "output": 24,
+     "cache_read": 0.4,
+     "cache_write": 5,
+     "tiers": [
+      {
+       "input": 8,
+       "output": 36,
+       "cache_read": 0.8,
+       "cache_write": 10,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 8,
+      "output": 36,
+      "cache_read": 0.8,
+      "cache_write": 10
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-09"
+   },
+   "gpt6lunafast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-6-luna",
+    "cross_generation": true,
+    "id": "openai/gpt-6-luna-fast",
+    "provider": "vercel",
+    "name": "GPT-6 Luna (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 0.2,
+     "output": 1,
+     "cache_read": 0.02,
+     "cache_write": 0.25,
+     "tiers": [
+      {
+       "input": 0.4,
+       "output": 1.5,
+       "cache_read": 0.04,
+       "cache_write": 0.5,
+       "tier": {
+        "type": "context",
+        "size": 272001
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 0.4,
+      "output": 1.5,
+      "cache_read": 0.04,
+      "cache_write": 0.5
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-22"
+   },
+   "gpt56solfast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-5.6-sol",
+    "cross_generation": true,
+    "id": "openai/gpt-5.6-sol-fast",
+    "provider": "vercel",
+    "name": "GPT 5.6 Sol (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 8,
+     "output": 40,
+     "cache_read": 0.8,
+     "cache_write": 10,
+     "tiers": [
+      {
+       "input": 16,
+       "output": 60,
+       "cache_read": 1.6,
+       "cache_write": 20,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 16,
+      "output": 60,
+      "cache_read": 1.6,
+      "cache_write": 20
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-09"
+   },
+   "gpt55fast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-5.5",
+    "cross_generation": true,
+    "id": "openai/gpt-5.5-fast",
+    "provider": "vercel",
+    "name": "GPT 5.5 (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1000000,
+    "cost": {
+     "input": 12.5,
+     "output": 75,
+     "cache_read": 1.25
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-04-23"
+   },
+   "gpt53codexfast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-5.3-codex",
+    "cross_generation": true,
+    "id": "openai/gpt-5.3-codex-fast",
+    "provider": "vercel",
+    "name": "GPT 5.3 Codex (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 400000,
+    "cost": {
+     "input": 3.5,
+     "output": 28,
+     "cache_read": 0.35
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-02-05"
+   },
+   "gpt56lunafast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-5.6-luna",
+    "cross_generation": true,
+    "id": "openai/gpt-5.6-luna-fast",
+    "provider": "vercel",
+    "name": "GPT 5.6 Luna (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 0.4,
+     "output": 2.4,
+     "cache_read": 0.04,
+     "cache_write": 0.5,
+     "tiers": [
+      {
+       "input": 0.8,
+       "output": 3.6,
+       "cache_read": 0.08,
+       "cache_write": 1,
+       "tier": {
+        "type": "context",
+        "size": 272000
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 0.8,
+      "output": 3.6,
+      "cache_read": 0.08,
+      "cache_write": 1
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-07-09"
+   },
+   "gpt61terrafast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-6.1-terra",
+    "cross_generation": true,
+    "id": "openai/gpt-6.1-terra-fast",
+    "provider": "vercel",
+    "name": "GPT-6.1 Terra (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 2,
+     "output": 10,
+     "cache_read": 0.1,
+     "cache_write": 2.5,
+     "tiers": [
+      {
+       "input": 4,
+       "output": 15,
+       "cache_read": 0.2,
+       "cache_write": 5,
+       "tier": {
+        "type": "context",
+        "size": 272001
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 4,
+      "output": 15,
+      "cache_read": 0.2,
+      "cache_write": 5
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-10-26"
+   },
+   "gpt6solfast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-6-sol",
+    "cross_generation": true,
+    "id": "openai/gpt-6-sol-fast",
+    "provider": "vercel",
+    "name": "GPT-6 Sol (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 4,
+     "output": 20,
+     "cache_read": 0.4,
+     "cache_write": 5,
+     "tiers": [
+      {
+       "input": 8,
+       "output": 30,
+       "cache_read": 0.8,
+       "cache_write": 10,
+       "tier": {
+        "type": "context",
+        "size": 272001
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 8,
+      "output": 30,
+      "cache_read": 0.8,
+      "cache_write": 10
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-22"
+   },
+   "gpt61solfast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-6.1-sol",
+    "cross_generation": true,
+    "id": "openai/gpt-6.1-sol-fast",
+    "provider": "vercel",
+    "name": "GPT-6.1 Sol (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 4,
+     "output": 20,
+     "cache_read": 0.2,
+     "cache_write": 5,
+     "tiers": [
+      {
+       "input": 8,
+       "output": 30,
+       "cache_read": 0.4,
+       "cache_write": 10,
+       "tier": {
+        "type": "context",
+        "size": 272001
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 8,
+      "output": 30,
+      "cache_read": 0.4,
+      "cache_write": 10
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-29"
+   },
+   "gpt54fast": {
+    "deprecated": false,
+    "superseded_by": "openai/gpt-5.4",
+    "cross_generation": true,
+    "id": "openai/gpt-5.4-fast",
+    "provider": "vercel",
+    "name": "GPT 5.4 (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 5,
+     "output": 30,
+     "cache_read": 0.5
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-03-05"
+   },
+   "gpt6astrafast": {
+    "deprecated": false,
+    "superseded_by": null,
+    "cross_generation": false,
+    "id": "openai/gpt-6-astra-fast",
+    "provider": "vercel",
+    "name": "GPT-6 Astra (Fast)",
+    "reasoning": true,
+    "tool_call": true,
+    "context": 1050000,
+    "cost": {
+     "input": 20,
+     "output": 100,
+     "cache_read": 2,
+     "cache_write": 25,
+     "tiers": [
+      {
+       "input": 40,
+       "output": 150,
+       "cache_read": 4,
+       "cache_write": 50,
+       "tier": {
+        "type": "context",
+        "size": 272001
+       }
+      }
+     ],
+     "context_over_200k": {
+      "input": 40,
+      "output": 150,
+      "cache_read": 4,
+      "cache_write": 50
+     }
+    },
+    "modalities": {
+     "input": [
+      "text",
+      "image",
+      "pdf"
+     ],
+     "output": [
+      "text"
+     ]
+    },
+    "release_date": "2026-09-04"
+   }
+  }
+ },
+ "capability": {
+  "source": "https://artificialanalysis.ai/models",
+  "index": "Artificial Analysis Intelligence Index",
+  "variant": "AA chart default selection, plus the model's own page",
+  "fetched": "2026-11-12T16:01:20+01:00",
+  "updated": "2026-11-12",
+  "models": {
+   "mimov26pro": {
+    "aa_slug": "mimo-v2-6-pro",
+    "aa_name": "MiMo-V2.6-Pro",
+    "intelligence": 29.8897833093321,
+    "engineering": 34.2701744047619,
+    "is_reasoning": true
+   },
+   "gpt6astra": {
+    "aa_slug": "gpt-6-astra",
+    "aa_name": "GPT-6 Astra (Max)",
+    "intelligence": 56.8538559596797,
+    "engineering": 61.7947113636364,
+    "is_reasoning": true
+   },
+   "claudeopus55": {
+    "aa_slug": "claude-opus-5-5",
+    "aa_name": "Claude Opus 5.5 (Max, Default Fallback)",
+    "intelligence": 59.1060336078904,
+    "engineering": 65.2760308441558,
+    "is_reasoning": true
+   },
+   "ling31flash1019": {
+    "aa_slug": "ling-3-1-flash-1019",
+    "aa_name": "Ling 3.1 Flash 1019",
+    "intelligence": 29.570119369837,
+    "engineering": 35.4586687770563,
+    "is_reasoning": true
+   },
+   "claudefable52": {
+    "aa_slug": "claude-fable-5-2",
+    "aa_name": "Claude Fable 5.2 (Max, Default Fallback)",
+    "intelligence": 64.563595756626,
+    "engineering": 72.638859469697,
+    "is_reasoning": true
+   },
+   "grok47": {
+    "aa_slug": "grok-4-7",
+    "aa_name": "Grok 4.7 (Xhigh)",
+    "intelligence": 35.4850117067196,
+    "engineering": 41.7679916125541,
+    "is_reasoning": true
+   },
+   "kimik31pro": {
+    "aa_slug": "kimi-k3-1-pro",
+    "aa_name": "Kimi K3.1 Pro",
+    "intelligence": 46.4526236744189,
+    "engineering": 50.8937710497836,
+    "is_reasoning": true
+   },
+   "reflectionbeam": {
+    "aa_slug": "reflection-beam",
+    "aa_name": "Beam 1.0",
+    "intelligence": 17.7307282547205,
+    "engineering": 25.2201247294372,
+    "is_reasoning": true
+   },
+   "gpt6luna": {
+    "aa_slug": "gpt-6-luna",
+    "aa_name": "GPT-6 Luna (Max)",
+    "intelligence": 27.8552004938153,
+    "engineering": 33.298545508658,
+    "is_reasoning": true
+   },
+   "claudehaiku55": {
+    "aa_slug": "claude-haiku-5-5",
+    "aa_name": "Claude Haiku 5.5 (Max)",
+    "intelligence": 36.4845435880142,
+    "engineering": 42.5384125,
+    "is_reasoning": true
+   },
+   "gemini38flash": {
+    "aa_slug": "gemini-3-8-flash",
+    "aa_name": "Gemini 3.8 Flash (High)",
+    "intelligence": 30.8468119957291,
+    "engineering": 38.7899060606061,
+    "is_reasoning": true
+   },
+   "gemini4carbon": {
+    "aa_slug": "gemini-4-carbon",
+    "aa_name": "Gemini 4 Carbon (High)",
+    "intelligence": 60.025738829526,
+    "engineering": 65.3103995670996,
+    "is_reasoning": true
+   },
+   "qwen3827b": {
+    "aa_slug": "qwen3-8-27b",
+    "aa_name": "Qwen3.8 27B (Xhigh)",
+    "intelligence": 20.1068756031705,
+    "engineering": 28.0993576839827,
+    "is_reasoning": true
+   },
+   "gpt61terra": {
+    "aa_slug": "gpt-6-1-terra",
+    "aa_name": "GPT-6.1 Terra (Max)",
+    "intelligence": 51.3265188577015,
+    "engineering": 54.7359752164502,
+    "is_reasoning": true
+   },
+   "qwen38max": {
+    "aa_slug": "qwen3-8-max",
+    "aa_name": "Qwen3.8 Max (0902)",
+    "intelligence": 33.6545627367888,
+    "engineering": 39.2803852813853,
+    "is_reasoning": true
+   },
+   "claudesonnet55": {
+    "aa_slug": "claude-sonnet-5-5",
+    "aa_name": "Claude Sonnet 5.5 (Max, Default Fallback)",
+    "intelligence": 54.54133407109,
+    "engineering": 58.4996613636364,
+    "is_reasoning": true
+   },
+   "gpt61sol": {
+    "aa_slug": "gpt-6-1-sol",
+    "aa_name": "GPT-6.1 Sol (Max)",
+    "intelligence": 54.6087338138148,
+    "engineering": 59.3526158549784,
+    "is_reasoning": true
+   },
+   "k2horizon375ba23b": {
+    "aa_slug": "k2-horizon-375b-a23b",
+    "aa_name": "K2 Horizon 375B A23B",
+    "intelligence": 17.8202731734027,
+    "engineering": 26.5973973484849,
+    "is_reasoning": true
+   },
+   "glm53": {
+    "aa_slug": "glm-5-3",
+    "aa_name": "GLM-5.3 (Max)",
+    "intelligence": 31.653381843882,
+    "engineering": 37.59005254329,
+    "is_reasoning": true
+   },
+   "tencenthy4": {
+    "aa_slug": "tencent-hy4",
+    "aa_name": "Tencent Hy4",
+    "intelligence": 34.5552385392508,
+    "engineering": 41.0859896645022,
+    "is_reasoning": true
+   },
+   "museember": {
+    "aa_slug": "muse-ember",
+    "aa_name": "Muse Ember (Max)",
+    "intelligence": 36.0212987864912,
+    "engineering": 41.7630534090909,
+    "is_reasoning": true
+   },
+   "nemotron35supervl": {
+    "aa_slug": "nemotron-3-5-super-vl",
+    "aa_name": "Nemotron 3.5 Super VL",
+    "intelligence": 13.6203422723141,
+    "engineering": 23.4588856060606,
+    "is_reasoning": true
+   },
+   "inkling2small": {
+    "aa_slug": "inkling-2-small",
+    "aa_name": "Inkling 2 Small",
+    "intelligence": 30.6286781498958,
+    "engineering": 38.8741721320346,
+    "is_reasoning": true
+   },
+   "musewonderfull": {
+    "aa_slug": "muse-wonder-full",
+    "aa_name": "Muse Wonder Full (Max)",
+    "intelligence": 50.0772123627021,
+    "engineering": 55.2713107142857,
+    "is_reasoning": true
+   },
+   "mistrallarge4": {
+    "aa_slug": "mistral-large-4",
+    "aa_name": "Mistral Large 4 (High)",
+    "intelligence": 26.1249946754784,
+    "engineering": 33.4385668831169,
+    "is_reasoning": true
+   },
+   "deepseekv41flash1017": {
+    "aa_slug": "deepseek-v4-1-flash-1017",
+    "aa_name": "DeepSeek V4.1 Flash 1017 (Max)",
+    "intelligence": 32.5896393532027,
+    "engineering": 37.5970801948052,
+    "is_reasoning": true
+   },
+   "musewonder": {
+    "aa_slug": "muse-wonder",
+    "aa_name": "Muse Wonder (Max)",
+    "intelligence": 43.5748225998431,
+    "engineering": 49.5534664502164,
+    "is_reasoning": true
+   },
+   "minimaxm31flash": {
+    "aa_slug": "minimax-m3-1-flash",
+    "intelligence": 29.0595214290458,
+    "is_reasoning": true
+   },
+   "mimov26flash": {
+    "aa_slug": "mimo-v2-6-flash",
+    "intelligence": 26.7276981444568,
+    "is_reasoning": true
+   },
+   "deepseekv41flash": {
+    "aa_slug": "deepseek-v4-1-flash",
+    "intelligence": 30.078569475636,
+    "is_reasoning": true
+   },
+   "deepseekv4flash": {
+    "aa_slug": "deepseek-v4-flash",
+    "intelligence": 64.563595756626,
+    "is_reasoning": true
+   },
+   "step35flash": {
+    "aa_slug": "step-3-5-flash",
+    "intelligence": 64.563595756626,
+    "is_reasoning": true
+   }
+  }
+ }
+}
