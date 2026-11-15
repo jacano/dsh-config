@@ -99,10 +99,10 @@ terminal tasks and grades whether they got done, and it ranks model **and agent*
 agent is stored with the number. `tbench_min` is the floor, and a model the board
 does not rank is not bought.
 
-AA's index and Forcebench were both in here until 2026-11-15 and both were removed,
-not because they were wrong but because a number that decides nothing ends up being
-quoted as if it did. The menu's order never changed: the four rows below are the
-same four. What went away is a second and third opinion nobody was gating on.
+One number, and only one, decides. A second capability scale is tempting and was
+dropped on purpose: not because it was wrong, but because a number that gates
+nothing ends up being quoted as if it did. What is left is the scale the policy
+names, printed on every row.
 
 A model the board does not rank is out, with that reason printed on the row: a
 purchase rule, not a judgement about the model. A row that is *old and unranked*

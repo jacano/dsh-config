@@ -126,7 +126,7 @@ excluded:
   - { id: moonshotai/Kimi-K3.1-Pro, provider: command-code, reason: "measured: 32 tok/s" }
   - { id: xiaomi/mimo-v2.6-pro, provider: command-code, reason: "measured: 26 tok/s, 8.4 s to start" }
   # Capability, not coverage: the model is on three routes and priced at 0,00029 here.
-  - { id: ornith-1-5-122b, reason: "not on Terminal-Bench; when Forcebench was still in use it scored it 21,2 [16,7-26,0] against 59,1 for DeepSeek V4.1 Flash, so the maker's parity claim did not survive the one independent run" }
+  - { id: ornith-1-5-122b, reason: "not on Terminal-Bench, so this policy will not buy it; the maker's parity claim was never confirmed by an executed benchmark" }
   - { id: deepseek/deepseek-v4.1-flash, provider: command-code, reason: "measured on this lane: 9-47 s to start" }
   - { id: Qwen/Qwen3.8-Flash, provider: command-code, reason: "measured: HTTP 524, the route does not answer" }
 

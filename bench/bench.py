@@ -799,8 +799,6 @@ def model_rows(plan: dict, catalog: dict, table: dict, board: dict) -> list[dict
             "tool_call": fact.get("tool_call"),
             "context": fact.get("context"),
             "release_date": fact.get("release_date"),
-            "deprecated": fact.get("deprecated"),
-            "superseded_by": fact.get("superseded_by"),
             "source": fact.get("id"),
             "tb": (ranked or {}).get("score"),
             # What models.dev says the same turn costs, next to what the shop
@@ -844,6 +842,11 @@ def cold_call(row: dict) -> float | None:
 def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, str]:
     if is_excluded(judged, row["model"], row["provider"]):
         return "out", "excluded in the policy"
+    # The board first: it is one dict lookup, it decides more than anything else
+    # here, and a model it does not rank has no business being priced, described
+    # or asked about.
+    if row["tb"] is None:
+        return "out", "not on Terminal-Bench, and this policy buys only what it ranks"
     cost = row["effective_turn_usd"]
     if cost is None or row["real_turn_usd"] is None:
         return "human", "no price on record"
@@ -861,9 +864,6 @@ def classify(row: dict, cost_max: float, cap_min: float, judged) -> tuple[str, s
         return "human", "reasoning unreported"
     if row["tool_call"] is None:
         return "human", "tool support unreported"
-    # One scale, and it is the board's: a model it does not rank is not bought.
-    if row["tb"] is None:
-        return "out", "not on Terminal-Bench, and this policy buys only what it ranks"
     if row["tb"] < cap_min:
         return "out", f"tbench {row['tb']:.1f} < {cap_min:.1f}"
     return "battery", ""
