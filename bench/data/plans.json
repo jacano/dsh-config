@@ -1,7 +1,7 @@
 {
  "updated": "2026-11-15",
  "refreshed_at": "2026-11-15T21:39:03+01:00",
- "about": "Plans a provider sells, the prices it publishes, and the catalogue Command Code prices its own models from. One file, three sections. The turn (91.500 tokens) and the exchange rate are constants in bench.py, where they are commented; they are not repeated here.",
+ "about": "Plans a provider sells, the prices it publishes (evidence: nothing reads them), and the catalogue Command Code prices its models from. The turn (91.500 tokens) and the exchange rate are constants in bench.py, where they are commented.",
  "catalog": {
   "claude-fable-5-2": {
    "name": "Claude Fable 5.2",
@@ -57,24 +57,21 @@
    "turn": 0.002385,
    "input": 0.15,
    "output": 0.6,
-   "cache": 0.015,
-   "intelligence": 42.7
+   "cache": 0.015
   },
   "muse-spark-open": {
    "name": "Muse Spark Open",
    "turn": 0.020975,
    "input": 1.25,
    "output": 4.25,
-   "cache": 0.15,
-   "intelligence": 38.9
+   "cache": 0.15
   },
   "nemotron-3-5-super-vl": {
    "name": "Nemotron 3.5 Super VL",
    "turn": 0.00451,
    "input": 0.2,
    "output": 0.5,
-   "cache": 0.04,
-   "intelligence": 26.5
+   "cache": 0.04
   },
   "jev-1-14-0": {
    "name": "Jev 1.14.0 Decision model · headless (cmd -p) and Provider API only, not in /model",
@@ -88,56 +85,49 @@
    "turn": 0.00699,
    "input": 0.3,
    "output": 0.9,
-   "cache": 0.06,
-   "intelligence": 41.1
+   "cache": 0.06
   },
   "gemini-4-argon": {
    "name": "Gemini 4 Argon",
    "turn": 0.0259,
    "input": 2.0,
    "output": 10.0,
-   "cache": 0.1,
-   "intelligence": 52.6
+   "cache": 0.1
   },
   "muse-wonder-1-0": {
    "name": "Muse Wonder",
    "turn": 0.0518,
    "input": 4.0,
    "output": 20.0,
-   "cache": 0.2,
-   "intelligence": 52.4
+   "cache": 0.2
   },
   "claude-haiku-5-5": {
    "name": "Claude Haiku 5.5",
    "turn": 0.00174,
    "input": 0.1,
    "output": 0.5,
-   "cache": 0.01,
-   "intelligence": 43.4
+   "cache": 0.01
   },
   "mistral-large-4": {
    "name": "Mistral Large 4",
    "turn": 0.02009,
    "input": 1.36,
    "output": 4.18,
-   "cache": 0.14,
-   "intelligence": 38.4
+   "cache": 0.14
   },
   "gpt-6-1-sol": {
    "name": "GPT-6.1 Sol",
    "turn": 0.0259,
    "input": 2.0,
    "output": 10.0,
-   "cache": 0.1,
-   "intelligence": 51.8
+   "cache": 0.1
   },
   "claude-sonnet-5-5": {
    "name": "Claude Sonnet 5.5",
    "turn": 0.0259,
    "input": 2.0,
    "output": 10.0,
-   "cache": 0.1,
-   "intelligence": 56.0
+   "cache": 0.1
   },
   "deepseek-v4-1-flash-fast": {
    "name": "DeepSeek V4.1 Flash Fast",
@@ -154,16 +144,14 @@
    "turn": 0.00174,
    "input": 0.1,
    "output": 0.5,
-   "cache": 0.01,
-   "intelligence": 38.1
+   "cache": 0.01
   },
   "gpt-6-sol": {
    "name": "GPT-6 Sol",
    "turn": 0.0348,
    "input": 2.0,
    "output": 10.0,
-   "cache": 0.2,
-   "intelligence": 47.6
+   "cache": 0.2
   },
   "qwen3-8-max-prime": {
    "name": "Qwen 3.8 Max Prime",
@@ -177,8 +165,7 @@
    "turn": 0.0518,
    "input": 4.0,
    "output": 20.0,
-   "cache": 0.2,
-   "intelligence": 57.6
+   "cache": 0.2
   },
   "jev": {
    "name": "Jev Decision model · headless (cmd -p) and Provider API only, not in /model",
@@ -192,16 +179,14 @@
    "turn": 0.000809,
    "input": 0.14,
    "output": 0.28,
-   "cache": 0.0028,
-   "intelligence": 37.9
+   "cache": 0.0028
   },
   "mimo-v2-6-pro": {
    "name": "MiMo V2.6 Pro",
    "turn": 0.00206,
    "input": 0.435,
    "output": 0.87,
-   "cache": 0.0036,
-   "intelligence": 46.3
+   "cache": 0.0036
   },
   "mimo-v2-6-pro-ultraspeed": {
    "name": "MiMo V2.6 Pro UltraSpeed",
@@ -215,16 +200,14 @@
    "turn": 0.0555,
    "input": 2.0,
    "output": 6.0,
-   "cache": 0.5,
-   "intelligence": 46.4
+   "cache": 0.5
   },
   "step-5-preview": {
    "name": "Step 5 Preview",
    "turn": 0.0095,
    "input": 1.0,
    "output": 2.7,
-   "cache": 0.05,
-   "intelligence": 43.7
+   "cache": 0.05
   },
   "glm-5-3-flashx": {
    "name": "GLM-5.3 FlashX",
@@ -246,7 +229,6 @@
    "input": 0.15,
    "output": 0.6,
    "cache": 0.003,
-   "intelligence": 39.5,
    "peak_hours_per_day": 7,
    "peak_multiplier": 2.0,
    "peak_note": "peak $0.30 / $1.20 01–04 & 06–10 UTC, Mon–Fri"
@@ -256,24 +238,21 @@
    "turn": 0.174,
    "input": 10.0,
    "output": 50.0,
-   "cache": 1.0,
-   "intelligence": 52.7
+   "cache": 1.0
   },
   "gemini-3-8-flash": {
    "name": "Gemini 3.8 Flash",
    "turn": 0.0261,
    "input": 1.5,
    "output": 7.5,
-   "cache": 0.15,
-   "intelligence": 40.9
+   "cache": 0.15
   },
   "muse-spark-1-3": {
    "name": "Muse Spark 1.3",
    "turn": 0.020975,
    "input": 1.25,
    "output": 4.25,
-   "cache": 0.15,
-   "intelligence": 48.1
+   "cache": 0.15
   },
   "muse-spark-1-3-contributor": {
    "name": "Muse Spark 1.3 Contributor",
@@ -287,16 +266,14 @@
    "turn": 0.03325,
    "input": 2.0,
    "output": 6.0,
-   "cache": 0.25,
-   "intelligence": 45.4
+   "cache": 0.25
   },
   "claude-fable-5-1": {
    "name": "Claude Fable 5.1",
    "turn": 0.10725,
    "input": 10.0,
    "output": 50.0,
-   "cache": 0.25,
-   "intelligence": 53.4
+   "cache": 0.25
   },
   "hy4-preview": {
    "name": "Tencent Hy4 Preview",
@@ -310,16 +287,14 @@
    "turn": 0.00357,
    "input": 0.15,
    "output": 0.5,
-   "cache": 0.03,
-   "intelligence": 41.8
+   "cache": 0.03
   },
   "longcat-2-0": {
    "name": "LongCat 2.0",
    "turn": 0.002634,
    "input": 0.3,
    "output": 1.2,
-   "cache": 0.006,
-   "intelligence": 19.1
+   "cache": 0.006
   },
   "qwen3-8-flash": {
    "name": "Qwen 3.8 Flash",
@@ -341,7 +316,6 @@
    "input": 0.15,
    "output": 0.6,
    "cache": 0.003,
-   "intelligence": 34.8,
    "peak_hours_per_day": 7,
    "peak_multiplier": 2.0,
    "peak_note": "peak $0.30 / $1.20 01–04 & 06–10 UTC, Mon–Fri"
@@ -351,16 +325,14 @@
    "turn": 0.03114,
    "input": 1.4,
    "output": 4.4,
-   "cache": 0.26,
-   "intelligence": 44.8
+   "cache": 0.26
   },
   "qwen3-8-27b": {
    "name": "Qwen 3.8 27B",
    "turn": 0.00846,
    "input": 0.4,
    "output": 3.0,
-   "cache": 0.04,
-   "intelligence": 33.7
+   "cache": 0.04
   },
   "deepseek-v4-pro": {
    "name": "DeepSeek V4 Pro",
@@ -368,7 +340,6 @@
    "input": 0.66,
    "output": 1.98,
    "cache": 0.022,
-   "intelligence": 36.0,
    "peak_hours_per_day": 7,
    "peak_multiplier": 2.0,
    "peak_note": "peak $1.32 / $3.96 01–04 & 06–10 UTC, Mon–Fri"
@@ -378,24 +349,21 @@
    "turn": 0.0261,
    "input": 1.5,
    "output": 7.5,
-   "cache": 0.15,
-   "intelligence": 39.1
+   "cache": 0.15
   },
   "grok-4-6": {
    "name": "Grok 4.6",
    "turn": 0.0555,
    "input": 2.0,
    "output": 6.0,
-   "cache": 0.5,
-   "intelligence": 44.3
+   "cache": 0.5
   },
   "muse-spark-1-2": {
    "name": "Muse Spark 1.2",
    "turn": 0.020975,
    "input": 1.25,
    "output": 4.25,
-   "cache": 0.15,
-   "intelligence": 39.6
+   "cache": 0.15
   },
   "muse-spark-1-2-contributor": {
    "name": "Muse Spark 1.2 Contributor",
@@ -409,8 +377,7 @@
    "turn": 0.03325,
    "input": 2.0,
    "output": 6.0,
-   "cache": 0.25,
-   "intelligence": 40.2
+   "cache": 0.25
   },
   "deepseek-v4-flash": {
    "name": "DeepSeek V4 Flash",
@@ -418,7 +385,6 @@
    "input": 0.15,
    "output": 0.6,
    "cache": 0.003,
-   "intelligence": 34.0,
    "peak_hours_per_day": 7,
    "peak_multiplier": 2.0,
    "peak_note": "peak $0.30 / $1.20 01–04 & 06–10 UTC, Mon–Fri"
@@ -428,8 +394,7 @@
    "turn": 0.0112,
    "input": 0.5,
    "output": 1.2,
-   "cache": 0.1,
-   "intelligence": 25.7
+   "cache": 0.1
   },
   "qwen3-7-flash": {
    "name": "Qwen 3.7 Flash",
@@ -443,96 +408,84 @@
    "turn": 0.087,
    "input": 5.0,
    "output": 25.0,
-   "cache": 0.5,
-   "intelligence": 50.8
+   "cache": 0.5
   },
   "gemini-3-5-flash-lite": {
    "name": "Gemini 3.5 Flash Lite",
    "turn": 0.00672,
    "input": 0.3,
    "output": 2.5,
-   "cache": 0.03,
-   "intelligence": 22.2
+   "cache": 0.03
   },
   "gemini-3-6-flash": {
    "name": "Gemini 3.6 Flash",
    "turn": 0.0261,
    "input": 1.5,
    "output": 7.5,
-   "cache": 0.15,
-   "intelligence": 34.0
+   "cache": 0.15
   },
   "inkling": {
    "name": "Inkling",
    "turn": 0.022205,
    "input": 1.0,
    "output": 4.05,
-   "cache": 0.17,
-   "intelligence": 25.0
+   "cache": 0.17
   },
   "kimi-k3": {
    "name": "Kimi K3",
    "turn": 0.0522,
    "input": 3.0,
    "output": 15.0,
-   "cache": 0.3,
-   "intelligence": 43.6
+   "cache": 0.3
   },
   "muse-spark-1-1": {
    "name": "Muse Spark 1.1",
    "turn": 0.020975,
    "input": 1.25,
    "output": 4.25,
-   "cache": 0.15,
-   "intelligence": 33.7
+   "cache": 0.15
   },
   "gpt-5-6-luna": {
    "name": "GPT-5.6 Luna",
    "turn": 0.00378,
    "input": 0.2,
    "output": 1.2,
-   "cache": 0.02,
-   "intelligence": 37.3
+   "cache": 0.02
   },
   "gpt-5-6-sol": {
    "name": "GPT-5.6 Sol",
    "turn": 0.0945,
    "input": 5.0,
    "output": 30.0,
-   "cache": 0.5,
-   "intelligence": 47.0
+   "cache": 0.5
   },
   "gpt-5-6-terra": {
    "name": "GPT-5.6 Terra",
    "turn": 0.0378,
    "input": 2.0,
    "output": 12.0,
-   "cache": 0.2,
-   "intelligence": 42.1
+   "cache": 0.2
   },
   "grok-4-5": {
    "name": "Grok 4.5",
    "turn": 0.0555,
    "input": 2.0,
    "output": 6.0,
-   "cache": 0.5,
-   "intelligence": 38.8
+   "cache": 0.5
   },
   "tencent-hy3": {
    "name": "Tencent Hy3",
    "turn": 0.004125,
    "input": 0.14,
    "output": 0.58,
-   "cache": 0.035,
-   "intelligence": 25.3
+   "cache": 0.035
   },
   "claude-sonnet-5": {
    "name": "Claude Sonnet 5",
    "turn": 0.0348,
    "input": 2.0,
    "output": 10.0,
-   "cache": 0.2,
-   "intelligence": 38.2
+   "cache": 0.2
   },
   "glm-5-2-fast": {
    "name": "GLM-5.2 Fast",
@@ -553,8 +506,7 @@
    "turn": 0.03114,
    "input": 1.4,
    "output": 4.4,
-   "cache": 0.26,
-   "intelligence": 33.7
+   "cache": 0.26
   },
   "kimi-k2-7-code-highspeed": {
    "name": "Kimi K2.7 Code HighSpeed",
@@ -568,208 +520,182 @@
    "turn": 0.02386,
    "input": 0.95,
    "output": 4.0,
-   "cache": 0.19,
-   "intelligence": 25.8
+   "cache": 0.19
   },
   "claude-fable-5": {
    "name": "Claude Fable 5",
    "turn": 0.174,
    "input": 10.0,
    "output": 50.0,
-   "cache": 1.0,
-   "intelligence": 49.6
+   "cache": 1.0
   },
   "nemotron-3-ultra-550b-a55b": {
    "name": "Nemotron 3 Ultra",
    "turn": 0.01488,
    "input": 0.6,
    "output": 2.4,
-   "cache": 0.12,
-   "intelligence": 22.9
+   "cache": 0.12
   },
   "minimax-m3": {
    "name": "MiniMax M3 -50%",
    "turn": 0.01488,
    "input": 0.6,
    "output": 2.4,
-   "cache": 0.12,
-   "intelligence": 29.2
+   "cache": 0.12
   },
   "qwen3-7-plus": {
    "name": "Qwen 3.7 Plus",
    "turn": 0.00992,
    "input": 0.4,
    "output": 1.6,
-   "cache": 0.08,
-   "intelligence": 25.2
+   "cache": 0.08
   },
   "step-3-7-flash": {
    "name": "Step 3.7 Flash",
    "turn": 0.005485,
    "input": 0.2,
    "output": 1.15,
-   "cache": 0.04,
-   "intelligence": 19.5
+   "cache": 0.04
   },
   "claude-opus-4-8": {
    "name": "Claude Opus 4.8",
    "turn": 0.087,
    "input": 5.0,
    "output": 25.0,
-   "cache": 0.5,
-   "intelligence": 41.8
+   "cache": 0.5
   },
   "qwen3-7-max": {
    "name": "Qwen 3.7 Max",
    "turn": 0.05825,
    "input": 2.5,
    "output": 7.5,
-   "cache": 0.5,
-   "intelligence": 29.5
+   "cache": 0.5
   },
   "gemini-3-5-flash": {
    "name": "Gemini 3.5 Flash",
    "turn": 0.02835,
    "input": 1.5,
    "output": 9.0,
-   "cache": 0.15,
-   "intelligence": 32.6
+   "cache": 0.15
   },
   "gemini-3-1-flash-lite": {
    "name": "Gemini 3.1 Flash Lite",
    "turn": 0.00517,
    "input": 0.25,
    "output": 1.5,
-   "cache": 0.03,
-   "intelligence": 15.6
+   "cache": 0.03
   },
   "step-3-5-flash": {
    "name": "Step 3.5 Flash",
    "turn": 0.00232,
    "input": 0.09,
    "output": 0.3,
-   "cache": 0.02,
-   "intelligence": 17.0
+   "cache": 0.02
   },
   "glm-5-1": {
    "name": "GLM-5.1",
    "turn": 0.03114,
    "input": 1.4,
    "output": 4.4,
-   "cache": 0.26,
-   "intelligence": 26.1
+   "cache": 0.26
   },
   "gpt-5-5": {
    "name": "GPT-5.5",
    "turn": 0.0945,
    "input": 5.0,
    "output": 30.0,
-   "cache": 0.5,
-   "intelligence": 38.4
+   "cache": 0.5
   },
   "minimax-m2-7": {
    "name": "MiniMax M2.7",
    "turn": 0.00744,
    "input": 0.3,
    "output": 1.2,
-   "cache": 0.06,
-   "intelligence": 22.8
+   "cache": 0.06
   },
   "qwen3-6-max-preview": {
    "name": "Qwen 3.6 Max Preview",
    "turn": 0.03614,
    "input": 1.3,
    "output": 7.8,
-   "cache": 0.26,
-   "intelligence": 28.4
+   "cache": 0.26
   },
   "qwen3-6-plus": {
    "name": "Qwen 3.6 Plus",
    "turn": 0.0139,
    "input": 0.5,
    "output": 3.0,
-   "cache": 0.1,
-   "intelligence": 27.0
+   "cache": 0.1
   },
   "kimi-k2-6": {
    "name": "Kimi K2.6",
    "turn": 0.02119,
    "input": 0.95,
    "output": 4.0,
-   "cache": 0.16,
-   "intelligence": 27.0
+   "cache": 0.16
   },
   "claude-opus-4-7": {
    "name": "Claude Opus 4.7",
    "turn": 0.087,
    "input": 5.0,
    "output": 25.0,
-   "cache": 0.5,
-   "intelligence": 40.7
+   "cache": 0.5
   },
   "gpt-5-4-mini": {
    "name": "GPT-5.4 Mini",
    "turn": 0.014175,
    "input": 0.75,
    "output": 4.5,
-   "cache": 0.075,
-   "intelligence": 24.1
+   "cache": 0.075
   },
   "glm-5": {
    "name": "GLM-5",
    "turn": 0.0236,
    "input": 1.0,
    "output": 3.2,
-   "cache": 0.2,
-   "intelligence": 27.9
+   "cache": 0.2
   },
   "gpt-5-3-codex": {
    "name": "GPT-5.3 Codex",
    "turn": 0.0585,
    "input": 2.0,
    "output": 8.0,
-   "cache": 0.5,
-   "intelligence": 32.5
+   "cache": 0.5
   },
   "gpt-5-4": {
    "name": "GPT-5.4",
    "turn": 0.04725,
    "input": 2.5,
    "output": 15.0,
-   "cache": 0.25,
-   "intelligence": 39.0
+   "cache": 0.25
   },
   "kimi-k2-5": {
    "name": "Kimi K2.5",
    "turn": 0.014,
    "input": 0.6,
    "output": 3.0,
-   "cache": 0.1,
-   "intelligence": 23.5
+   "cache": 0.1
   },
   "minimax-m2-5": {
    "name": "MiniMax M2.5",
    "turn": 0.00477,
    "input": 0.3,
    "output": 1.2,
-   "cache": 0.03,
-   "intelligence": 22.8
+   "cache": 0.03
   },
   "claude-haiku-4-5": {
    "name": "Claude Haiku 4.5",
    "turn": 0.0174,
    "input": 1.0,
    "output": 5.0,
-   "cache": 0.1,
-   "intelligence": 15.4
+   "cache": 0.1
   },
   "claude-sonnet-4-6": {
    "name": "Claude Sonnet 4.6",
    "turn": 0.0522,
    "input": 3.0,
    "output": 15.0,
-   "cache": 0.3,
-   "intelligence": 30.1
+   "cache": 0.3
   }
  },
  "published": {

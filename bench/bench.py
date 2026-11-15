@@ -437,6 +437,13 @@ def build_models(store: dict) -> dict:
         rec["release_date"] = target.get("release_date")
         rec["deprecated"] = False        # the chain ends somewhere alive
 
+    # Now that the successor chain is resolved, keep only what a reader uses: the
+    # merge's working fields (cross_generation, resolved_to) are not evidence, and
+    # modalities was never asked for.
+    keep = {"deprecated", "superseded_by", "id", "provider", "name", "reasoning",
+            "tool_call", "context", "cost", "release_date"}
+    rows = {k: {f: v for f, v in rec.items() if f in keep} for k, rec in rows.items()}
+
     return {
         "source": MODELS_URL,
         "fetched": datetime.now().astimezone().isoformat(timespec="seconds"),
