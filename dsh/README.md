@@ -47,23 +47,21 @@ mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
 ```
 
 **3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
-shows four groups:
+shows five groups:
 
-| Group | Rows | Standing |
-| --- | --- | --- |
-| **Command Code** | DeepSeek V4.1 Flash Fast | Admitted: cleared every gate. |
-| **Command Code (Claude)** | Claude Haiku 5.5 | Admitted: the fastest writer measured. |
-| **OpenDesign** | DeepSeek V4.1 Flash | **Not admitted.** Kept as a spare under the owner's hand. |
-| **OpenGateway** | DeepSeek V4.1 Flash Eco | **Not admitted.** Same standing. |
+| Group | Rows | Protocol | Standing |
+| --- | --- | --- | --- |
+| **Command Code** | DeepSeek V4.1 Flash Fast | OpenAI | Admitted: cleared every gate. |
+| **Command Code (Claude)** | Claude Haiku 5.5 | Anthropic | Admitted: 146 t/s, 0,000174 a turn. |
+| **OpenDesign** | DeepSeek V4.1 Flash | OpenAI | Admitted: 105 t/s, 35,6 ms/1k, 0,000060 a turn. |
+| **OpenDesign (Claude)** | Claude Haiku 5.5 | Anthropic | Admitted: 149 t/s, 0,000158 a turn. |
+| **OpenGateway** | DeepSeek V4.1 Flash Eco | OpenAI | Admitted: 121 t/s, 49,2 ms/1k, 0,000527 a turn. |
 
-The last two are rows the benchmark does not endorse: they are cheaper and they
-read the context far more slowly than the admitted pair (35.6 and 49.2 ms per 1k
-against 8.4), which at 60k of context is seconds of waiting per call. OpenDesign's
-eco lane was here and is gone: 76.6 ms per 1k and 59 tok/s made a turn take 32
-seconds. They sit in
-the menu because the owner asked for a spare route, not because they passed
-anything. `bench/models-policy.yml` records them under `excluded:` and
-`python bench/bench.py measure` prints the menu with the admitted rows.
+All five are admitted by `bench/models.csv` and `admitted:` in
+`bench/models-policy.yml`; `python bench/bench.py measure` prints them and fails if
+the menu and the policy drift apart. Claude models go through an
+`anthropic-messages` route because that is the protocol their gateways document;
+everything else is OpenAI-compatible.
 
 The group name says which models are behind it; the protocol lives in each node's
 `api:` field, where it belongs.

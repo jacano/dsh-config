@@ -43,6 +43,14 @@
         defaultInput: [text, image]
         models:
           - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+      opendesign-anthropic:
+        displayName: OpenDesign (Claude)
+        api: anthropic-messages
+        baseURL: https://amr-link.open-design.ai/v1
+        apiKeyEnv: OPENDESIGN_API_KEY
+        defaultContextWindow: 1000000
+        defaultMaxTokens: 32768
+        models:
           - { id: claude-haiku-5.5, name: Claude Haiku 5.5 (OpenDesign), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
       opengateway:
         displayName: OpenGateway
