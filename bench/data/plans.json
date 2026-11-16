@@ -1170,7 +1170,9 @@
     "Tencent Hy3": 70.0,
     "Qwen 3.8 27B": 70.0
    },
-   "processing_fee": true
+   "processing_fee": true,
+   "processing_fee_usd": 0.0,
+   "billing_seen": "checkout 2026-11-16: subscription payment $10.00, Go monthly, and a $1.00 subscription grant. The page prints '+ processing fee' and the charge carries none."
   },
   "open-design": {
    "plan": "Go",
@@ -1186,7 +1188,8 @@
     {
      "id": "deepseek-v4.1-flash",
      "factor": 0.5,
-     "list_turn_usd": 0.002634
+     "list_turn_usd": 0.002634,
+     "billed_note": "console 2026-11-16: 107 in / 94 out / 256 cache read at 0,30-1,20-0,006, billing x1, plan contribution x0,5 -> 0,0001 credits. The page's 0,5x is the x0,5 it charges; only Haiku differs."
     },
     {
      "id": "deepseek-v4.1-flash-eco",
@@ -1265,7 +1268,8 @@
      "until": "2026-10-27",
      "seen": "DeepSeek V4.1 Flash — The limited-time off-peak offer lasts one week: October 20 at 18:00 to October 27 at 18:00 (UTC+8). The multiplier drops from 0.5× to 0.25×, then returns to 0.5×."
     }
-   ]
+   ],
+   "billing_seen": "console 2026-11-16: Go, period ends 2026-12-16, both a 5-hourly and a 7-day quota shown, plus $1.00 of pay-as-you-go credits on the side."
   }
  }
 }
