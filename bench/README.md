@@ -182,8 +182,6 @@ that runs it and grades the result. Two sources, and neither one is the seller.
    [`../dsh/cordis.patch.yml`](../dsh/cordis.patch.yml).
 5. **Prove it:** `python bench/bench.py measure` must exit 0.
 
-For comparing two gateways serving the same model — transport, short and long
-calls, concurrency — use [jacano/llm-endpoint-bench](https://github.com/jacano/llm-endpoint-bench).
 
 ## Re-baselining
 
