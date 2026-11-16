@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """bench — one script, two data files, three questions.
 
-    python bench/bench.py plan               # what a subscription costs per token
+    python bench/bench.py plan               # how many turns a month buys
+    python bench/bench.py plan --model claude-haiku-5.5
     python bench/bench.py plan --today 2026-10-22
-    python bench/bench.py plan --model deepseek-v4-pro
     python bench/bench.py select             # fold 1: what is worth calling at all
     python bench/bench.py measure            # fold 2: the stored table against the gates
     python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 
 Three questions, in the order they cost money:
 
-  plan     what a plan really charges per million tokens: the fee, the model's
-           multiplier, the promo inside its window, and the peak share of the
-           week. Free, calls no model.
+  plan     how far a subscription goes: one row per model, one column per plan, the
+           turns a month buys once the plan's ceiling and its windows are applied.
+           Free, calls no model.
   select   fold 1: price, Terminal-Bench, then the policy.
            Free, calls no model.
   measure  fold 2: speed, latency, cache, prefill, retention, errors, tool calls.
@@ -1013,7 +1013,7 @@ def main() -> int:
     p = argparse.ArgumentParser(prog="bench.py", description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    pl = sub.add_parser("plan", help="what a subscription costs per token")
+    pl = sub.add_parser("plan", help="how many turns a month buys")
     pl.add_argument("--today", type=date.fromisoformat,
                    help="a date (YYYY-MM-DD), for the promos of that day")
     pl.add_argument("--model", help="one model; without it, every model worth a plan")
