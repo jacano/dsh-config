@@ -56,10 +56,11 @@ what a slice of credits buys on each model, its multiplier included. The mistake
 priced Haiku fourteen times too high for an hour, which is why the reading is
 recorded here and not just in the commit.
 
-## 2026-11-16 · three commands, no pipeline
+## 2026-11-16 · three questions and an agentic run, no pipeline
 
 `plan` says what a subscription buys, `filter` says what Terminal-Bench ranks,
-`measure` puts what is left against the gates. Each answers its own question and none
+`measure` puts what is left against the gates, and `agentic` runs one real task. Each
+answers its own question and none
 of them chains into the next: there is no fold to explain, no stage that decides for
 the next one, and no `refresh` - the numbers are read from the pages named under
 `sources` when someone asks, not on a schedule.

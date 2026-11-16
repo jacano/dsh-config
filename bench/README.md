@@ -1,7 +1,8 @@
 # bench — choosing the models
 
-One script, two data files, three questions. The script does not decide anything
-by itself: it prices, it filters, it measures, and it says what it could not.
+One script, three data files, four questions. The script does not decide anything
+by itself: it prices, it filters, it measures, it runs a task, and it says what it
+could not.
 
 ```bash
 python bench/bench.py plan               # how many turns a month buys
@@ -39,9 +40,21 @@ itself: you run the one you need. The gates live in
 
 ## plan — how far each plan goes
 
-A subscription costs the same whether it is used or not, and its per-model ceiling
-stops the damage. So the question is not what a token costs: it is how many turns a
-month buys of the model you want, and that is the whole table.
+A subscription costs the same whether it is used or not, and its ceiling stops the
+damage. So the question is not what a token costs: it is how many turns a month buys
+of the model you want, and that is the whole table.
+
+A turn is assumed to be **89.000 tokens read from cache + 1.000 fresh + 1.500
+written**, which is what an agent call looks like after the prefix is warm:
+
+```
+cost = (89.000 x cache_read + 1.000 x input + 1.500 x output) / 1.000.000
+```
+
+Then the plan's multiplier applies, and the same model is not the same price twice:
+one plan lists double and halves it with a 0,5x multiplier, another takes a tenth off
+the list, a third charges double for a fifth of the week. The block's `factor` and
+`billed_factor` are the whole of that, and no two plans have to agree.
 
 ```bash
 python bench/bench.py plan                        # every model worth a plan
@@ -70,23 +83,11 @@ under `sources`, because the card alone does not say how far a plan goes:
 | `open-design` | `open-design.ai/pricing/` | `open-design.ai/model-credits/` — the plan's pool, its windows, and the multiplier per model |
 
 The card is enough to know the fee; it is not enough to know how far the plan goes.
-A new subscription is added by writing its two URLs and a reader for the second one
-is a block with those two URLs and the numbers already filled in, which is the whole
-of the work: this repo has no network call in it.
+Adding a subscription is one block with those two URLs and its numbers already
+filled in. This repo makes no network call: the numbers are read from the pages
+above when someone asks, not on a schedule.
 
 ## filter — the board
-
-A turn is assumed to be **89.000 tokens read from cache + 1.000 fresh + 1.500
-written**, which is what an agent call looks like after the prefix is warm:
-
-```
-cost = (89.000 × cache_read + 1.000 × input + 1.500 × output) / 1.000.000
-```
-
-Then the plan's multiplier applies, and the same model is not the same price twice:
-one plan lists double and halves it with a 0,5× multiplier, another takes a tenth
-off the list, a third charges double for a fifth of the week. The block's `factor`
-and `billed_factor` are the whole of that, and no two plans have to agree.
 
 **One scale, and nothing else about the model.** Terminal-Bench 4.1 (`tb`) is the
 only thing `filter` knows about a model: it runs terminal tasks and grades whether
@@ -99,18 +100,20 @@ Everything else a model *could* be described by (does it reason, does it call
 tools, how much context) was removed on 2026-11-15: it gated nothing, and a number
 that gates nothing ends up being quoted as if it did.
 
-**The same model on two routes is two rows**, and nothing merges them: you see both
-and decide. The console is the bill, not the page — one plan billed a model at ×2
-while its own table printed ×4 — so `billed_factor` carries what was charged,
-`factor` keeps what was published, and neither overwrites the other.
+Two spellings of one model are one row - plans write `deepseek-v4.1-flash` where the
+catalogue writes `deepseek-v4-1-flash` - but two lanes of it are two rows, because a
+fast lane and an eco lane are a different purchase. The console is the bill, not the
+page: one plan billed a model at 2x while its own table printed 4x, so
+`billed_factor` carries what was charged, `factor` keeps what was published, and
+neither overwrites the other.
 
 ## measure — the gates, and the menu
 
 **Measured.** Speed is the median of three 1.600-token generations; latency is the
 median of three warm passes after two priming requests; cache must read back on
-those passes. Two more gates encode what a person actually feels on a long
-context: the first token with 60k of prefix, and the whole turn at that size, so a
-route that reads slowly cannot hide behind a fast short prompt.
+those passes. Two probes go further into what a person feels on a long context -
+the first token with 60k of prefix, and the whole turn at that size - so a route
+that reads slowly cannot hide behind a fast short prompt.
 
 **Fitness.** How the route behaves, not the model:
 
@@ -129,7 +132,7 @@ Claude rows go through `/messages` with a `cache_control` breakpoint: they refus
 
 ```bash
 python bench/bench.py measure                    # the stored table against the gates
-python bench/bench.py measure --model <id> --tbench 38.5 --cost 0.0013
+python bench/bench.py measure --model <id> --tbench 38.5 --cost 0.0013  # recorded, not gated
 python bench/bench.py measure --provider opendesign --model deepseek-v4.1-flash
 ```
 
@@ -145,8 +148,8 @@ numbers meaningless; that mistake was made once.
 
 | Question | Source | Where |
 | --- | --- | --- |
-| What does the plan cost, and what does it give? | `commandcode.ai/pricing`, `open-design.ai` | `data/plans.json` |
-| What does a token cost on that provider? | each provider's own catalogue or price list | `data/plans.json` |
+| What does the plan charge, and what does it give? | the provider's pricing card and its credits page, both named under `sources` | `data/plans.json` |
+| What does a token cost on that provider? | the provider's own catalogue or price list | `data/plans.json` |
 | Can it do the work? | Terminal-Bench 4.1, executed and graded | `data/tbench.json` |
 | How does it behave on the wire? | measured here | `models.csv` |
 
@@ -185,6 +188,6 @@ nothing or everything.
 
 ## Still open
 
-- A candidate is measured once; admitted rows are re-measured in three rounds.
-- Transport TTFB lives in the endpoint bench, not here.
+- A measurement is one run; the numbers inside it that move (retention) are already
+  medians of three, and a row that matters is measured again when it is doubted.
 - Image input and structured output beyond tool calls.

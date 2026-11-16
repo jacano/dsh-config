@@ -5,7 +5,7 @@
     python bench/bench.py plan --model claude-haiku-5.5
     python bench/bench.py plan --today 2026-10-22
     python bench/bench.py filter             # what Terminal-Bench actually ranks
-    python bench/bench.py measure            # fold 2: the stored table against the gates
+    python bench/bench.py measure            # the stored table against the gates
     python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 
 Three questions, in the order they cost money:
@@ -15,8 +15,9 @@ Three questions, in the order they cost money:
            Free, calls no model.
   filter   does the board rank it, and does it clear the floor. Price is not asked
            here: `plan` shows it, and a number to look at is not a gate. Free.
-  measure  fold 2: speed, latency, cache, prefill, retention, errors, tool calls.
-           fold 3: the agentic task — a real bug, a real repository, pytest.
+  measure  speed, latency, cache, prefill, retention, errors, tool calls, and the
+           menu has to agree with the policy.
+  agentic  a real bug in a real repository, pytest decides.
 
 data/plans.json    the plans, what they publish, and the catalogue they price from
 data/tbench.json   the board: what each model does on Terminal-Bench, and through
@@ -56,7 +57,6 @@ CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 TURN = 91_500          # 89k cache + 1k fresh + 1.5k written, one agent turn
 DAYS = 30.0            # a month, for the windows
 LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
-UA = {"User-Agent": "curl/8.5.0"}
 GATEWAYS = {
     "command-code": ("https://api.commandcode.ai/provider/v1", "COMMANDCODE_API_KEY"),
     "opendesign": ("https://amr-link.open-design.ai/v1", "OPENDESIGN_API_KEY"),
@@ -141,7 +141,7 @@ def plans() -> dict:
 
 
 def catalogue() -> dict:
-    """slug -> the two things fold 1 asks of a price row."""
+    """slug -> what the catalogue says it costs and how it lands on the board."""
     return {slug: {"name": row["name"], "cost": row.get("turn")}
             for slug, row in plans()["catalog"].items()}
 
@@ -178,13 +178,6 @@ def load_policy() -> tuple[dict, set]:
 # Read once at import: the gate helpers below use them, and so does anything that
 # imports this file rather than running it.
 GATES, ADMITTED = load_policy()
-
-
-MONTHS = {name: i for i, name in enumerate(
-    ("January", "February", "March", "April", "May", "June", "July", "August",
-     "September", "October", "November", "December"), 1)}
-
-
 # --------------------------------------------------------------------------- plan: money
 
 def blend_of(row: dict) -> float:
@@ -422,7 +415,7 @@ def cmd_filter(args) -> int:
     return 0
 
 
-# --------------------------------------------------------------------------- measure: fold 2
+# --------------------------------------------------------------------------- measure
 
 CORPUS = ("Line {i} of the reference corpus: the quick brown fox jumps over the lazy dog "
           "while the engineer reviews patch number {i} and notes that the cache behaviour "
@@ -445,7 +438,6 @@ def corpus(start: int, lines: int) -> str:
 CONTEXT_K = 60
 ANSWER_TOKENS = 1500
 
-ADMITTED: set[str] = set()
 BASE = ""
 KEY_ENV = ""
 KEY = ""
@@ -499,7 +491,7 @@ def fails_measured(m, tb, cost, g):
     if m["cache"] is None or m["cache"] < g["cache_min"]:
         f.append(f"cache {m['cache'] or 0:.0%}")
     # The 60k figures are printed, not enforced: a real agent greps and reads
-    # fragments, so a long-prefix turn is the exception, not the rule. Fold 3 is
+    # fragments, so a long-prefix turn is the exception, not the rule. The agentic run is
     # what decides now.
     ttft = at_context(m)
     if "latency_60k_max" in g and ttft is not None and ttft > g["latency_60k_max"]:
@@ -657,7 +649,8 @@ def call(model: str, prompt: str, max_tokens: int, tools: list | None = None,
                                                           "required": [t["param"]]}}} for t in tools]
             body["tool_choice"] = "auto"
         url, headers = f"{BASE}/chat/completions", {"Authorization": f"Bearer {KEY}"}
-    headers.update({"Content-Type": "application/json", "User-Agent": "curl/8.5.0"})
+    headers.update({"Content-Type": "application/json",
+                   "User-Agent": "curl/8.5.0"})
     req = Request(url, data=json.dumps(body).encode(), headers=headers, method="POST")
     with urlopen(req, timeout=300) as resp:
         return json.loads(resp.read().decode())
@@ -807,7 +800,7 @@ def cmd_measure(args) -> int:
     return live(args.model, args.tbench, args.cost)
 
 
-# --------------------------------------------------------------------------- fold 3
+# --------------------------------------------------------------------------- agentic
 
 MODULE = '''"""Small pricing helpers. Three behaviours are expected; one is broken."""
 

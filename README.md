@@ -15,9 +15,9 @@ in it.
 | Install DSH on a new machine and point it at a provider | [dsh/README.md](dsh/README.md) |
 | Add, remove or rename a model in the menu | [dsh/README.md](dsh/README.md) |
 | Judge a new model, or a new subscription | [bench/README.md](bench/README.md) |
-| See why a model was dropped | [bench/models-policy.yml](bench/models-policy.yml) |
+| See why a model was dropped | [bench/models-policy.yml](bench/models-policy.yml) for the gates, [bench/models.csv](bench/models.csv) for the numbers |
 | See what was decided, and with which numbers | [bench/decisions.md](bench/decisions.md) |
-| Repeat the whole selection from scratch | [bench/README.md](bench/README.md) |
+| Ask the four questions again | [bench/README.md](bench/README.md) |
 
 ## The menu today
 

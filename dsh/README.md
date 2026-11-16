@@ -29,8 +29,11 @@ By hand, that file is:
 ```yaml
 version: 1
 refs:
-  COMMANDCODE_API_KEY: "your-command-code-key"
+  <THE_REF_THAT_BLOCK_NAMES>: "your-key"
 ```
+
+The name on the left is whatever that provider's block puts in `apiKeyEnv`; the
+groups are the providers, so the reference follows the block, not the other way.
 
 On macOS and Linux, `chmod 600` it: the store refuses a document readable beyond
 its owner.
@@ -64,13 +67,13 @@ The group name says which models are behind it; the protocol lives in each node'
 ## The one file
 
 `dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`. Every profile reads it and it
-outranks the profile's own layer, so one file covers both flavours. The active part
-carries one line per model and no comment on purpose: it is configuration, and
-everything that needs explaining is in this README. Paused providers sit commented
-at the end of the file, verbatim, which is the one exception — restoring one is
-uncommenting it. It is a YAML
-array of loader patch entries: `id` names the row, `name` the plugin, `config`
-replaces that row's config whole.
+outranks the profile's own layer, so one file covers both flavours.
+
+It is a YAML array of loader patch entries: `id` names the row, `name` the plugin,
+`config` replaces that row's config whole. The active part carries one line per model
+and no comment on purpose — it is configuration, and everything that needs explaining
+is in this README. Paused providers are the one exception: they sit commented at the
+end of the file, verbatim, so restoring one is uncommenting it.
 
 - A `name` that does not match its row is skipped with a warning, not applied.
   Bundles repurpose ids — `llm-deepseek` is `dsh-llm-deepseek-api-key` on the
