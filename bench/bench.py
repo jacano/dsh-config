@@ -54,12 +54,14 @@ MEASURED = BENCH / "models.csv"
 CONFIG = REPO / "dsh" / "cordis.patch.yml"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 
-TURN = 91_500          # 89k cache + 1k fresh + 1.5k written, one agent turn
+TURN = 91_500
+REFERENCE_USD = 10.0   # the bill every plan here is sold at, and the one compared          # 89k cache + 1k fresh + 1.5k written, one agent turn
 DAYS = 30.0            # a month, for the windows
 LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
 GATEWAYS = {
     "command-code": ("https://api.commandcode.ai/provider/v1", "COMMANDCODE_API_KEY"),
     "opendesign": ("https://amr-link.open-design.ai/v1", "OPENDESIGN_API_KEY"),
+    "opengateway": ("https://apis.opengateway.ai/v1", "OPENGATEWAY_API_KEY"),
 }
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -271,8 +273,12 @@ def plan_rows(store: dict, day: date, want: str) -> list[dict]:
             hourly = 1.0 if "list_turn_usd" in m else blend_of(row)
             unit = (float(listed) * float(m.get("billed_factor") or m.get("factor", 1.0))
                     * (offer or 1.0) * hourly)
+            # A metered plan has no ceiling, so the comparable question is what the
+            # same ten dollars buy: for a subscription that IS the ceiling, here it
+            # is simply ten dollars of usage.
+            budget = usable if usable else REFERENCE_USD
             out.append({"provider": provider,
-                        "turns": (usable / unit) if usable and unit else None})
+                        "turns": (budget / unit) if unit else None})
     return out
 
 
@@ -302,8 +308,8 @@ def cmd_plan(args) -> int:
 
     names = list(store["providers"])
     header = "  " + f"{'model':30s} {'tb':>4s}  " + "  ".join(f"{n:>13s}" for n in names)
-    print(f"turns of {TURN:,} tokens that one month buys, on {day.isoformat()}")
-    print("  a plan cannot be overdrawn past a model's ceiling; when it is gone it is gone\n")
+    print(f"turns of {TURN:,} tokens that {REFERENCE_USD:.0f} dollars buys, on {day.isoformat()}")
+    print("  a subscription cannot be overdrawn past its ceiling; metered is what it costs\n")
     print(header)
     seen: dict[str, dict] = {}
     for mid in wanted:
@@ -317,7 +323,7 @@ def cmd_plan(args) -> int:
         # catalogue writes `deepseek-v4-1-flash`. Merging on the board row instead
         # would merge the eco and the fast lanes into their parent, which are priced
         # differently and are the whole point of the table.
-        key = norm(mid)
+        key = norm(mid.split("/")[-1])
         row = seen.setdefault(key, {"id": mid, "per": {}})
         for name, turns in per.items():
             if turns and not row["per"].get(name):

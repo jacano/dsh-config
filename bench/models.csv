@@ -2,3 +2,4 @@ slug,catalog_slug,name,speed_tps,ttft_s,cache_hit,prefill_ms_per_1k,cache_loop_h
 claude-haiku-5.5,,Claude Haiku 5.5 (OpenDesign),145,1.32,1.000,17.4,1.00,1.28,0,1.00,0.0001582
 deepseek-v4.1-flash,,DeepSeek V4.1 Flash (OpenDesign),103,2.26,1.000,18.2,1.00,0.75,0,1.00,0.0001097
 deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco (OpenDesign),59,2.52,1.000,87.7,1.00,1.00,0,1.00,0.0000323
+deepseek/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco (OpenGateway),87,2.08,1.000,29.9,1.00,0.93,0,1.00,0.00024

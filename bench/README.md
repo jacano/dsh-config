@@ -62,11 +62,18 @@ python bench/bench.py plan --model claude-haiku-5.5
 python bench/bench.py plan --today 2026-10-22     # the day a promo was live
 ```
 
-One row per model, one column per plan. Two things feed a cell, and both come from
-`data/plans.json`: the ceiling that model has on that plan (a per-model allowance,
-or the plan's credits when the model has none), and what one turn consumes there
-(the provider's list rate, its multiplier, and the hours it charges double for).
-A dash means that plan does not sell the model.
+One row per model, one column per plan, and every cell answers the same question:
+**what do ten dollars buy**. On a subscription that is its ceiling - a per-model
+allowance, or the plan's credits when the model has none. On a metered plan there is
+no ceiling, so it is simply ten dollars of usage. Two things feed a cell, both from
+`data/plans.json`: that budget, and what one turn consumes (the provider's list
+rate, its multiplier, and the hours it charges double for). A dash means that plan
+does not sell the model.
+
+The turn is 89k of cache read against 1k of fresh input, which flatters a route that
+discounts cache heavily. A workload with more fresh input - a big file read once and
+paid for - moves the comparison; the OpenDesign and OpenGateway eco lanes end up
+close on such a mix while this table shows four times between them.
 
 The number is a ceiling, not a promise: a weekly or five-hour window can bind
 before the monthly one, and `plan` takes the lowest. What it never does is let a
@@ -81,6 +88,7 @@ under `sources`, because the card alone does not say how far a plan goes:
 | --- | --- | --- |
 | `command-code` | `commandcode.ai/pricing` | `commandcode.ai/docs/plans/goat` — every model's monthly credit, plus the 5-hour and 7-day windows |
 | `open-design` | `open-design.ai/pricing/` | `open-design.ai/model-credits/` — the plan's pool, its windows, and the multiplier per model |
+| `opengateway` | `opengateway.ai/pricing` | the same page: a metered tier has no ceiling to look up, only a price and a discount that may end |
 
 The card is enough to know the fee; it is not enough to know how far the plan goes.
 Adding a subscription is one block with those two URLs and its numbers already
