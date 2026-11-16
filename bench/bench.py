@@ -63,12 +63,7 @@ UA = {"User-Agent": "curl/8.5.0"}
 GATEWAYS = {
     "command-code": ("https://api.commandcode.ai/provider/v1", "COMMANDCODE_API_KEY"),
     "opendesign": ("https://amr-link.open-design.ai/v1", "OPENDESIGN_API_KEY"),
-    "opencode-go": ("https://opencode.ai/inference/go/openai/v1", "OPENCODE_API_KEY"),
 }
-# A gateway may demand a header the OpenAI shape does not carry: OpenCode Go
-# refuses a request without a session id, which is how it keeps a conversation's
-# routing stable.
-GATEWAY_HEADERS = {"opencode-go": {"x-opencode-session": "dsh-bench"}}
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -622,7 +617,7 @@ def model_rows(plan: dict, catalog: dict, board: dict) -> list[dict]:
         factor = float(m.get("billed_factor") or m.get("factor", 1.0))
         # The same money rule `plan` uses: a plan that sells usage through a monthly
         # limit makes a dollar cost fee/limit, and one that names the rate outright
-        # says so. Reading only the latter priced OpenCode Go at list.
+        # says so. Reading only the latter prices a monthly-limit plan at list.
         monthly = m.get("monthly_limit_usd")
         monthly = monthly if isinstance(monthly, (int, float)) else plan.get("credits_usd")
         usable, _ = plan_caps(plan, monthly)
