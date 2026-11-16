@@ -47,7 +47,7 @@ mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
 ```
 
 **3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
-shows five groups:
+shows six groups:
 
 | Group | Rows | Protocol | Standing |
 | --- | --- | --- | --- |
@@ -56,15 +56,16 @@ shows five groups:
 | **OpenDesign** | DeepSeek V4.1 Flash | OpenAI | Admitted: 105 t/s, 35,6 ms/1k, 0,000060 a turn. |
 | **OpenDesign (Claude)** | Claude Haiku 5.5 | Anthropic | Admitted: 149 t/s, 0,000158 a turn. |
 | **OpenGateway** | DeepSeek V4.1 Flash Eco | OpenAI | **Exception, only here.** Not in the benchmark: no plan, no measured row, not in `admitted:`. |
+| **OpenCode Go** | DeepSeek V4.1 Flash | OpenAI | **Exception, only here.** The Go subscription, not the zen gateway: it refuses a request without `x-opencode-session`. Measured at 58-64 t/s, so it fails the speed gate and is admitted nowhere. |
 
 The two Command Code rows are unreachable while that subscription is lapsed
 (2026-11-16: every call answers *insufficient credits*, the key is fine). They stay
 in the menu so renewing is one copy away; until then the default is OpenDesign's.
 
-Four of the five are admitted by `bench/models.csv` and `admitted:` in
+Four of the six are admitted by `bench/models.csv` and `admitted:` in
 `bench/models-policy.yml`, and `python bench/bench.py measure` fails if those two
-drift apart. OpenGateway is deliberately outside that check: a spare route the owner
-keeps in the menu only, so the benchmark neither prices it nor measures it. Claude
+drift apart. OpenGateway and OpenCode Go are deliberately outside that check: spare routes the
+owner keeps in the menu only, so the benchmark neither admits them nor governs them. Claude
 models go through an `anthropic-messages` route because that is the protocol their
 gateways document; everything else is OpenAI-compatible.
 
