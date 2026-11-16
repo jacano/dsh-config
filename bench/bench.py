@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """bench — one script, two data files, three questions.
 
-    python bench/bench.py plan               # how many turns a month buys
+    python bench/bench.py plan               # what a million tokens costs
     python bench/bench.py plan --model claude-haiku-5.5
     python bench/bench.py plan --today 2026-10-22
     python bench/bench.py filter             # what Terminal-Bench actually ranks
@@ -10,9 +10,8 @@
 
 Three questions, in the order they cost money:
 
-  plan     how far a subscription goes: one row per model, one column per plan, the
-           turns a month buys once the plan's ceiling and its windows are applied.
-           Free, calls no model.
+  plan     what a million tokens of each kind costs, after the plan's multiplier,
+           its ceiling and its windows. Free, calls no model.
   filter   does the board rank it, and does it clear the floor. Price is not asked
            here: `plan` shows it, and a number to look at is not a gate. Free.
   measure  speed, latency, cache, prefill, retention, errors, tool calls, and the
@@ -54,12 +53,6 @@ MEASURED = BENCH / "models.csv"
 CONFIG = REPO / "dsh" / "cordis.patch.yml"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 
-# A turn is a choice, not a fact: this is the mix the table assumes, and `--mix`
-# replaces it. 89k of cache read against 1k of fresh input flatters whichever route
-# discounts cache hardest, so the number is printed with every table.
-MIX = (1_000, 89_000, 1_500)      # fresh input, cache read, output
-TURN = sum(MIX)
-REFERENCE_USD = 10.0   # the bill every plan here is sold at, and the one compared          # 89k cache + 1k fresh + 1.5k written, one agent turn
 DAYS = 30.0            # a month, for the windows
 LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
 GATEWAYS = {
@@ -69,16 +62,6 @@ GATEWAYS = {
 }
 
 sys.stdout.reconfigure(encoding="utf-8")
-
-
-def mix_arg(value: str) -> tuple[int, int, int]:
-    try:
-        fresh, cache, out = (int(x) for x in value.replace(" ", "").split(","))
-    except ValueError:
-        raise argparse.ArgumentTypeError("expected fresh,cache,out as three integers")
-    if min(fresh, cache, out) < 0:
-        raise argparse.ArgumentTypeError("a token count cannot be negative")
-    return fresh, cache, out
 
 
 # --------------------------------------------------------------------------- core
@@ -261,118 +244,64 @@ def plan_lookup(cat: dict, model_id: str) -> dict:
     return {}
 
 
-def turn_cost(rates: dict, factor: float, mix: tuple[int, int, int]) -> float:
-    """What a turn of that shape costs, at those rates, after the multiplier."""
-    fresh, cache, out = mix
-    return (fresh * rates["input"] + cache * rates["cache"]
-            + out * rates["output"]) / 1e6 * factor
+def plan_rows(store: dict, day: date, want: str | None = None) -> list[dict]:
+    """What a million of each kind of token costs on each plan that sells it.
 
-
-def plan_rows(store: dict, day: date, want: str,
-              mix: tuple[int, int, int] = MIX) -> list[dict]:
-    """How many turns of `want` a month buys, for each plan that sells it."""
+    No mix, no turn, no assumed shape: the multiplier, the ceiling and the hour are
+    already in the number, and the rest is the caller's business.
+    """
     cat = store["catalog"]
-    target = norm(want)
+    target = norm(want) if want else None
     out: list[dict] = []
 
     for provider, plan in store["providers"].items():
         entries = ([{"id": slug, "catalog": slug} for slug in cat]
                    if plan["models"] == "catalog" else plan["models"])
         for m in entries:
-            bare = norm(re.sub(r"\([^)]*\)", "", m["id"]))
-            if target not in (norm(m["id"]), norm(m["id"].split("/")[-1]), bare):
-                continue
+            if target:
+                bare = norm(re.sub(r"\([^)]*\)", "", m["id"]))
+                if target not in (norm(m["id"]), norm(m["id"].split("/")[-1]), bare):
+                    continue
             row = cat.get(m.get("catalog") or "") or plan_lookup(cat, m["id"])
             rates = m if "input" in m else row
             if "input" not in rates:
                 continue
             monthly = m.get("monthly_limit_usd")
             monthly = monthly if isinstance(monthly, (int, float)) else plan.get("credits_usd")
-            usable, _bound = plan_caps(plan, monthly, row.get("name") or m["id"])
+            usable, bound = plan_caps(plan, monthly, row.get("name") or m["id"])
+            fee = plan.get("fee_usd")
+            scale = (float(fee) / usable) if usable and fee else 1.0
             offer = live_promo(plan, m["id"], day)
-            # A plan that publishes one price per model gets no blend: only the
-            # catalogue's own note about peak hours earns one.
             hourly = 1.0 if "input" in m else blend_of(row)
             factor = float(m.get("billed_factor") or m.get("factor", 1.0))
-            unit = turn_cost(rates, factor * (offer or 1.0) * hourly, mix)
-            # A metered plan has no ceiling, so the comparable question is what the
-            # same ten dollars buy: for a subscription that IS the ceiling, here it
-            # is simply ten dollars of usage.
-            budget = usable if usable else REFERENCE_USD
-            scale = (float(plan["fee_usd"]) / usable) if usable and plan.get("fee_usd") else 1.0
-            out.append({"provider": provider,
-                        "turns": (budget / unit) if unit else None,
-                        **{k: rates[k] * factor * (offer or 1.0) * hourly * scale
-                           for k in ("input", "cache", "output")}})
+            factor *= (offer or 1.0) * hourly * scale
+            out.append({"provider": provider, "model": m["id"], "caps at": bound,
+                        **{k: float(rates[k]) * factor for k in ("input", "cache", "output")}})
     return out
 
 
 def cmd_plan(args) -> int:
-    """How many turns of a model each plan buys in a month.
-
-    A subscription is spent whether the turns are used or not, and its per-model
-    ceiling stops the damage: the question is not what a token costs but how far the
-    plan goes. One row per model, one column per plan, turns of the same workload.
-    """
-    day = args.today or date.today()
+    """The price of a million tokens of each kind, after every multiplier."""
     store, boards = plans(), tbench()
-
+    day = args.today or date.today()
+    rows = plan_rows(store, day, args.model)
     if args.model:
-        wanted = [args.model]
-    else:
-        every = set()
-        for plan in store["providers"].values():
-            ids = store["catalog"] if plan["models"] == "catalog" else plan["models"]
-            every |= {m if isinstance(m, str) else m["id"] for m in ids}
-        wanted = [i for i in every
-                  if (board_score(boards, i) or 0) >= GATES["static"]["tbench_min"]]
-        wanted.sort()
-        if not wanted:
-            print("no model on either plan clears the Terminal-Bench floor")
+        rows = [r for r in rows if r["model"] == args.model or
+                norm(r["model"].split("/")[-1]) == norm(args.model)]
+        if not rows:
+            print(f"no plan serves {args.model}; try an id from data/plans.json")
             return 1
+    else:
+        floor = GATES["static"]["tbench_min"]
+        rows = [r for r in rows if (board_score(boards, r["model"]) or 0) >= floor]
 
-    names = list(store["providers"])
-    header = "  " + f"{'model':30s} {'tb':>4s}  " + "  ".join(f"{n:>13s}" for n in names)
-    fresh, cache, out = args.mix
-    print(f"turns of {TURN:,} tokens ({fresh:,} fresh + {cache:,} cache + {out:,} out) "
-          f"that {REFERENCE_USD:.0f} dollars buys, on {day.isoformat()}")
-    print("  a subscription cannot be overdrawn past its ceiling; metered is what it costs\n")
-    print(header)
-    seen: dict[str, dict] = {}
-    for mid in wanted:
-        per = {r["provider"]: r["turns"] for r in plan_rows(store, day, mid, args.mix)}
-        if not per:
-            if args.model:
-                print(f"  no plan serves {mid}; try an id from data/plans.json")
-                return 1
-            continue
-        # One model, two spellings: plans write `deepseek-v4.1-flash` where the
-        # catalogue writes `deepseek-v4-1-flash`. Merging on the board row instead
-        # would merge the eco and the fast lanes into their parent, which are priced
-        # differently and are the whole point of the table.
-        key = norm(mid.split("/")[-1])
-        row = seen.setdefault(key, {"id": mid, "per": {}})
-        for name, turns in per.items():
-            if turns and not row["per"].get(name):
-                row["per"][name] = turns
-
-    for key, row in sorted(seen.items(), key=lambda kv: kv[1]["id"]):
-        mid, per = row["id"], row["per"]
-        tb = board_score(boards, mid)
-        cells = "  ".join(f"{f'{per[n]:,.0f}' if per.get(n) else '-':>13s}" for n in names)
-        print("  " + f"{mid:30s} {('%.1f' % tb) if tb else '-':>4s}  " + cells)
-
-    if args.model:
-        # The honest table behind that row: what a million of each kind costs, with
-        # no mix assumed at all. Multiply by your own shape.
-        rates = {r["provider"]: r for r in plan_rows(store, day, args.model, args.mix)}
-        print(f"\n  dollars per million tokens, after the multiplier and the ceiling")
-        print(f"  {'plan':22s} {'input':>10s} {'cache read':>12s} {'output':>10s}")
-        for name in names:
-            r = rates.get(name)
-            if not r:
-                continue
-            print(f"  {name:22s} {r['input']:>10.5f} {r['cache']:>12.5f} {r['output']:>10.5f}")
+    print(f"dollars per million tokens, on {day.isoformat()}")
+    print("  the multiplier, the ceiling and the hour are already in these numbers\n")
+    print(f"  {'model':34s} {'tb':>4s} {'plan':14s} {'input':>10s} {'cache read':>11s} {'output':>10s}")
+    for r in sorted(rows, key=lambda x: (x["input"], x["provider"])):
+        tb = board_score(boards, r["model"])
+        print(f"  {r['model'][:34]:34s} {('%.1f' % tb) if tb else '-':>4s} {r['provider']:14s} "
+              f"{r['input']:>10.5f} {r['cache']:>11.5f} {r['output']:>10.5f}")
     return 0
 
 
@@ -919,12 +848,10 @@ def main() -> int:
     p = argparse.ArgumentParser(prog="bench.py", description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    pl = sub.add_parser("plan", help="how many turns a month buys")
+    pl = sub.add_parser("plan", help="what a million tokens costs")
     pl.add_argument("--today", type=date.fromisoformat,
                    help="a date (YYYY-MM-DD), for the promos of that day")
     pl.add_argument("--model", help="one model; without it, every model worth a plan")
-    pl.add_argument("--mix", type=mix_arg, default=MIX,
-                    help="fresh,cache,out in tokens per turn (default %(default)s)")
     pl.set_defaults(fn=cmd_plan)
 
     s = sub.add_parser("filter", help="what Terminal-Bench ranks, and what it does not")

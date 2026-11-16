@@ -38,23 +38,11 @@ Each command answers its own question and none of them chains into the next by
 itself: you run the one you need. The gates live in
 [`models-policy.yml`](models-policy.yml), so a threshold moves in one place.
 
-## plan — how far each plan goes
+## plan — what a million tokens costs
 
-A subscription costs the same whether it is used or not, and its ceiling stops the
-damage. So the question is not what a token costs: it is how many turns a month buys
-of the model you want, and that is the whole table.
-
-A turn is assumed to be **89.000 tokens read from cache + 1.000 fresh + 1.500
-written**, which is what an agent call looks like after the prefix is warm:
-
-```
-cost = (89.000 x cache_read + 1.000 x input + 1.500 x output) / 1.000.000
-```
-
-Then the plan's multiplier applies, and the same model is not the same price twice:
-one plan lists double and halves it with a 0,5x multiplier, another takes a tenth off
-the list, a third charges double for a fifth of the week. The block's `factor` and
-`billed_factor` are the whole of that, and no two plans have to agree.
+A price per token, with nothing assumed about how you use it. The multiplier, the
+plan's ceiling and the hours it charges double for are already inside the number, so
+what is left is the shape of your own traffic - and that is yours to know.
 
 ```bash
 python bench/bench.py plan                        # every model worth a plan
@@ -62,37 +50,18 @@ python bench/bench.py plan --model claude-haiku-5.5
 python bench/bench.py plan --today 2026-10-22     # the day a promo was live
 ```
 
-One row per model, one column per plan, and every cell answers the same question:
-**what do ten dollars buy**. On a subscription that is its ceiling - a per-model
-allowance, or the plan's credits when the model has none. On a metered plan there is
-no ceiling, so it is simply ten dollars of usage. Two things feed a cell, both from
-`data/plans.json`: that budget, and what one turn consumes (the provider's list
-rate, its multiplier, and the hours it charges double for). A dash means that plan
-does not sell the model.
-
-**The turn is an assumption, and it is printed with the table.** By default it is
-1k of fresh input, 89k of cache read and 1.5k of output, which flatters whichever
-route discounts cache hardest. Pass your own shape and the cells change with it:
-
-```bash
-python bench/bench.py plan --mix 345000,309000,771     # fresh, cache, out
+```
+  model                            tb plan                input  cache read     output
+  deepseek-v4.1-flash-eco        38.5 open-design       0.00368     0.00007    0.01473
+  deepseek/deepseek-v4.1-flash-e 38.5 opengateway       0.00670     0.00060    0.12000
+  deepseek-v4.1-flash            38.5 open-design       0.00682     0.00014    0.02727
+  deepseek-v4-1-flash            38.5 command-code      0.01812     0.00036    0.07250
 ```
 
-Two routes that look four times apart on the default mix can come out within ten per
-cent of each other on an input-heavy one, because a discount is rarely the same
-across the three kinds of token. When that matters, ask for the prices instead of
-the turns - `plan --model <id>` prints what a million of each kind costs, with no mix
-assumed at all:
-
-```
-  plan                        input   cache read     output
-  command-code              0.01812      0.00036    0.07250
-  open-design               0.00682      0.00014    0.02727
-```
-
-The number is a ceiling, not a promise: a weekly or five-hour window can bind
-before the monthly one, and `plan` takes the lowest. What it never does is let a
-turn cost more than the plan's own fee divided by what that model is allowed.
+A subscription turns fee and ceiling into a rate: `fee / what it lets you spend`,
+times the provider's multiplier. A metered plan has no ceiling to divide by, so its
+price is simply the price. That is the whole of it - there is no turn, no blend of
+your own traffic, and no number standing in for one you have not measured.
 
 ### Where the numbers come from
 

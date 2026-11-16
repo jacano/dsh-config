@@ -4,6 +4,10 @@ Dated on purpose: each entry is what was decided with the numbers of that day, n
 rule that follows from the code. The live numbers are in `data/plans.json`,
 `data/tbench.json` and `models.csv`; `plan`, `filter` and `measure` print them.
 
+The first two entries count **turns of 1k fresh input, 89k of cache read and 1.5k of
+output**. `plan` prints prices per million tokens now, with no shape assumed; the
+turn was the unit of the day and the counts below are that turn's arithmetic.
+
 ## 2026-11-16 · OpenDesign Go is the subscription to pay for
 
 $10 buys a single pool of $220 of Coding Plan credits a month, capped at $55 per
