@@ -104,7 +104,7 @@ Two spellings of one model are one row - plans write `deepseek-v4.1-flash` where
 catalogue writes `deepseek-v4-1-flash` - but two lanes of it are two rows, because a
 fast lane and an eco lane are a different purchase. The console is the bill, not the
 page: one plan billed a model at 2x while its own table printed 4x, so
-`billed_factor` carries what was charged, `factor` keeps what was published, and
+`billed_factor` carries what was charged, `factor` keeps what the provider advertises, and
 neither overwrites the other.
 
 ## measure — the gates, and the menu

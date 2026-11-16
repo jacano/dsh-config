@@ -51,7 +51,6 @@ TBENCH_FILE = DATA / "tbench.json"
 POLICY = BENCH / "models-policy.yml"
 MEASURED = BENCH / "models.csv"
 CONFIG = REPO / "dsh" / "cordis.patch.yml"
-SNAPSHOTS = BENCH / "snapshots"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 
 TURN = 91_500          # 89k cache + 1k fresh + 1.5k written, one agent turn
@@ -123,17 +122,6 @@ def by_label(table: dict, model_id: str, catalog_slug: str) -> dict | None:
 
 def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def snapshot(name: str, rows: list[dict]) -> Path:
-    """Write a dated CSV under snapshots/, which git does not track."""
-    SNAPSHOTS.mkdir(parents=True, exist_ok=True)
-    path = SNAPSHOTS / name
-    with open(path, "w", newline="", encoding="utf-8") as fh:
-        writer = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
-        writer.writeheader()
-        writer.writerows(rows)
-    return path
 
 
 def plans() -> dict:
@@ -351,7 +339,7 @@ def cmd_plan(args) -> int:
             continue
         # One model, two spellings: plans write `deepseek-v4.1-flash` where the
         # catalogue writes `deepseek-v4-1-flash`. Merging on the board row instead
-        # would fold the eco and the fast lanes into their parent, which are priced
+        # would merge the eco and the fast lanes into their parent, which are priced
         # differently and are the whole point of the table.
         key = norm(mid)
         row = seen.setdefault(key, {"id": mid, "per": {}})
@@ -408,10 +396,6 @@ def cmd_filter(args) -> int:
 
     print(f"{len(keep_all)} models clear the floor · {off} are not ranked · {low} rank below it")
 
-    if args.write:
-        rows = [{"provider": p, "model": m, "tb": tb} for p, m, tb in keep_all]
-        path = snapshot(f"filter-{date.today().isoformat()}.csv", rows)
-        print(f"\nwritten: {path.relative_to(REPO)}")
     return 0
 
 
@@ -850,7 +834,7 @@ PATCH = """- id: agent-default-model
   disabled: true
 """
 
-WORK = Path.home() / "workspace" / "agentic-fold3"
+WORK = Path.home() / "workspace" / "agentic-run"
 
 
 def dsh_command(patch: Path, task: str) -> list[str]:
@@ -917,7 +901,6 @@ def main() -> int:
     pl.set_defaults(fn=cmd_plan)
 
     s = sub.add_parser("filter", help="what Terminal-Bench ranks, and what it does not")
-    s.add_argument("--write", action="store_true", help="save a snapshot")
     s.set_defaults(fn=cmd_filter)
 
     m = sub.add_parser("measure", help="the stored table against the gates")

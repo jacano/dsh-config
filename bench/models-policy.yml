@@ -7,7 +7,7 @@ version: 1
 updated: 2026-11-16
 
 criteria:
-  method: "price and Terminal-Bench, then the agentic fold"
+  method: "price and Terminal-Bench, then the agentic run"
   phases:
     static:
       tbench_min: 38.0
