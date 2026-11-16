@@ -1145,7 +1145,6 @@
     "claude-haiku-5-5": 0.125,
     "gpt-6-luna": 0.125
    },
-   "usd_per_usage_dollar": 0.1,
    "tiers_seen": [
     {
      "plan": "Go",
@@ -1259,7 +1258,6 @@
      "list_turn_usd": 0.003666
     }
    ],
-   "usd_per_usage_dollar": 0.0455,
    "promos": [
     {
      "model": "DeepSeek V4.1 Flash",

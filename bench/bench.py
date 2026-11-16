@@ -653,8 +653,9 @@ def model_rows(plan: dict, catalog: dict, board: dict) -> list[dict]:
         monthly = m.get("monthly_limit_usd")
         monthly = monthly if isinstance(monthly, (int, float)) else plan.get("credits_usd")
         usable, _ = plan_caps(plan, monthly, cat.get("name") or m["id"])
-        leverage = float(plan.get("usd_per_usage_dollar")
-                         or (float(plan["fee_usd"]) / usable if plan.get("fee_usd") and usable else 1.0))
+        # The same division `plan` does: fee over what the plan can be spent at,
+        # allowance included. A stored rate would go stale the day a cap changes.
+        leverage = float(plan["fee_usd"]) / usable if plan.get("fee_usd") and usable else 1.0
         # The same week `plan` prices: Command Code charges double for 20,8 % of it,
         # and gating on the off-peak list would flatter that plan by a fifth.
         hourly = blend_of(plans()["catalog"].get(m.get("catalog") or "", {}))
@@ -908,7 +909,8 @@ def phase_one(models: dict, catalog: dict) -> None:
     board = tbench()
     # The catalogue is Command Code's list price; the plan sells that usage at a
     # tenth, so the preview has to use the plan's money, not the list's.
-    leverage = float(plans()["providers"].get("command-code", {}).get("usd_per_usage_dollar", 1.0))
+    cc = plans()["providers"].get("command-code", {})
+    leverage = float(cc["fee_usd"]) / float(cc["credits_usd"]) if cc else 1.0
     worth = [slug for slug, row in catalog.items()
              if not fails_static(board_score(board, slug),
                                  None if row["cost"] is None else row["cost"] * leverage,
