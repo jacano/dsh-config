@@ -4,6 +4,7 @@
     python bench/bench.py plan               # what a million tokens costs
     python bench/bench.py plan --model claude-haiku-5.5
     python bench/bench.py plan --today 2026-10-22
+    python bench/bench.py pick               # the ones nothing beats on both axes
     python bench/bench.py filter             # what Terminal-Bench actually ranks
     python bench/bench.py measure            # the stored table against the gates
     python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
@@ -12,6 +13,7 @@ Three questions, in the order they cost money:
 
   plan     what a million tokens of each kind costs, after the plan's multiplier,
            its ceiling and its windows. Free, calls no model.
+  pick     of those, the ones nothing else beats on price and capability.
   filter   does the board rank it, and does it clear the floor. Price is not asked
            here: `plan` shows it, and a number to look at is not a gate. Free.
   measure  speed, latency, cache, prefill, retention, errors, tool calls, and the
@@ -301,6 +303,79 @@ def cmd_plan(args) -> int:
         write = f"{r['cache_write']:>12.5f}" if "cache_write" in r else f"{'-':>12s}"
         print(f"  {r['model'][:34]:34s} {('%.1f' % tb) if tb else '-':>4s} {r['provider']:14s} "
               f"{r['input']:>10.5f} {r['cache']:>11.5f} {write} {r['output']:>10.5f}")
+    return 0
+
+
+# --------------------------------------------------------------------------- pick
+
+def cmd_pick(args) -> int:
+    """The models nothing else beats on both price and capability.
+
+    A model is out of the running when another one is at least as good on the board
+    and at least as cheap per million input tokens - the two axes that decide a
+    purchase. What survives that is the frontier, and everything else is dominated by
+    a named row rather than by a feeling.
+    """
+    store, boards = plans(), tbench()
+    floor = GATES["static"]["tbench_min"]
+    measured = load_measured()
+    day = args.today or date.today()
+
+    rows = []
+    for r in plan_rows(store, day):
+        tb = board_score(boards, r["model"])
+        if tb is None or tb < floor:
+            continue
+        m = measured.get(r["model"])
+        if r["model"] in ADMITTED:
+            state = "admitted"
+        elif m is None:
+            state = "unmeasured"
+        elif fails_measured(m, tb, GATES["measured"]) + fails_fitness(m, GATES["fitness"]):
+            state = "measured, fails"
+        else:
+            state = "measured, passes"
+        rows.append({**r, "tb": tb, "state": state})
+    if not rows:
+        print("nothing on the board clears the floor")
+        return 1
+
+    def dominates(a, b):
+        return (a["tb"] >= b["tb"] and a["input"] <= b["input"]
+                and (a["tb"] > b["tb"] or a["input"] < b["input"]))
+
+    front = [r for r in rows if not any(dominates(o, r) for o in rows if o is not r)]
+    front.sort(key=lambda r: r["tb"])
+
+    print(f"the frontier on {day.isoformat()}: Terminal-Bench against dollars per million "
+          f"of input\n")
+    print(f"  {'model':32s} {'plan':13s} {'tb':>5s} {'input':>9s} {'cache':>9s} "
+          f"{'write':>9s} {'output':>9s}  state")
+    for r in front:
+        write = f"{r['cache_write']:9.5f}" if "cache_write" in r else f"{'-':>9s}"
+        print(f"  {r['model'][:32]:32s} {r['provider']:13s} {r['tb']:5.1f} "
+              f"{r['input']:9.5f} {r['cache']:9.5f} {write} {r['output']:9.5f}  {r['state']}")
+
+    print(f"\n  {len(front)} of {len(rows)} survive: the rest are beaten by one of these\n")
+    print("  dominated by, per model:")
+    for r in sorted((x for x in rows if x not in front), key=lambda x: -x["tb"]):
+        better = min((o for o in front if dominates(o, r)), key=lambda o: o["input"])
+        print(f"    {r['model'][:34]:34s} {r['tb']:5.1f} {r['input']:9.5f}  <- "
+              f"{better['model'][:28]} ({better['tb']:.1f})")
+
+    bad = [r for r in front if r["state"] == "measured, fails"]
+    if bad:
+        print(f"\n  {len(bad)} frontier row{'s' if len(bad) > 1 else ''} fails a measured gate: "
+              f"cheap for a reason. `measure` says which.")
+    print("\n  what each provider contributes to that frontier:")
+    for provider in store["providers"]:
+        mine = [r for r in front if r["provider"] == provider]
+        if not mine:
+            print(f"    {provider:13s} nothing - every model it sells is dominated")
+            continue
+        for r in mine:
+            print(f"    {provider:13s} {r['model'][:32]:32s} tb {r['tb']:5.1f} "
+                  f"at {r['input']:.5f}  ({r['state']})")
     return 0
 
 
@@ -839,6 +914,11 @@ def main() -> int:
                    help="a date (YYYY-MM-DD), for the promos of that day")
     pl.add_argument("--model", help="one model; without it, every model worth a plan")
     pl.set_defaults(fn=cmd_plan)
+
+    pk = sub.add_parser("pick", help="the models nothing beats on price and capability")
+    pk.add_argument("--today", type=date.fromisoformat,
+                    help="a date (YYYY-MM-DD), for the promos of that day")
+    pk.set_defaults(fn=cmd_pick)
 
     s = sub.add_parser("filter", help="what Terminal-Bench ranks, and what it does not")
     s.set_defaults(fn=cmd_filter)

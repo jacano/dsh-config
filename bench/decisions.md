@@ -76,3 +76,16 @@ eco lanes sat four times apart on it and within ten per cent on the mix an invoi
 implied - which means the table was quoting an assumption, not a price. It quotes
 dollars per million now, of each kind of token, and says nothing about how the model
 is used.
+
+## 2026-11-17 · the analysis is a command, and a provider arrives by data
+
+The reasoning that picked five models out of twenty-three was done by hand once, and a
+conclusion nobody can re-run is a conclusion that rots. It is `pick` now: the frontier
+of Terminal-Bench against dollars per million of input, every row that is not on it
+named with the row that beats it, and what each provider contributes.
+
+That closes the loop a new subscription goes through - **give the numbers, price them,
+filter them, rank them, measure what survives** - and the order matters: the first
+three cost nothing and the fourth is the only one that spends a token. A provider that
+stops before the last step is unmeasured, not rejected, and `pick` says so on the row.
+

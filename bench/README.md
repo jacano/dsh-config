@@ -160,31 +160,32 @@ The provider is never asked to grade itself. Prices do come from the provider,
 because nobody else can know them; whether the work gets done comes from a board
 that runs it and grades the result. Two sources, and neither one is the seller.
 
-## Adding a model or a provider
+## Onboarding a provider
 
-1. **A new provider** is a block in `data/plans.json` under `providers`: plan, fee,
-   credits, its two pages under `sources`, and its models with either a `catalog`
-   slug or their own `input`, `cache`, `cache_write` and `output` per million plus
-   a `factor`. Then
-   `python bench/bench.py plan` shows how far it goes.
-2. **A new model on an existing provider** is one entry in that list. Run
-   `python bench/bench.py filter`: if the board does not rank it, that is the whole
-   story — nothing is recorded, because the gate will say it again tomorrow.
-3. **Live, only for rows `filter` keeps:**
+The work is in the data, and the four commands read it. In order:
 
-   ```bash
-   python bench/bench.py measure --model <id> --tbench <board score>
-   ```
+1. **Give the numbers.** For each plan: the fee, what it buys (one pool or a ceiling
+   per model), the windows it resets on, the multiplier per model, any discount with
+   its dates, and the rate per million for input, cache read, cache write and output.
+   The two pages they come from go in the block under `sources`.
+2. **Write the block** in `data/plans.json`: one entry under `providers`, its models
+   with `input`, `cache`, `cache_write`, `output` and a `factor`. Where the console
+   charges something other than what the page advertises, `billed_factor` carries the
+   bill and `factor` keeps the brochure - the same split `open-design` uses for Haiku.
+3. **Price it:** `python bench/bench.py plan`. Every rate already has the multiplier,
+   the ceiling and the peak hour inside it, so what it prints is what a million tokens
+   costs - check those against the provider's own arithmetic.
+4. **Filter it:** `python bench/bench.py filter`. What the board does not rank is out,
+   with that reason on its row.
+5. **Rank it:** `python bench/bench.py pick`. The frontier of price against
+   capability, and for everything that is not on it, the row that beats it. This is
+   the answer to "is anything here worth buying", before a token is spent.
+6. **Measure what survived:** `measure --model <id> --tbench <score>` for the rows
+   worth the call. It prints a line in `models.csv`'s own shape; paste it, add the id
+   to `admitted:`, add the model to the menu, and `measure` must then exit 0.
 
-   Nothing about money is asked or recorded here: the price of a route is `plan`'s
-   table, and what this measures is how it behaves on the wire.
-
-4. **If it clears everything:** paste the row `measure` printed into `models.csv`,
-   add the id to `admitted:`, and add the model to `models:` in
-   [`../dsh/cordis.patch.yml`](../dsh/cordis.patch.yml). `measure` prints the row in
-   the table's own column order for exactly that.
-5. **Prove it:** `python bench/bench.py measure` must exit 0.
-
+A provider that never reaches step 6 is unmeasured, not rejected - `pick` says so on
+the row, and it is the difference between "not worth it" and "nobody tried".
 
 ## Re-baselining
 
