@@ -102,6 +102,11 @@ names the API root rather than a versioned path because pi-ai appends
 `/v1/messages` itself. A `claude-*` id that earns a 400 on the OpenAI shape wants
 that second route: the block's `api` is where to look, not the model.
 
+A block may sit in the menu and not in the benchmark: that is an exception, kept
+because it is the only route of its kind and named as one where it was added.
+`measure` governs only the rows it has measured, so an exception neither passes nor
+fails a gate - it is simply not judged.
+
 Which route is the default is `agent-default-model`'s `config`. It should name the
 subscription that is being paid for this month, which is a fact the file cannot
 know: read the line, not the prose around it.

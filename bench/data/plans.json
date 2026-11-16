@@ -1269,7 +1269,24 @@
      "seen": "DeepSeek V4.1 Flash — The limited-time off-peak offer lasts one week: October 20 at 18:00 to October 27 at 18:00 (UTC+8). The multiplier drops from 0.5× to 0.25×, then returns to 0.5×."
     }
    ],
-   "billing_seen": "console 2026-11-16: Go, period ends 2026-12-16, both a 5-hourly and a 7-day quota shown, plus $1.00 of pay-as-you-go credits on the side."
+   "billing_seen": "console 2026-11-16: Go, period ends 2026-12-16, both a 5-hourly and a 7-day quota shown, plus $1.00 of pay-as-you-go credits on the side.",
+   "allowances_usd": {
+    "GLM-5.3 Flash-X": 30.0,
+    "DeepSeek V4 Pro": 60.0,
+    "Kimi K2.7 Code": 60.0,
+    "Hy4 Preview": 60.0,
+    "Claude Haiku 5.5": 15.0,
+    "GPT-6 Luna": 15.0,
+    "MiniMax M3.1 Flash": 60.0,
+    "GLM-5.3 Flash": 60.0,
+    "DeepSeek V4 Flash Vision Exp": 60.0,
+    "MiMo V2.6 Pro": 60.0,
+    "DeepSeek V4 Flash": 60.0,
+    "MiMo V2.6 Flash": 60.0,
+    "DeepSeek V4.1 Flash": 120.0,
+    "DeepSeek V4.1 Flash Eco": 220.0
+   },
+   "allowances_note": "console 2026-11-16, 'View models and their credit types': a monthly cap per model in dollars, the largest being the plan's headline 220. The pool is shared; the cap is what one model may take from it."
   }
  }
 }

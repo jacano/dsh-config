@@ -32,5 +32,3 @@ criteria:
 admitted:
   - id: deepseek-v4.1-flash
     note: cheapest route on a cold cache, completions
-  - id: claude-haiku-5.5
-    note: fastest writer measured, Anthropic route
