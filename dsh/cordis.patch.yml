@@ -15,25 +15,6 @@
   name: "@deepseek-ai/dsh-llm-pi-ai"
   config:
     providers:
-      command-code:
-        displayName: Command Code
-        api: openai-completions
-        baseURL: https://api.commandcode.ai/provider/v1
-        apiKeyEnv: COMMANDCODE_API_KEY
-        defaultContextWindow: 1000000
-        defaultInput: [text, image]
-        models:
-          - { id: deepseek/deepseek-v4.1-flash-fast, name: DeepSeek V4.1 Flash Fast (Command Code), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
-      command-code-anthropic:
-        displayName: Command Code (Claude)
-        api: anthropic-messages
-        baseURL: https://api.commandcode.ai/provider
-        apiKeyEnv: COMMANDCODE_API_KEY
-        defaultContextWindow: 1000000
-        defaultMaxTokens: 32768
-        compat: { forceAdaptiveThinking: true }
-        models:
-          - { id: claude-haiku-5-5, name: Claude Haiku 5.5 (Command Code), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
       opendesign:
         displayName: OpenDesign
         api: openai-completions
@@ -42,7 +23,7 @@
         defaultContextWindow: 1000000
         defaultInput: [text, image]
         models:
-          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
       opendesign-anthropic:
         displayName: OpenDesign (Claude)
         api: anthropic-messages
@@ -61,3 +42,42 @@
         defaultInput: [text, image]
         models:
           - { id: deepseek/deepseek-v4.1-flash-eco, name: DeepSeek V4.1 Flash Eco (OpenGateway), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+
+# --------------------------------------------------------------------------
+# Paused. Command Code lapsed and OpenCode was cancelled, both on 2026-11-16.
+# The blocks are kept verbatim: to bring one back, paste it above under
+# `providers:` and uncomment. Nothing here is read by anything.
+#
+# Command Code (GOAT)
+#      command-code:
+#        displayName: Command Code
+#        api: openai-completions
+#        baseURL: https://api.commandcode.ai/provider/v1
+#        apiKeyEnv: COMMANDCODE_API_KEY
+#        defaultContextWindow: 1000000
+#        defaultInput: [text, image]
+#        models:
+#          - { id: deepseek/deepseek-v4.1-flash-fast, name: DeepSeek V4.1 Flash Fast (Command Code), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+#      command-code-anthropic:
+#        displayName: Command Code (Claude)
+#        api: anthropic-messages
+#        baseURL: https://api.commandcode.ai/provider
+#        apiKeyEnv: COMMANDCODE_API_KEY
+#        defaultContextWindow: 1000000
+#        defaultMaxTokens: 32768
+#        compat: { forceAdaptiveThinking: true }
+#        models:
+#          - { id: claude-haiku-5-5, name: Claude Haiku 5.5 (Command Code), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+#
+# OpenCode Go
+#      opencode-go:
+#        displayName: OpenCode Go
+#        api: openai-completions
+#        baseURL: https://opencode.ai/inference/go/openai/v1
+#        apiKeyEnv: OPENCODE_API_KEY
+#        headers: { x-opencode-session: dsh }
+#        defaultContextWindow: 1000000
+#        defaultMaxTokens: 65536
+#        models:
+#          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenCode Go), contextWindow: 1000000, maxTokens: 65536, reasoningEfforts: *efforts }
+#

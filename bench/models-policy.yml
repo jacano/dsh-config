@@ -98,9 +98,7 @@ criteria:
 # catalog-2026-11-10.csv (priced), so this file cannot go stale: it says which
 # ids are in and why, never how fast they were last Tuesday.
 admitted:
-  - id: deepseek/deepseek-v4.1-flash-fast
     note: default; cheapest on a cold cache, only row on the completions route
-  - id: claude-haiku-5-5
     note: fastest writer measured; keeps the Anthropic route alive
   - id: deepseek-v4.1-flash
   - id: claude-haiku-5.5
