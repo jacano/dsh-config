@@ -807,75 +807,114 @@
     {
      "id": "deepseek-v4.1-flash",
      "factor": 0.5,
-     "list_turn_usd": 0.002634,
-     "billed_note": "console 2026-11-16: 107 in / 94 out / 256 cache read at 0,30-1,20-0,006, billing x1, plan contribution x0,5 -> 0,0001 credits. The page's 0,5x is the x0,5 it charges; only Haiku differs."
+     "billed_note": "console 2026-11-16: 107 in / 94 out / 256 cache read at 0,30-1,20-0,006, billing x1, plan contribution x0,5 -> 0,0001 credits. The page's 0,5x is the x0,5 it charges; only Haiku differs.",
+     "input": 0.3,
+     "cache": 0.006,
+     "output": 1.2
     },
     {
      "id": "deepseek-v4.1-flash-eco",
      "factor": 0.27,
-     "list_turn_usd": 0.002634
+     "input": 0.3,
+     "cache": 0.006,
+     "output": 1.2
     },
     {
      "id": "minimax-m3.1-flash",
      "factor": 1.0,
-     "list_turn_usd": 0.002385
+     "list_turn_usd": 0.002385,
+     "input": 0.15,
+     "cache": 0.015,
+     "output": 0.6
     },
     {
      "id": "mimo-v2.6-pro",
      "factor": 1.0,
-     "list_turn_usd": 0.00206
+     "list_turn_usd": 0.00206,
+     "input": 0.435,
+     "cache": 0.0036,
+     "output": 0.87
     },
     {
      "id": "mimo-v2.6-flash",
      "factor": 1.0,
-     "list_turn_usd": 0.000809
+     "list_turn_usd": 0.000809,
+     "input": 0.14,
+     "cache": 0.0028,
+     "output": 0.28
     },
     {
      "id": "deepseek-v4-pro",
      "factor": 1.0,
-     "list_turn_usd": 0.011176
+     "list_turn_usd": 0.011176,
+     "input": 1.32,
+     "cache": 0.044,
+     "output": 3.96
     },
     {
      "id": "deepseek-v4-flash",
      "factor": 1.0,
-     "list_turn_usd": 0.003666
+     "list_turn_usd": 0.003666,
+     "input": 0.44,
+     "cache": 0.014,
+     "output": 1.32
     },
     {
      "id": "glm-5.3-flash",
      "factor": 1.0,
-     "list_turn_usd": 0.001785
+     "list_turn_usd": 0.001785,
+     "input": 0.075,
+     "cache": 0.015,
+     "output": 0.25
     },
     {
      "id": "glm-5.3-flashx",
      "factor": 2.0,
-     "list_turn_usd": 0.00892
+     "list_turn_usd": 0.00892,
+     "input": 0.37,
+     "cache": 0.075,
+     "output": 1.25
     },
     {
      "id": "claude-haiku-5.5",
      "factor": 4.0,
-     "list_turn_usd": 0.00174,
      "billed_factor": 2.0,
-     "billed_note": "console, 2026-11-16: 2.888 in / 16 out billed 0,0006 credits against a list of 0,0003, so the plan charges x2. The page's multiplier table says 4x; `factor` keeps the page's number and `billed_factor` is what the cost uses."
+     "billed_note": "console, 2026-11-16: 2.888 in / 16 out billed 0,0006 credits against a list of 0,0003, so the plan charges x2. The page's multiplier table says 4x; `factor` keeps the page's number and `billed_factor` is what the cost uses.",
+     "input": 0.1,
+     "cache": 0.01,
+     "output": 0.5
     },
     {
      "id": "gpt-6-luna",
      "factor": 4.0,
-     "list_turn_usd": 0.00174
+     "list_turn_usd": 0.00174,
+     "input": 0.1,
+     "cache": 0.01,
+     "output": 0.5
     },
     {
      "id": "kimi-k2.7-code",
      "factor": 1.0,
-     "list_turn_usd": 0.02386
+     "list_turn_usd": 0.02386,
+     "input": 0.95,
+     "cache": 0.19,
+     "output": 4.0
     },
     {
      "id": "hy4-preview",
      "factor": 1.0,
-     "list_turn_usd": 0.008323
+     "list_turn_usd": 0.008323,
+     "input": 0.834,
+     "cache": 0.042,
+     "output": 2.501
     },
     {
      "id": "deepseek-v4-flash-vision-exp",
      "factor": 1.0,
-     "list_turn_usd": 0.003666
+     "list_turn_usd": 0.003666,
+     "input": 0.44,
+     "cache": 0.014,
+     "output": 1.32
     }
    ],
    "promos": [
@@ -907,9 +946,11 @@
    "models": [
     {
      "id": "deepseek/deepseek-v4.1-flash-eco",
-     "list_turn_usd": 0.002634,
-     "factor": 0.1,
-     "billed_factor": 0.0911
+     "input": 0.0067,
+     "cache": 0.0006,
+     "output": 0.12,
+     "factor": 1.0,
+     "note": "the -90% is not one multiplier: on the 4,61 dollar invoice the input came out at 0,0067 per million (published 0,030), cache at 0,0006 and output at 0,120, so the rates are stored as billed and the factor is 1. Context over 256K is billed at 2x and the discount may end by notice."
     }
    ]
   }

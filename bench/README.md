@@ -70,10 +70,25 @@ no ceiling, so it is simply ten dollars of usage. Two things feed a cell, both f
 rate, its multiplier, and the hours it charges double for). A dash means that plan
 does not sell the model.
 
-The turn is 89k of cache read against 1k of fresh input, which flatters a route that
-discounts cache heavily. A workload with more fresh input - a big file read once and
-paid for - moves the comparison; the OpenDesign and OpenGateway eco lanes end up
-close on such a mix while this table shows four times between them.
+**The turn is an assumption, and it is printed with the table.** By default it is
+1k of fresh input, 89k of cache read and 1.5k of output, which flatters whichever
+route discounts cache hardest. Pass your own shape and the cells change with it:
+
+```bash
+python bench/bench.py plan --mix 345000,309000,771     # fresh, cache, out
+```
+
+Two routes that look four times apart on the default mix can come out within ten per
+cent of each other on an input-heavy one, because a discount is rarely the same
+across the three kinds of token. When that matters, ask for the prices instead of
+the turns - `plan --model <id>` prints what a million of each kind costs, with no mix
+assumed at all:
+
+```
+  plan                        input   cache read     output
+  command-code              0.01812      0.00036    0.07250
+  open-design               0.00682      0.00014    0.02727
+```
 
 The number is a ceiling, not a promise: a weekly or five-hour window can bind
 before the monthly one, and `plan` takes the lowest. What it never does is let a

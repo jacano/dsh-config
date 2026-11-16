@@ -54,7 +54,11 @@ MEASURED = BENCH / "models.csv"
 CONFIG = REPO / "dsh" / "cordis.patch.yml"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 
-TURN = 91_500
+# A turn is a choice, not a fact: this is the mix the table assumes, and `--mix`
+# replaces it. 89k of cache read against 1k of fresh input flatters whichever route
+# discounts cache hardest, so the number is printed with every table.
+MIX = (1_000, 89_000, 1_500)      # fresh input, cache read, output
+TURN = sum(MIX)
 REFERENCE_USD = 10.0   # the bill every plan here is sold at, and the one compared          # 89k cache + 1k fresh + 1.5k written, one agent turn
 DAYS = 30.0            # a month, for the windows
 LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
@@ -65,6 +69,16 @@ GATEWAYS = {
 }
 
 sys.stdout.reconfigure(encoding="utf-8")
+
+
+def mix_arg(value: str) -> tuple[int, int, int]:
+    try:
+        fresh, cache, out = (int(x) for x in value.replace(" ", "").split(","))
+    except ValueError:
+        raise argparse.ArgumentTypeError("expected fresh,cache,out as three integers")
+    if min(fresh, cache, out) < 0:
+        raise argparse.ArgumentTypeError("a token count cannot be negative")
+    return fresh, cache, out
 
 
 # --------------------------------------------------------------------------- core
@@ -247,7 +261,15 @@ def plan_lookup(cat: dict, model_id: str) -> dict:
     return {}
 
 
-def plan_rows(store: dict, day: date, want: str) -> list[dict]:
+def turn_cost(rates: dict, factor: float, mix: tuple[int, int, int]) -> float:
+    """What a turn of that shape costs, at those rates, after the multiplier."""
+    fresh, cache, out = mix
+    return (fresh * rates["input"] + cache * rates["cache"]
+            + out * rates["output"]) / 1e6 * factor
+
+
+def plan_rows(store: dict, day: date, want: str,
+              mix: tuple[int, int, int] = MIX) -> list[dict]:
     """How many turns of `want` a month buys, for each plan that sells it."""
     cat = store["catalog"]
     target = norm(want)
@@ -261,8 +283,8 @@ def plan_rows(store: dict, day: date, want: str) -> list[dict]:
             if target not in (norm(m["id"]), norm(m["id"].split("/")[-1]), bare):
                 continue
             row = cat.get(m.get("catalog") or "") or plan_lookup(cat, m["id"])
-            listed = m["list_turn_usd"] if "list_turn_usd" in m else row.get("turn")
-            if listed is None:
+            rates = m if "input" in m else row
+            if "input" not in rates:
                 continue
             monthly = m.get("monthly_limit_usd")
             monthly = monthly if isinstance(monthly, (int, float)) else plan.get("credits_usd")
@@ -270,15 +292,18 @@ def plan_rows(store: dict, day: date, want: str) -> list[dict]:
             offer = live_promo(plan, m["id"], day)
             # A plan that publishes one price per model gets no blend: only the
             # catalogue's own note about peak hours earns one.
-            hourly = 1.0 if "list_turn_usd" in m else blend_of(row)
-            unit = (float(listed) * float(m.get("billed_factor") or m.get("factor", 1.0))
-                    * (offer or 1.0) * hourly)
+            hourly = 1.0 if "input" in m else blend_of(row)
+            factor = float(m.get("billed_factor") or m.get("factor", 1.0))
+            unit = turn_cost(rates, factor * (offer or 1.0) * hourly, mix)
             # A metered plan has no ceiling, so the comparable question is what the
             # same ten dollars buy: for a subscription that IS the ceiling, here it
             # is simply ten dollars of usage.
             budget = usable if usable else REFERENCE_USD
+            scale = (float(plan["fee_usd"]) / usable) if usable and plan.get("fee_usd") else 1.0
             out.append({"provider": provider,
-                        "turns": (budget / unit) if unit else None})
+                        "turns": (budget / unit) if unit else None,
+                        **{k: rates[k] * factor * (offer or 1.0) * hourly * scale
+                           for k in ("input", "cache", "output")}})
     return out
 
 
@@ -308,12 +333,14 @@ def cmd_plan(args) -> int:
 
     names = list(store["providers"])
     header = "  " + f"{'model':30s} {'tb':>4s}  " + "  ".join(f"{n:>13s}" for n in names)
-    print(f"turns of {TURN:,} tokens that {REFERENCE_USD:.0f} dollars buys, on {day.isoformat()}")
+    fresh, cache, out = args.mix
+    print(f"turns of {TURN:,} tokens ({fresh:,} fresh + {cache:,} cache + {out:,} out) "
+          f"that {REFERENCE_USD:.0f} dollars buys, on {day.isoformat()}")
     print("  a subscription cannot be overdrawn past its ceiling; metered is what it costs\n")
     print(header)
     seen: dict[str, dict] = {}
     for mid in wanted:
-        per = {r["provider"]: r["turns"] for r in plan_rows(store, day, mid)}
+        per = {r["provider"]: r["turns"] for r in plan_rows(store, day, mid, args.mix)}
         if not per:
             if args.model:
                 print(f"  no plan serves {mid}; try an id from data/plans.json")
@@ -334,6 +361,18 @@ def cmd_plan(args) -> int:
         tb = board_score(boards, mid)
         cells = "  ".join(f"{f'{per[n]:,.0f}' if per.get(n) else '-':>13s}" for n in names)
         print("  " + f"{mid:30s} {('%.1f' % tb) if tb else '-':>4s}  " + cells)
+
+    if args.model:
+        # The honest table behind that row: what a million of each kind costs, with
+        # no mix assumed at all. Multiply by your own shape.
+        rates = {r["provider"]: r for r in plan_rows(store, day, args.model, args.mix)}
+        print(f"\n  dollars per million tokens, after the multiplier and the ceiling")
+        print(f"  {'plan':22s} {'input':>10s} {'cache read':>12s} {'output':>10s}")
+        for name in names:
+            r = rates.get(name)
+            if not r:
+                continue
+            print(f"  {name:22s} {r['input']:>10.5f} {r['cache']:>12.5f} {r['output']:>10.5f}")
     return 0
 
 
@@ -884,6 +923,8 @@ def main() -> int:
     pl.add_argument("--today", type=date.fromisoformat,
                    help="a date (YYYY-MM-DD), for the promos of that day")
     pl.add_argument("--model", help="one model; without it, every model worth a plan")
+    pl.add_argument("--mix", type=mix_arg, default=MIX,
+                    help="fresh,cache,out in tokens per turn (default %(default)s)")
     pl.set_defaults(fn=cmd_plan)
 
     s = sub.add_parser("filter", help="what Terminal-Bench ranks, and what it does not")
