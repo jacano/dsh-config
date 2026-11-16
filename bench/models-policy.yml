@@ -11,7 +11,6 @@ criteria:
   phases:
     static:
       tbench_min: 38.0
-      cost_max: 0.0006
     measured:
       # Floors for "broken", not targets for "good"; about three deviations of
       # their own jitter under the worst admitted row. A gate on the envelope

@@ -4,7 +4,7 @@
     python bench/bench.py plan               # how many turns a month buys
     python bench/bench.py plan --model claude-haiku-5.5
     python bench/bench.py plan --today 2026-10-22
-    python bench/bench.py select             # fold 1: what is worth calling at all
+    python bench/bench.py filter             # what Terminal-Bench actually ranks
     python bench/bench.py measure            # fold 2: the stored table against the gates
     python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 
@@ -13,8 +13,8 @@ Three questions, in the order they cost money:
   plan     how far a subscription goes: one row per model, one column per plan, the
            turns a month buys once the plan's ceiling and its windows are applied.
            Free, calls no model.
-  select   fold 1: price, Terminal-Bench, then the policy.
-           Free, calls no model.
+  filter   does the board rank it, and does it clear the floor. Price is not asked
+           here: `plan` shows it, and a number to look at is not a gate. Free.
   measure  fold 2: speed, latency, cache, prefill, retention, errors, tool calls.
            fold 3: the agentic task — a real bug, a real repository, pytest.
 
@@ -374,144 +374,53 @@ def cmd_plan(args) -> int:
     return 0
 
 
-# --------------------------------------------------------------------------- select: fold 1
+# ------------------------------------------------------------------ filter: the board
 
-GAP_WORDS = re.compile(r"no (capability|data|score|ficha)|unmeasured|unranked|sin ficha",
-                       re.IGNORECASE)
+def cmd_filter(args) -> int:
+    """Keep the models Terminal-Bench ranks, and say what it does not.
 
+    One question, asked of every model on every plan: does the board rank it, and
+    does it clear the floor. Price is not asked here - that is `plan`'s job, and a
+    number to look at, not a gate to pass.
+    """
+    store, board = plans(), tbench()
+    floor = GATES["static"]["tbench_min"]
+    print(f"Terminal-Bench >= {floor:.1f} · everything the board does not rank is out\n")
 
-def model_rows(plan: dict, catalog: dict, board: dict) -> list[dict]:
-    entries = ([{"id": slug, "catalog": slug} for slug in catalog]
-               if plan["models"] == "catalog" else plan["models"])
-    out = []
-    for m in entries:
-        cat = catalog.get(m.get("catalog") or "", {})
-        ranked = by_label(board, m["id"], m.get("catalog") or "")
-        bare = m["id"].split("/")[-1]
-        listed = m["list_turn_usd"] if "list_turn_usd" in m else cat.get("cost")
-        factor = float(m.get("billed_factor") or m.get("factor", 1.0))
-        # The same money rule `plan` uses: a plan that sells usage through a monthly
-        # limit makes a dollar cost fee/limit, and one that names the rate outright
-        # says so. Reading only the latter prices a monthly-limit plan at list.
-        monthly = m.get("monthly_limit_usd")
-        monthly = monthly if isinstance(monthly, (int, float)) else plan.get("credits_usd")
-        usable, _ = plan_caps(plan, monthly, cat.get("name") or m["id"])
-        # The same division `plan` does: fee over what the plan can be spent at,
-        # allowance included. A stored rate would go stale the day a cap changes.
-        leverage = float(plan["fee_usd"]) / usable if plan.get("fee_usd") and usable else 1.0
-        # The same week `plan` prices: Command Code charges double for 20,8 % of it,
-        # and gating on the off-peak list would flatter that plan by a fifth.
-        hourly = blend_of(plans()["catalog"].get(m.get("catalog") or "", {}))
-        usage = listed * factor * hourly if listed is not None else None
-        out.append({
-            "model": m["id"],
-            "real_turn_usd": usage * leverage if usage is not None else None,
-            "name": cat.get("name") or m["id"],
-            "list_turn_usd": listed,
-            "factor": factor,
-            "effective_turn_usd": usage,
-            "cache_write_usd_per_m": (plan.get("cache_write_usd_per_m") or {}).get(bare),
-            "leverage": leverage,
-            "tb": (ranked or {}).get("score"),
-        })
-    return out
-
-
-CTX = 60_000          # the context a turn is priced at
-
-
-def cold_call(row: dict) -> float | None:
-    """The first call of a session also writes the prefix, and that is not free."""
-    write = row.get("cache_write_usd_per_m")
-    if not write or row["real_turn_usd"] is None:
-        return None
-    usage = row["effective_turn_usd"] + CTX * write / 1_000_000 * row["factor"]
-    return usage * float(row.get("leverage", 1.0))
-
-
-def classify(row: dict, cost_max: float, cap_min: float) -> tuple[str, str]:
-    # The board, both questions at once and first: is it ranked, and does it clear
-    # the floor. A model that fails either has no business being priced.
-    if row["tb"] is None:
-        return "out", "not on Terminal-Bench, and this policy buys only what it ranks"
-    if row["tb"] < cap_min:
-        return "out", f"tbench {row['tb']:.1f} < {cap_min:.1f}"
-    cost = row["effective_turn_usd"]
-    if cost is None or row["real_turn_usd"] is None:
-        return "human", "no price on record"
-    if row["real_turn_usd"] > cost_max:
-        return "out", f"cost {row['real_turn_usd']:.6f} > {cost_max:.6f}"
-    return "battery", ""
-
-
-def cmd_select(args) -> int:
-    store = plans()
-    gates, _ = load_policy()
-    static = gates["static"]
-    cost_max, cap_min = float(static["cost_max"]), float(static["tbench_min"])
-    catalog, board = catalogue(), tbench()
-    measured = load_measured()
-
-    print(f"fold 1 · Terminal-Bench >= {cap_min:.1f} · price <= ${cost_max:.4f}/turn\n")
-    rows = []
+    keep_all: list[tuple[str, str, float]] = []
+    off, low = 0, 0
     for pname, plan in store["providers"].items():
         if plan.get("active") is False:
-            print(f"\n{pname}  [prepared, not enabled] {plan.get('note', '')[:90]}")
             continue
-        money = (f"${plan['fee_usd']:.0f}/{plan.get('billing', 'mo')}"
-                 if plan.get("fee_usd") else "prepaid")
-        credits = f" + ${plan['credits_usd']:.0f} credits" if plan.get("credits_usd") else ""
-        print(f"{pname}  [{plan['plan']} {money}{credits}]")
+        ids = ([m for m in store["catalog"]]
+               if plan["models"] == "catalog" else [m["id"] for m in plan["models"]])
+        keep, out = [], 0
+        for mid in ids:
+            tb = board_score(board, mid)
+            if tb is None:
+                off += 1
+                out += 1
+            elif tb < floor:
+                low += 1
+                out += 1
+            else:
+                keep.append((pname, mid, tb))
+        keep_all += keep
+        print(f"{pname}  [{plan['plan']}]")
+        for _p, mid, tb in sorted(keep, key=lambda r: -r[2]):
+            print(f"  keep  {mid[:34]:34s} tb {tb:5.1f}")
+        if out:
+            print(f"  ({out} out: not on the board, or under the floor)")
+        print()
 
-        buckets = {"battery": [], "human": [], "out": [], "settled": []}
-        for row in model_rows(plan, catalog, board):
-            row["provider"] = pname        # before the gates: an exclusion is per lane
-            bucket, why = classify(row, cost_max, cap_min)
-            # Fold 1 decides what to measure; the measured table already answered for
-            # some of it. A row it rejected is not a candidate, and one it accepted is
-            # in the menu - proposing either again would be to forget the work.
-            prior = measured.get(row["model"])
-            if bucket == "battery" and prior:
-                fails = fails_measured(prior, row["tb"], row["real_turn_usd"], gates["measured"])
-                fails += fails_fitness(prior, gates["fitness"])
-                bucket, why = ("out", "measured: " + " · ".join(fails)) if fails else ("settled", "")
-            row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
-                       plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why,
-                       cold_call_usd=cold_call(row))
-            buckets[bucket].append(row)
-            rows.append(row)
-
-        for row in sorted(buckets["battery"], key=lambda r: r["effective_turn_usd"]):
-            cold = cold_call(row)
-            extra = f"  1.a ${cold:.5f}" if cold else ""
-            print(f"  run   {pname:13s} {row['model'].split('/')[-1][:26]:26s} "
-                  f"tb {row['tb']:5.1f}  uso ${row['effective_turn_usd']:.5f}  "
-                  f"real ${row['real_turn_usd']:.6f}{extra}")
-        for row in sorted(buckets["human"], key=lambda r: r["effective_turn_usd"]):
-            score = "-" if row["tb"] is None else f"{row['tb']:.1f}"
-            print(f"  ????  {pname:13s} {row['model'].split('/')[-1][:26]:26s} "
-                  f"tb {score:>5}  real ${row['real_turn_usd']:.6f}  {row['why']}")
-        settled = len(buckets["settled"])
-        tail = f", {settled} already admitted" if settled else ""
-        print(f"  ({len(buckets['out'])} out{tail})")
-
-    print("  tb = Terminal-Bench 4.1: terminal tasks, model + agent, best run per model")
-
-    battery = [r for r in rows if r["bucket"] == "battery"]
-    human = [r for r in rows if r["bucket"] == "human"]
-    print(f"\n{len(rows)} models: {len(battery)} to the battery, {len(human)} need a human, "
-          f"{len(rows) - len(battery) - len(human)} out.\n")
-
-    if human:
-        print("waiting on a decision:")
-        for r in sorted(human, key=lambda x: x["effective_turn_usd"] or 0):
-            print(f"  {r['provider']:13s} {r['model']:30s} "
-                  f"real ${r['real_turn_usd']:.6f}  {r['why']}")
+    print(f"{len(keep_all)} models clear the floor · {off} are not ranked · {low} rank below it")
 
     if args.write:
-        path = snapshot(f"shortlist-{date.today().isoformat()}.csv", rows)
+        rows = [{"provider": p, "model": m, "tb": tb} for p, m, tb in keep_all]
+        path = snapshot(f"filter-{date.today().isoformat()}.csv", rows)
         print(f"\nwritten: {path.relative_to(REPO)}")
     return 0
+
 
 # --------------------------------------------------------------------------- measure: fold 2
 
@@ -564,8 +473,6 @@ def fails_static(tb, cost, g):
         f.append("not on Terminal-Bench")
     elif tb < g["tbench_min"]:
         f.append(f"tbench {tb:.1f} < {g['tbench_min']:.1f}")
-    if cost is None or cost > g["cost_max"]:
-        f.append(f"cost {cost or 0:.4f} > {g['cost_max']:.4f}")
     return f
 
 def at_context(m, tokens=CONTEXT_K * 1000):
@@ -652,25 +559,10 @@ def unpriced(models: dict) -> list[str]:
             for m in models.values() if m["cost_override"] is None and not m["catalog"]]
 
 
-def phase_one(models: dict, catalog: dict) -> None:
-    """Static, and free: how much of the catalogue the board ranks well enough."""
-    print("phase 1 - static (free):  " + "  ".join(f"{k}={v}" for k, v in GATES["static"].items()))
-    board = tbench()
-    # The catalogue is Command Code's list price; the plan sells that usage at a
-    # tenth, so the preview has to use the plan's money, not the list's.
-    cc = plans()["providers"].get("command-code", {})
-    leverage = float(cc["fee_usd"]) / float(cc["credits_usd"]) if cc else 1.0
-    worth = [slug for slug, row in catalog.items()
-             if not fails_static(board_score(board, slug),
-                                 None if row["cost"] is None else row["cost"] * leverage,
-                                 GATES["static"])]
-    print(f"  {len(catalog)} catalog rows -> {len(worth)} worth measuring")
-
-
 def phase_two(models: dict, catalog: dict) -> list[str]:
     """Measured and fitness, row by row, against the admitted set."""
-    print("phase 2 - measured:       " + "  ".join(f"{k}={v}" for k, v in GATES["measured"].items()))
-    print("phase 3 - fitness:        " + "  ".join(f"{k}={v}" for k, v in GATES["fitness"].items()))
+    print("measured:  " + "  ".join(f"{k}={v}" for k, v in GATES["measured"].items()))
+    print("fitness:   " + "  ".join(f"{k}={v}" for k, v in GATES["fitness"].items()))
     problems = []
     board = tbench()
     for m in models.values():
@@ -715,11 +607,10 @@ def menu(models: dict) -> list[str]:
 def check() -> int:
     models, catalog = load_measured(), catalogue()
     problems = unpriced(models)
-    phase_one(models, catalog)
     problems += phase_two(models, catalog)
     problems += menu(models)
     if not problems:
-        print(f"\nOK: {len(ADMITTED)} rows clear all three phases, and the menu matches the policy")
+        print(f"\nOK: {len(ADMITTED)} rows clear every gate, and the menu matches the policy")
         return 0
     print("\nFAIL:")
     for problem in problems:
@@ -1032,18 +923,18 @@ def main() -> int:
     pl.add_argument("--model", help="one model; without it, every model worth a plan")
     pl.set_defaults(fn=cmd_plan)
 
-    s = sub.add_parser("select", help="fold 1: what is worth calling at all")
+    s = sub.add_parser("filter", help="what Terminal-Bench ranks, and what it does not")
     s.add_argument("--write", action="store_true", help="save a snapshot")
-    s.set_defaults(fn=cmd_select)
+    s.set_defaults(fn=cmd_filter)
 
-    m = sub.add_parser("measure", help="fold 2: the stored table against the gates")
+    m = sub.add_parser("measure", help="the stored table against the gates")
     m.add_argument("--model")
     m.add_argument("--tbench", type=float)
     m.add_argument("--cost", type=float)
     m.add_argument("--provider", default="command-code", choices=sorted(GATEWAYS))
     m.set_defaults(fn=cmd_measure)
 
-    a = sub.add_parser("agentic", help="fold 3: a real task, judged by pytest")
+    a = sub.add_parser("agentic", help="a real task, judged by pytest")
     a.add_argument("--provider", required=True)
     a.add_argument("--model", required=True)
     a.add_argument("--rounds", type=int, default=3)

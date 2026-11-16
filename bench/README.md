@@ -4,9 +4,9 @@ One script, two data files, three questions. The script does not decide anything
 by itself: it prices, it filters, it measures, and it says what it could not.
 
 ```bash
-python bench/bench.py plan               # what a subscription costs per token
-python bench/bench.py select             # fold 1: what is worth calling at all
-python bench/bench.py measure            # fold 2: the stored table against the gates
+python bench/bench.py plan               # how many turns a month buys
+python bench/bench.py filter             # what Terminal-Bench actually ranks
+python bench/bench.py measure            # the stored table against the gates
 python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 ```
 
@@ -20,26 +20,22 @@ python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 Nothing here edits the DSH configuration; that is a separate change in
 [`../dsh/`](../dsh/).
 
-## The funnel
+## Three questions, not a pipeline
 
 ```
-prices   every model a provider sells, in every lane, with that plan's discount
-   │     or credit multiplier — and what the plan costs per token once the blend,
-   │     the promo and the window are folded in          (bench.py plan)
-   ↓
-fold 1   price → Terminal-Bench → policy
-   │     free, calls no model                            (bench.py select)
-   ↓
-fold 2   speed, latency, cache, prefill, retention, errors, tool calls
-fold 3   a real bug in a real repository, three rounds, pytest decides
-   │                                                     (bench.py measure, agentic)
+plan     what a subscription buys: turns per month, per model, per plan
+   │     a number to look at, never a veto
+filter   does Terminal-Bench rank it, and does it clear the floor
+   │     free, calls no model
+measure  the ones left, against the gates the policy states
+   │     and against the menu, which has to agree
    ↓
 admitted, and only then in the config
 ```
 
-Each step can only remove rows. The gates live in
-[`models-policy.yml`](models-policy.yml) and both folds read them from there, so a
-threshold moves in one place.
+Each command answers its own question and none of them chains into the next by
+itself: you run the one you need. The gates live in
+[`models-policy.yml`](models-policy.yml), so a threshold moves in one place.
 
 ## plan — how far each plan goes
 
@@ -78,7 +74,7 @@ A new subscription is added by writing its two URLs and a reader for the second 
 is a block with those two URLs and the numbers already filled in, which is the whole
 of the work: this repo has no network call in it.
 
-## select — fold 1
+## filter — the board
 
 A turn is assumed to be **89.000 tokens read from cache + 1.000 fresh + 1.500
 written**, which is what an agent call looks like after the prefix is warm:
@@ -92,35 +88,23 @@ one plan lists double and halves it with a 0,5× multiplier, another takes a ten
 off the list, a third charges double for a fifth of the week. The block's `factor`
 and `billed_factor` are the whole of that, and no two plans have to agree.
 
-What fold 1 will not do:
-
-- price a model from another provider's catalogue, unless no catalogue exists and
-  that is written down;
-- judge capability from a provider's own claim;
-- keep a list of models it has judged. There is no such list: a row the gate
-  rejects is rejected again on the next run, and writing it down would be a
-  snapshot of yesterday wearing a decision's clothes.
-
 **One scale, and nothing else about the model.** Terminal-Bench 4.1 (`tb`) is the
-only thing fold 1 knows about a model beyond its price: it runs terminal tasks and
-grades whether they got done, and it ranks model **and agent** — "38,5 with Claude
-Code" is a different claim from "38,5 alone", which is why the agent is stored with
-the number. `tbench_min` is the floor.
+only thing `filter` knows about a model: it runs terminal tasks and grades whether
+they got done, and it ranks model **and agent** — "38,5 with Claude Code" is a
+different claim from "38,5 alone", which is why the agent is stored with the
+number. `tbench_min` is the floor, and a model the board does not rank is out with
+that reason on its row: a purchase rule, not a judgement about the model.
 
-The filter asks two questions and no more: what does it cost, and does the board
-rank it. A model the board does not rank is out, with that reason printed on the
-row — a purchase rule, not a judgement about the model. Everything else a model
-*could* be described by (does it reason, does it call tools, how much context) was
-removed on 2026-11-15: it gated nothing, and a number that gates nothing ends up
-being quoted as if it did.
+Everything else a model *could* be described by (does it reason, does it call
+tools, how much context) was removed on 2026-11-15: it gated nothing, and a number
+that gates nothing ends up being quoted as if it did.
 
-Two rows in the shortlist can be the same model on different routes, and the filter
-does not merge them: it prices both and lets the number speak. The console is the
-bill, not the page: one plan billed a model at ×2 while its own table printed ×4,
-so `billed_factor` carries what was charged, `factor` keeps what was published, and
-the observation is stored apart from the brochure, so neither is overwritten.
+**The same model on two routes is two rows**, and nothing merges them: you see both
+and decide. The console is the bill, not the page — one plan billed a model at ×2
+while its own table printed ×4 — so `billed_factor` carries what was charged,
+`factor` keeps what was published, and neither overwrites the other.
 
-## measure — fold 2
+## measure — the gates, and the menu
 
 **Measured.** Speed is the median of three 1.600-token generations; latency is the
 median of three warm passes after two priming requests; cache must read back on
@@ -149,7 +133,7 @@ python bench/bench.py measure --model <id> --tbench 38.5 --cost 0.0013
 python bench/bench.py measure --provider opendesign --model deepseek-v4.1-flash
 ```
 
-## agentic — fold 3
+## agentic — a real task
 
 Synthetic numbers say nothing about whether a model can read a repository, find the
 bug and fix it. This runs a 1.600-line module with two failing tests through DSH
@@ -177,9 +161,9 @@ that runs it and grades the result. Two sources, and neither one is the seller.
    slug or their own `list_turn_usd` plus a `factor`. Then
    `python bench/bench.py plan` shows how far it goes.
 2. **A new model on an existing provider** is one entry in that list. Run
-   `python bench/bench.py select`: if the row says `out`, the printed reason is the
-   whole story — nothing is recorded, because the gate will say it again tomorrow.
-3. **Live, only for rows fold 1 marks `run`:**
+   `python bench/bench.py filter`: if the board does not rank it, that is the whole
+   story — nothing is recorded, because the gate will say it again tomorrow.
+3. **Live, only for rows `filter` keeps:**
 
    ```bash
    python bench/bench.py measure --model <id> --tbench <board score> --cost <usd per turn>
