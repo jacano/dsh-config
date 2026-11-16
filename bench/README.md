@@ -126,7 +126,8 @@ route that reads slowly cannot hide behind a fast short prompt.
 - *Cache in a loop* — five identical turns, counting from the third. The first is
   always cold, and a probe that includes it can never look healthy.
 - *Parallel retention* — four requests at once, aggregate throughput over
-  `4 × solo`.
+  `4 × solo`, three rounds and the median: one round of this moved 0,74 to
+  0,99 within ten minutes, which is the scheduler talking, not the route.
 - *Error budget* — ten short calls, counting non-200 responses.
 - *Tool calls* — one reply must carry two tools at once, right names, parseable
   arguments.

@@ -1033,19 +1033,25 @@ def measure_route(model: str) -> dict:
         loop_hits += 1 if turn >= 2 and usage_tokens(data)[1] else 0
     loop_rate = loop_hits / 3
 
-    solo_start = time.perf_counter()
-    data = call(model, corpus(30000, 120) + "\n\nWrite 200 words.", 200)
-    solo = usage_tokens(data)[0] / (time.perf_counter() - solo_start)
+    # Retention is the noisiest number here: four parallel calls against one solo
+    # call, and a single round moved 0,74 to 0,99 within ten minutes. Three rounds,
+    # median, or the gate is reading the scheduler rather than the route.
+    retention = []
+    for _ in range(3):
+        solo_start = time.perf_counter()
+        data = call(model, corpus(30000, 120) + "\n\nWrite 200 words.", 200)
+        solo = usage_tokens(data)[0] / (time.perf_counter() - solo_start)
 
-    total = []
+        total = []
 
-    def one():
-        d = call(model, corpus(40000, 120) + "\n\nWrite 200 words.", 200)
-        total.append(usage_tokens(d)[0])
-    start = time.perf_counter()
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        list(pool.map(lambda _: one(), range(4)))
-    aggregate = sum(total) / (time.perf_counter() - start)
+        def one():
+            d = call(model, corpus(40000, 120) + "\n\nWrite 200 words.", 200)
+            total.append(usage_tokens(d)[0])
+        start = time.perf_counter()
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            list(pool.map(lambda _: one(), range(4)))
+        aggregate = sum(total) / (time.perf_counter() - start)
+        retention.append(aggregate / (solo * 4))
 
     errors = 0
     for _ in range(10):
@@ -1082,7 +1088,7 @@ def measure_route(model: str) -> dict:
         "cache": hits / 3,
         "prefill": round(slope, 1),
         "cache_loop": loop_rate,
-        "retention": round(aggregate / (solo * 4), 2),
+        "retention": round(statistics.median(retention), 2),
         "errors": errors,
         "tools": good / 2,
     }
