@@ -87,13 +87,15 @@ def probes_for(model_id: str, catalog_slug: str, lanes=LANES) -> list[str]:
 
 def by_build(table: dict, probes: list[str]) -> dict | None:
     """A source may name a build, not a lane: "x-1017" is the model with a number
-    glued on. Only bare digits count, or "flash" would reach "flash-fast"."""
+    glued on. Bare digits only, or "flash" would reach "flash-fast" - and at least
+    two of them, because a build is a date (1017, 0902) while "glm-5" followed by a
+    single 3 is the next version, a different model with a different score."""
     for probe in probes:
         if not probe:
             continue
         for key, rec in table.items():
             rest = key[len(probe):] if key.startswith(probe) else ""
-            if rest.isdigit():
+            if rest.isdigit() and len(rest) >= 2:
                 return rec
     return None
 
