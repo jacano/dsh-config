@@ -16,6 +16,7 @@ in it.
 | Add, remove or rename a model in the menu | [dsh/README.md](dsh/README.md) |
 | Judge a new model, or a new subscription | [bench/README.md](bench/README.md) |
 | See why a model was dropped | [bench/models-policy.yml](bench/models-policy.yml) |
+| See what was decided, and with which numbers | [bench/decisions.md](bench/decisions.md) |
 | Repeat the whole selection from scratch | [bench/README.md](bench/README.md) |
 
 ## The menu today
