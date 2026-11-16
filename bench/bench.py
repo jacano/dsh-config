@@ -323,6 +323,49 @@ def open_design_page() -> dict:
     return out
 
 
+def command_code_credits() -> dict:
+    """The GOAT docs: per-model monthly credits, and the two usage windows.
+
+    The pricing card lists five allowances and "+33 more"; this page lists all of
+    them, which is the only place a model like Haiku's 20 is written down.
+    """
+    text = text_of(fetch("https://commandcode.ai/docs/plans/goat"))
+    out: dict = {}
+    five = re.search(r"\$(\d+) of usage in any (\d+) hours", text)
+    week = re.search(r"\$(\d+) in any (\d+) days", text)
+    if five and week:
+        out["windows"] = {"five_hours_usd": float(five.group(1)),
+                          "week_usd": float(week.group(1))}
+    # Rows read `<name> $in $out $cache_read <dash|$cache_write> $credits`; the dash
+    # is a plain hyphen in most of them, and the heading above the table ends in
+    # "Monthly credits", so a name that contains those words is not a model.
+    rows = re.findall(r"([A-Z][A-Za-z0-9 .\-/()]{2,32}?) \$\d[\d.]* \$\d[\d.]* \$\d[\d.]* "
+                      r"(?:-|—|\$\d[\d.]*) \$(\d+)(?= |$)", text)
+    if rows:
+        out["allowances_usd"] = {
+            re.sub(r"\s*\((?:latest|exp)\)", "", name).strip(): float(usd)
+            for name, usd in rows
+            if not re.search(r"credits|model|input|output", name, re.I)
+        }
+    return out
+
+
+def open_design_credits() -> dict:
+    """The credits page: what the plan's pool is, and the windows it resets on."""
+    text = text_of(fetch("https://open-design.ai/model-credits/"))
+    go = re.search(r"Go \$(\d+) \$(\d+) \$(\d+) \$(\d+) \$(\d+) \$(\d+)", text)
+    if not go:
+        return {}
+    _fee, maximum, top, coding, week, five = (float(g) for g in go.groups())
+    return {"credits_usd": coding,
+            "monthly_max_usd": maximum,
+            "top_model_credits_usd": top,
+            "windows": {"week_usd": week, "five_hours_usd": five}}
+
+
+CREDITS_SOURCES = {"command-code": command_code_credits, "open-design": open_design_credits}
+
+
 def refresh_plans(store: dict, write: bool) -> None:
     for name, page in (("command-code", command_code_page), ("open-design", open_design_page)):
         plan = store["providers"][name]
@@ -331,8 +374,17 @@ def refresh_plans(store: dict, write: bool) -> None:
         except Exception as exc:  # noqa: BLE001
             print(f"{name}: page unreadable ({exc!r}). Stored values kept.\n")
             continue
+        # The pricing card gives the headline; the plan's own credits page is where
+        # the per-model numbers and the windows are written, so it is read too.
+        credits = CREDITS_SOURCES.get(name)
+        if credits:
+            try:
+                fresh.update(credits())
+            except Exception as exc:  # noqa: BLE001
+                print(f"{name}: credits page unreadable ({exc!r}). Using the card only.")
         print(name)
-        for field in ("fee_usd", "credits_usd", "windows"):
+        for field in ("fee_usd", "credits_usd", "windows", "monthly_max_usd",
+                      "top_model_credits_usd"):
             if field in fresh:
                 old = plan.get(field)
                 mark = "" if old == fresh[field] else f"   <- stored {old}"

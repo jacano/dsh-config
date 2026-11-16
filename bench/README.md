@@ -65,6 +65,21 @@ The number is a ceiling, not a promise: a weekly or five-hour window can bind
 before the monthly one, and `plan` takes the lowest. What it never does is let a
 turn cost more than the plan's own fee divided by what that model is allowed.
 
+### Where the numbers come from
+
+Each provider carries the two pages that decide its cost, in `data/plans.json`
+under `sources`, and `refresh` re-reads both rather than only the card:
+
+| Provider | Card | The page with the detail |
+| --- | --- | --- |
+| `command-code` | `commandcode.ai/pricing` | `commandcode.ai/docs/plans/goat` — every model's monthly credit, plus the 5-hour and 7-day windows |
+| `open-design` | `open-design.ai/pricing/` | `open-design.ai/model-credits/` — the plan's pool, its windows, and the multiplier per model |
+
+The card is enough to know the fee; it is not enough to know how far the plan goes.
+A new subscription is added by writing its two URLs and a reader for the second one
+next to `command_code_credits` and `open_design_credits`, and `refresh` does the
+rest: it prints what changed against what is stored, and `--write` stores it.
+
 ## select — fold 1
 
 A turn is assumed to be **89.000 tokens read from cache + 1.000 fresh + 1.500
