@@ -43,43 +43,27 @@ Each step can only remove rows. The gates live in
 [`models-policy.yml`](models-policy.yml) and both folds read them from there, so a
 threshold moves in one place.
 
-## plan — what a plan costs per token
+## plan — how far each plan goes
 
-`select` asks whether a model is worth calling; this asks what the plan selling it
-really charges. There is no single shape: each plan declares its own, in
-`data/plans.json`, and the number for that plan is built from what it declares and
-from nothing else.
-
-| Plan | Buys | Price moves with the hour | Caps | Promo |
-| --- | --- | --- | --- | --- |
-| `command-code` | monthly credits, with a per-model allowance | **yes** — the catalogue's own note says which hours and by how much, and the multiplier is read from the two prices it prints | the month, or the model's own allowance when that is lower | none |
-| `open-design` | monthly credits, at a per-model multiplier | no, one price per model | the month, **plus** a 7-day and a 5-hour window | one dated offer |
-
-What that means in practice:
-
-- **Only `command-code` is blended by the hour.** Its catalogue prints an off-peak
-  price and a peak one and says when the peak applies; the plan's price is the week
-  weighted by that share. A plan with one price gets no blend, and one that sells
-  the peak lane as its own row is blended rather than counted twice.
-- **Only `open-design` has windows.** A 7-day or 5-hour cap limits the *rate*, not
-  the total: when one binds, the plan buys less than its credits and the price per
-  token climbs. Which cap binds is the `caps at` column.
-- **Only `open-design` has a promo, and only inside its dates.** Outside them the
-  offer does not exist; a discount with no end date is a price, and this script
-  refuses to treat one as the other. `--today` asks the question for another day.
-- **Money is fee ÷ usage**, times the model's multiplier, for both. A plan that
-  sells `$220` for `$10` and one that sells `$100` for `$10` differ there and
-  nowhere else.
-
-`tokens/$1` is what one dollar buys at the plan's blended marginal price. It is the
-same number as `$/M`, upside down, and it is the one that answers the question you
-actually have: for the money, how much model do I get.
+A subscription costs the same whether it is used or not, and its per-model ceiling
+stops the damage. So the question is not what a token costs: it is how many turns a
+month buys of the model you want, and that is the whole table.
 
 ```bash
-python bench/bench.py plan --today 2026-10-22    # the day a promo was live
-python bench/bench.py plan --model deepseek-v4-pro
-python bench/bench.py plan --write               # snapshots/, never versioned
+python bench/bench.py plan                        # every model worth a plan
+python bench/bench.py plan --model claude-haiku-5.5
+python bench/bench.py plan --today 2026-10-22     # the day a promo was live
 ```
+
+One row per model, one column per plan. Two things feed a cell, and both come from
+`data/plans.json`: the ceiling that model has on that plan (a per-model allowance,
+or the plan's credits when the model has none), and what one turn consumes there
+(the provider's list rate, its multiplier, and the hours it charges double for).
+A dash means that plan does not sell the model.
+
+The number is a ceiling, not a promise: a weekly or five-hour window can bind
+before the monthly one, and `plan` takes the lowest. What it never does is let a
+turn cost more than the plan's own fee divided by what that model is allowed.
 
 ## select — fold 1
 

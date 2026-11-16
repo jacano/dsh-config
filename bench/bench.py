@@ -360,7 +360,7 @@ def refresh_plans(store: dict, write: bool) -> None:
                 print(f"  {field}: {shown}")
         if write:
             for field in ("fee_usd", "credits_usd", "windows", "credits_row", "promos",
-                          "tiers_seen", "allowances_usd", "processing_fee"):
+                          "allowances_usd", "processing_fee", "processing_fee_usd"):
                 if field in fresh:
                     plan[field] = fresh[field]
         print()
@@ -602,34 +602,61 @@ def plan_rows(day: date, want: str) -> list[dict]:
 
 
 def cmd_plan(args) -> int:
+    """How many turns of a model each plan buys in a month.
+
+    A subscription is spent whether the turns are used or not, and its per-model
+    ceiling stops the damage: the question is not what a token costs but how far the
+    plan goes. One row per model, one column per plan, turns of the same workload.
+    """
+    global GATES
+    GATES, _ = load_policy()
     day = args.today or date.today()
-    got = plan_rows(day, args.model)
-    if not got:
-        print(f"no plan serves {args.model}; try an id from data/plans.json")
-        return 1
+    store = plans()
 
-    print(f"what a million tokens cost on {day.isoformat()}, blend and promo inside\n")
-    cheapest = got[0]["usd_per_m"]
-    print(f"  {'plan':30s} {'fee':>4s} {'buys':>6s} {'caps at':>9s} {'$/M':>11s} "
-          f"{'tokens/$1':>11s} {'turns/mo':>9s}  {'promo':<6s} {'vs best':>7s}  status")
-    for r in got:
-        fee = f"${r['fee']:.0f}" if r["fee"] else "-"
-        buys = f"${r['buys']:.0f}" if r["buys"] else "-"
-        tokens = 1 / r["usd_per_m"]        # millions of tokens one dollar buys
-        turns = f"{r['turns']:,.0f}" if r.get("turns") else "-"
-        print(f"  {r['plan'][:30]:30s} {fee:>4s} {buys:>6s} {r['caps at']:>9s} "
-              f" ${r['usd_per_m']:>10.6f} {tokens:>10,.1f}M {turns:>9s}  {r['promo']:<6s} "
-              f"{r['usd_per_m'] / cheapest:>6.1f}x  {r['status']}")
+    if args.model:
+        wanted = [args.model]
+    else:
+        every = set()
+        for plan in store["providers"].values():
+            ids = store["catalog"] if plan["models"] == "catalog" else plan["models"]
+            every |= {m if isinstance(m, str) else m["id"] for m in ids}
+        boards = tbench()
+        wanted = [i for i in every
+                  if (board_score(boards, i) or 0) >= GATES["static"]["tbench_min"]]
+        wanted.sort()
+        if not wanted:
+            print("no model on either plan clears the Terminal-Bench floor")
+            return 1
 
-    blend = blend_of(plans()["catalog"].get(args.model, {}))
-    print(f"\n  turn {TURN:,} tokens (89k cache + 1k fresh + 1.5k written) · "
-          f"peak {blend - 1:.1%} of the week, priced x{blend:.2f} on the blend")
-    print("  tokens/$1 = millions of tokens one dollar buys at the plan's blended "
-          "marginal price")
+    names = list(store["providers"])
+    header = "  " + f"{'model':30s} {'tb':>4s}  " + "  ".join(f"{n:>13s}" for n in names)
+    print(f"turns of {TURN:,} tokens that one month buys, on {day.isoformat()}")
+    print("  a plan cannot be overdrawn past a model's ceiling; when it is gone it is gone\n")
+    print(header)
+    boards = tbench()
+    seen: dict[str, dict] = {}
+    for mid in wanted:
+        per = {r["plan"].split()[0]: r.get("turns") for r in plan_rows(day, mid)}
+        if not per:
+            if args.model:
+                print(f"  no plan serves {mid}; try an id from data/plans.json")
+                return 1
+            continue
+        # One model, two spellings: plans write `deepseek-v4.1-flash` where the
+        # catalogue writes `deepseek-v4-1-flash`. Merging on the board row instead
+        # would fold the eco and the fast lanes into their parent, which are priced
+        # differently and are the whole point of the table.
+        key = norm(mid)
+        row = seen.setdefault(key, {"id": mid, "per": {}})
+        for name, turns in per.items():
+            if turns and not row["per"].get(name):
+                row["per"][name] = turns
 
-    if args.write:
-        path = snapshot(f"plan-cost-{day.isoformat()}.csv", got)
-        print(f"\nwritten: {path.relative_to(REPO)}")
+    for key, row in sorted(seen.items(), key=lambda kv: kv[1]["id"]):
+        mid, per = row["id"], row["per"]
+        tb = board_score(boards, mid)
+        cells = "  ".join(f"{f'{per[n]:,.0f}' if per.get(n) else '-':>13s}" for n in names)
+        print("  " + f"{mid:30s} {('%.1f' % tb) if tb else '-':>4s}  " + cells)
     return 0
 
 
@@ -1287,7 +1314,7 @@ def main() -> int:
     pl = sub.add_parser("plan", help="what a subscription costs per token")
     pl.add_argument("--today", type=date.fromisoformat,
                    help="a date (YYYY-MM-DD), for the promos of that day")
-    pl.add_argument("--model", default="deepseek-v4-1-flash")
+    pl.add_argument("--model", help="one model; without it, every model worth a plan")
     pl.add_argument("--write", action="store_true", help="save a snapshot")
     pl.set_defaults(fn=cmd_plan)
 
