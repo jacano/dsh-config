@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """bench — one script, two data files, three questions.
 
-    python bench/bench.py refresh            # re-read the providers and the board
-    python bench/bench.py refresh --write    # store what it parsed in data/
     python bench/bench.py plan               # what a subscription costs per token
     python bench/bench.py plan --today 2026-10-22
     python bench/bench.py plan --model deepseek-v4-pro
@@ -127,17 +125,6 @@ def read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def write_json(path: Path, payload: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-
-
-def fetch(url: str, headers: dict | None = None, timeout: int = 120) -> str:
-    req = Request(url, headers={**UA, **(headers or {})})
-    with urlopen(req, timeout=timeout) as resp:
-        return resp.read().decode("utf-8", "replace")
-
-
 def snapshot(name: str, rows: list[dict]) -> Path:
     """Write a dated CSV under snapshots/, which git does not track."""
     SNAPSHOTS.mkdir(parents=True, exist_ok=True)
@@ -147,11 +134,6 @@ def snapshot(name: str, rows: list[dict]) -> Path:
         writer.writeheader()
         writer.writerows(rows)
     return path
-
-
-def text_of(html: str) -> str:
-    html = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", html)
-    return re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", html))
 
 
 def plans() -> dict:
@@ -193,332 +175,9 @@ def load_policy() -> tuple[dict, set]:
     return gates, admitted
 
 
-# --------------------------------------------------------------------------- refresh
-
 MONTHS = {name: i for i, name in enumerate(
     ("January", "February", "March", "April", "May", "June", "July", "August",
      "September", "October", "November", "December"), 1)}
-
-
-def promo_block(text: str, today: date | None = None) -> dict | None:
-    """A dated offer, as a window plus the multiplier it drops to.
-
-    A promo whose end date nobody stored is indistinguishable from a price, and
-    that is how a one-week offer ends up quoted as a standing one. The multiplier
-    is the value it drops *to*: 0,5x -> 0,25x is a 0,25x week, not a plan.
-    """
-    m = re.search(r"((?:[A-Z][A-Za-z0-9.\-]*)(?:\s+[A-Z0-9][A-Za-z0-9.\-]*){0,4})"
-                  r"\s+Off-peak promo\s*\?(.{0,320})", text)
-    if not m:
-        return None
-    model, rest = m.group(1).strip(), m.group(2)
-    mult = re.search(r"from\s+([\d.]+)\s*[×x]\s*to\s+([\d.]+)\s*[×x]", rest)
-    days = re.findall(r"([A-Z][a-z]+)\s+(\d{1,2})\s+at\s+\d{1,2}:\d{2}", rest)
-    if not (mult and len(days) == 2):
-        return None
-    today = today or date.today()
-
-    def iso(month: str, day: str) -> str | None:
-        try:
-            when = date(today.year, MONTHS[month], int(day))
-        except (KeyError, ValueError):
-            return None
-        if (when - today).days > 30:          # a December end read in January
-            when = when.replace(year=when.year - 1)
-        if (when - today).days < -300:        # a January end read in December
-            when = when.replace(year=when.year + 1)
-        return when.isoformat()
-
-    start, end = iso(*days[0]), iso(*days[1])
-    if not (start and end):
-        return None
-    seen = re.sub(r"\s+", " ", f"{model} — {rest}").strip()[:200]
-    seen = seen[:seen.rfind(".") + 1] if "." in seen else seen
-    return {"model": model, "multiplier": float(mult.group(2)),
-            "from": start, "until": end, "seen": seen}
-
-
-def find_model(entries: list, name: str):
-    """Exact key first, then the loosest substring: Flash and Flash-X differ by one
-    letter and must not be confused."""
-    target = norm(name)
-    for m in entries:
-        if norm(m["id"]) == target:
-            return m
-    for m in entries:
-        a = norm(m["id"])
-        if a.endswith(target) or target in a or a in target:
-            return m
-    return None
-
-
-def command_code_page() -> dict:
-    clean = text_of(fetch("https://commandcode.ai/pricing"))
-    out: dict = {}
-    goat = re.search(r"GOAT\s*\$\s*(\d+)\s*/\s*month.*?Up to \$(\d+)\s*in credits", clean)
-    if goat:
-        out["fee_usd"] = float(goat.group(1))
-        out["credits_usd"] = float(goat.group(2))
-    row = re.search(r"Monthly credits(.{0,160})", clean)
-    if row:
-        out["credits_row"] = [int(n or m) for n, m in
-                              re.findall(r"\$(\d+)|Up to \$(\d+)", row.group(1))][:5]
-    deals = re.search(r"(Limited-time bonus[^.]{0,160})", clean)
-    if deals:
-        out["note_seen"] = deals.group(1).strip()
-
-    # The page sells several tiers and, since 2026-11-16, prints a per-model
-    # allowance under each and a processing fee beside the price.
-    tiers = re.findall(r"(Go|GOAT|Pro|Max)\s*\$\s*(\d+)\s*/month[^$]{0,40}\$(\d+)\s*in credits", clean)
-    if tiers:
-        out["tiers_seen"] = [{"plan": p, "fee_usd": float(f), "credits_usd": float(c)}
-                             for p, f, c in tiers]
-    # Each tier prints its own list, so the allowances only mean anything sliced to
-    # the GOAT block: the page puts every plan's caps in one run of text.
-    card = re.search(r"GOAT\s*\$\s*10\s*/month", clean)      # the card, not the nav link
-    goat = card.start() if card else -1
-    end = clean.find("+ 33 more models")
-    if goat >= 0 and end > goat:
-        allowances = re.findall(r"\$\s*(\d+)\s*on\s+([A-Za-z0-9][A-Za-z0-9 .\-]{2,32})",
-                                clean[goat:end])
-        if allowances:
-            out["allowances_usd"] = {name.strip(): float(usd) for usd, name in allowances}
-    out["processing_fee"] = bool(re.search(r"processing fee", clean, re.I))
-    return out
-
-
-def open_design_page() -> dict:
-    clean = text_of(fetch("https://open-design.ai/pricing/"))
-    out: dict = {}
-    row = re.search(r"Go\s*\$(\d+)\s*\$(\d+)\s*\$(\d+)\s*\$(\d+)\s*\$(\d+)\s*\$(\d+)", clean)
-    if row:
-        out["fee_usd"] = float(row.group(1))
-        out["credits_usd"] = float(row.group(2))
-        out["windows"] = {"week_usd": float(row.group(5)), "five_hours_usd": float(row.group(6))}
-
-    html = fetch("https://open-design.ai/model-credits/")
-    credits_text = text_of(html)
-    go_row = re.search(r"Go\s*\$(\d+)\s*\$(\d+)\s*\$(\d+)\s*\$(\d+)\s*\$(\d+)\s*\$(\d+)", credits_text)
-    if go_row:
-        out["fee_usd"] = float(go_row.group(1))
-        out["credits_usd"] = float(go_row.group(2))
-        out["windows"] = {"week_usd": float(go_row.group(5)),
-                          "five_hours_usd": float(go_row.group(6))}
-    pairs = re.findall(
-        r'<th scope="row"[^>]*>\s*([^<]{2,40}?)\s*</th>.*?class="multiplier-value"[^>]*>\s*([\d.]+)x?',
-        html, re.S)
-    mults = {}
-    for name, value in pairs:
-        name = name.strip()
-        if name.lower() in {"go", "go plus", "go pro", "go max", "plus", "pro", "max"}:
-            continue
-        if not re.search(r"[A-Za-z]", name):
-            continue
-        mults[name] = float(value)
-    if mults:
-        out["multipliers"] = mults
-    promo = promo_block(text_of(html))
-    if promo:
-        out["promos"] = [promo]
-    return out
-
-
-def command_code_credits() -> dict:
-    """The GOAT docs: per-model monthly credits, and the two usage windows.
-
-    The pricing card lists five allowances and "+33 more"; this page lists all of
-    them, which is the only place a model like Haiku's 20 is written down.
-    """
-    text = text_of(fetch("https://commandcode.ai/docs/plans/goat"))
-    out: dict = {}
-    five = re.search(r"\$(\d+) of usage in any (\d+) hours", text)
-    week = re.search(r"\$(\d+) in any (\d+) days", text)
-    if five and week:
-        out["windows"] = {"five_hours_usd": float(five.group(1)),
-                          "week_usd": float(week.group(1))}
-    # Rows read `<name> $in $out $cache_read <dash|$cache_write> $credits`; the dash
-    # is a plain hyphen in most of them, and the heading above the table ends in
-    # "Monthly credits", so a name that contains those words is not a model.
-    rows = re.findall(r"([A-Z][A-Za-z0-9 .\-/()]{2,32}?) \$\d[\d.]* \$\d[\d.]* \$\d[\d.]* "
-                      r"(?:-|—|\$\d[\d.]*) \$(\d+)(?= |$)", text)
-    if rows:
-        out["allowances_usd"] = {
-            re.sub(r"\s*\((?:latest|exp)\)", "", name).strip(): float(usd)
-            for name, usd in rows
-            if not re.search(r"credits|model|input|output", name, re.I)
-        }
-    return out
-
-
-def open_design_credits() -> dict:
-    """The credits page: what the plan's pool is, and the windows it resets on."""
-    text = text_of(fetch("https://open-design.ai/model-credits/"))
-    go = re.search(r"Go \$(\d+) \$(\d+) \$(\d+) \$(\d+) \$(\d+) \$(\d+)", text)
-    if not go:
-        return {}
-    _fee, maximum, top, coding, week, five = (float(g) for g in go.groups())
-    return {"credits_usd": coding,
-            "monthly_max_usd": maximum,
-            "top_model_credits_usd": top,
-            "windows": {"week_usd": week, "five_hours_usd": five}}
-
-
-CREDITS_SOURCES = {"command-code": command_code_credits, "open-design": open_design_credits}
-
-
-def refresh_plans(store: dict, write: bool) -> None:
-    for name, page in (("command-code", command_code_page), ("open-design", open_design_page)):
-        plan = store["providers"][name]
-        try:
-            fresh = page()
-        except Exception as exc:  # noqa: BLE001
-            print(f"{name}: page unreadable ({exc!r}). Stored values kept.\n")
-            continue
-        # The pricing card gives the headline; the plan's own credits page is where
-        # the per-model numbers and the windows are written, so it is read too.
-        credits = CREDITS_SOURCES.get(name)
-        if credits:
-            try:
-                fresh.update(credits())
-            except Exception as exc:  # noqa: BLE001
-                print(f"{name}: credits page unreadable ({exc!r}). Using the card only.")
-        print(name)
-        for field in ("fee_usd", "credits_usd", "windows", "monthly_max_usd",
-                      "top_model_credits_usd"):
-            if field in fresh:
-                old = plan.get(field)
-                mark = "" if old == fresh[field] else f"   <- stored {old}"
-                print(f"  {field}: {fresh[field]}{mark}")
-        if "multipliers" in fresh:
-            print(f"  multipliers: {len(fresh['multipliers'])} models")
-            for model, value in fresh["multipliers"].items():
-                hit = find_model(plan["models"], model)
-                if hit is None:
-                    print(f"    {model[:30]:30s} {value:<5} not in plans.json")
-                    continue
-                old = hit.get("factor", 1.0)
-                mark = "" if old == value else f"   <- stored {old}"
-                print(f"    {model[:30]:30s} {value:<5}{mark}")
-                if write:
-                    hit["factor"] = value
-        for promo in fresh.get("promos", []):
-            print(f"  promo: {promo['model']} {promo['multiplier']:g}x  "
-                  f"{promo['from']} -> {promo['until']}")
-        for field in ("credits_row", "note_seen", "tiers_seen", "allowances_usd",
-                      "processing_fee", "error"):
-            if field in fresh:
-                value = fresh[field]
-                shown = f"{value[:100]}…" if isinstance(value, str) and len(value) > 100 else value
-                print(f"  {field}: {shown}")
-        if write:
-            for field in ("fee_usd", "credits_usd", "windows", "credits_row", "promos",
-                          "allowances_usd", "processing_fee", "processing_fee_usd"):
-                if field in fresh:
-                    plan[field] = fresh[field]
-        print()
-
-
-def wanted_ids(store: dict) -> set[str]:
-    names = {norm(slug) for slug in store["catalog"]}
-    for plan in store["providers"].values():
-        if isinstance(plan["models"], list):
-            names |= {norm(m["id"].split("/")[-1]) for m in plan["models"]}
-    return {n for n in names if n}
-
-
-TBENCH_URL = "https://www.tbench.ai/"
-
-
-def build_tbench(store: dict) -> dict:
-    """Terminal-Bench 4.1: does an agent finish real terminal work, and at what price.
-
-    The board ranks model+agent pairs, not models, so the agent is stored with the
-    number: "38.5 with Claude Code" is a different claim from "38.5 alone". The
-    payload is the page's own RSC state, so a layout change raises here and the
-    stored rows stay.
-    """
-    raw = fetch(TBENCH_URL, timeout=120)
-    chunks = re.findall(r'self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)', raw, re.S)
-    text = "".join(json.loads(c) for c in chunks)
-    at = text.find('"rows":[')
-    if at < 0:
-        raise ValueError("tbench payload changed: no rows array")
-    depth, start = 0, at + len('"rows":')
-    for j in range(start, len(text)):
-        if text[j] == "[":
-            depth += 1
-        elif text[j] == "]":
-            depth -= 1
-            if depth == 0:
-                rows = json.loads(text[start:j + 1])
-                break
-    else:
-        raise ValueError("tbench payload changed: rows array never closed")
-
-    want = wanted_ids(store)
-
-    def ours(key: str) -> bool:
-        """The board writes "Haiku 5.5" where we write "claude-haiku-5-5", and
-        "DeepSeek V4.1 Flash 1017" where we write "deepseek-v4-1-flash"."""
-        for w in want:
-            if key == w or key.endswith(w) or w.endswith(key):
-                return True
-            if key.startswith(w) and key[len(w):].isdigit():
-                return True
-        return False
-
-    best: dict[str, dict] = {}
-    for row in rows:
-        meta, metrics = row.get("metadata") or {}, row.get("metrics") or {}
-        label = (meta.get("model_display") or {}).get("label") or ""
-        key = norm(label)
-        if not key or not ours(key):
-            continue
-        score = metrics.get("accuracy")
-        if score is None or (key in best and best[key]["score"] >= score):
-            continue
-        best[key] = {
-            "label": label, "score": score,
-            "ci95": metrics.get("accuracy_ci95_half_width"),
-            "agent": (meta.get("agent_display") or {}).get("label"),
-            "effort": meta.get("reasoning_effort"), "date": meta.get("display_date"),
-            "cost_usd": metrics.get("total_cost_usd"),
-            "tokens": metrics.get("total_tokens"),
-        }
-    return {
-        "source": TBENCH_URL, "benchmark": "Terminal-Bench 4.1",
-        "fetched": datetime.now().astimezone().isoformat(timespec="seconds"),
-        "models": best,
-    }
-
-
-def cmd_refresh(args) -> int:
-    store = plans()
-    only = {s.strip() for s in (args.only or "plans,tbench").split(",") if s.strip()}
-
-    if "plans" in only:
-        refresh_plans(store, args.write)
-
-
-    if "tbench" in only:
-        try:
-            fresh = build_tbench(store)
-            print(f"terminal-bench: {len(fresh['models'])} of our models")
-            if args.write:
-                write_json(TBENCH_FILE, fresh)
-                print(f"written: {TBENCH_FILE.relative_to(REPO)}")
-        except Exception as exc:  # noqa: BLE001
-            print(f"terminal-bench unreadable ({exc!r}). Stored rows kept.")
-
-
-    if args.write and "plans" in only:
-        store["updated"] = date.today().isoformat()
-        store["refreshed_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
-        write_json(PLANS_FILE, store)
-        print(f"written: {PLANS_FILE.relative_to(REPO)}")
-    else:
-        print("nothing written. run with --write to store these numbers.")
-    return 0
 
 
 # --------------------------------------------------------------------------- plan: money
@@ -972,10 +631,6 @@ def config_routes() -> dict[str, list[str]]:
     return routes
 
 
-def config_ids() -> set[str]:
-    return set(config_routes())
-
-
 def unpriced(models: dict) -> list[str]:
     """A measured row without a price is invisible to the gates: it fails static
     for a cost of nothing and never says so, because it is not admitted either."""
@@ -1357,11 +1012,6 @@ def cmd_agentic(args) -> int:
 def main() -> int:
     p = argparse.ArgumentParser(prog="bench.py", description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="cmd", required=True)
-
-    r = sub.add_parser("refresh", help="re-read the providers and the board")
-    r.add_argument("--write", action="store_true", help="store what it parsed in data/")
-    r.add_argument("--only", help="plans,tbench (default: both)")
-    r.set_defaults(fn=cmd_refresh)
 
     pl = sub.add_parser("plan", help="what a subscription costs per token")
     pl.add_argument("--today", type=date.fromisoformat,

@@ -4,8 +4,6 @@ One script, two data files, three questions. The script does not decide anything
 by itself: it prices, it filters, it measures, and it says what it could not.
 
 ```bash
-python bench/bench.py refresh            # re-read the providers and both catalogues
-python bench/bench.py refresh --write    # store what it parsed in data/
 python bench/bench.py plan               # what a subscription costs per token
 python bench/bench.py select             # fold 1: what is worth calling at all
 python bench/bench.py measure            # fold 2: the stored table against the gates
@@ -68,7 +66,7 @@ turn cost more than the plan's own fee divided by what that model is allowed.
 ### Where the numbers come from
 
 Each provider carries the two pages that decide its cost, in `data/plans.json`
-under `sources`, and `refresh` re-reads both rather than only the card:
+under `sources`, because the card alone does not say how far a plan goes:
 
 | Provider | Card | The page with the detail |
 | --- | --- | --- |
@@ -77,8 +75,8 @@ under `sources`, and `refresh` re-reads both rather than only the card:
 
 The card is enough to know the fee; it is not enough to know how far the plan goes.
 A new subscription is added by writing its two URLs and a reader for the second one
-next to `command_code_credits` and `open_design_credits`, and `refresh` does the
-rest: it prints what changed against what is stored, and `--write` stores it.
+is a block with those two URLs and the numbers already filled in, which is the whole
+of the work: this repo has no network call in it.
 
 ## select — fold 1
 
@@ -120,7 +118,7 @@ Two rows in the shortlist can be the same model on different routes, and the fil
 does not merge them: it prices both and lets the number speak. The console is the
 bill, not the page: one plan billed a model at ×2 while its own table printed ×4,
 so `billed_factor` carries what was charged, `factor` keeps what was published, and
-a refresh cannot overwrite the observation with the brochure.
+the observation is stored apart from the brochure, so neither is overwritten.
 
 ## measure — fold 2
 
@@ -175,9 +173,9 @@ that runs it and grades the result. Two sources, and neither one is the seller.
 ## Adding a model or a provider
 
 1. **A new provider** is a block in `data/plans.json` under `providers`: plan, fee,
-   credits, and its models with either a `catalog` slug or its own `list_turn_usd`
-   plus a `factor`. Run `python bench/bench.py refresh` to see whether the pages
-   agree with you, and `python bench/bench.py plan` to see what it costs per token.
+   credits, its two pages under `sources`, and its models with either a `catalog`
+   slug or their own `list_turn_usd` plus a `factor`. Then
+   `python bench/bench.py plan` shows how far it goes.
 2. **A new model on an existing provider** is one entry in that list. Run
    `python bench/bench.py select`: if the row says `out`, the printed reason is the
    whole story — nothing is recorded, because the gate will say it again tomorrow.
