@@ -32,6 +32,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import re
 import shutil
 import statistics
@@ -62,7 +63,12 @@ UA = {"User-Agent": "curl/8.5.0"}
 GATEWAYS = {
     "command-code": ("https://api.commandcode.ai/provider/v1", "COMMANDCODE_API_KEY"),
     "opendesign": ("https://amr-link.open-design.ai/v1", "OPENDESIGN_API_KEY"),
+    "opencode-go": ("https://opencode.ai/inference/go/openai/v1", "OPENCODE_API_KEY"),
 }
+# A gateway may demand a header the OpenAI shape does not carry: OpenCode Go
+# refuses a request without a session id, which is how it keeps a conversation's
+# routing stable.
+GATEWAY_HEADERS = {"opencode-go": {"x-opencode-session": "dsh-bench"}}
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -614,7 +620,14 @@ def model_rows(plan: dict, catalog: dict, board: dict) -> list[dict]:
         bare = m["id"].split("/")[-1]
         listed = m["list_turn_usd"] if "list_turn_usd" in m else cat.get("cost")
         factor = float(m.get("billed_factor") or m.get("factor", 1.0))
-        leverage = float(plan.get("usd_per_usage_dollar", 1.0))
+        # The same money rule `plan` uses: a plan that sells usage through a monthly
+        # limit makes a dollar cost fee/limit, and one that names the rate outright
+        # says so. Reading only the latter priced OpenCode Go at list.
+        monthly = m.get("monthly_limit_usd")
+        monthly = monthly if isinstance(monthly, (int, float)) else plan.get("credits_usd")
+        usable, _ = plan_caps(plan, monthly)
+        leverage = float(plan.get("usd_per_usage_dollar")
+                         or (float(plan["fee_usd"]) / usable if plan.get("fee_usd") and usable else 1.0))
         usage = listed * factor if listed is not None else None
         out.append({
             "model": m["id"],
@@ -742,6 +755,7 @@ GATES: dict[str, dict[str, float]] = {}
 ADMITTED: set[str] = set()
 BASE = ""
 KEY_ENV = ""
+PROVIDER = ""
 KEY = ""
 
 
@@ -915,6 +929,9 @@ def check() -> int:
 
 
 def api_key() -> str:
+    from_env = os.environ.get(KEY_ENV)
+    if from_env:
+        return from_env
     if not CREDS.exists():
         raise SystemExit(f"no {CREDS}. A live run needs {KEY_ENV} there; every free "
                          f"subcommand works without it.")
@@ -951,6 +968,7 @@ def call(model: str, prompt: str, max_tokens: int, tools: list | None = None,
             body["tool_choice"] = "auto"
         url, headers = f"{BASE}/chat/completions", {"Authorization": f"Bearer {KEY}"}
     headers.update({"Content-Type": "application/json", "User-Agent": "curl/8.5.0"})
+    headers.update(GATEWAY_HEADERS.get(PROVIDER, {}))
     req = Request(url, data=json.dumps(body).encode(), headers=headers, method="POST")
     with urlopen(req, timeout=300) as resp:
         return json.loads(resp.read().decode())
@@ -1084,9 +1102,10 @@ def live(model: str, tbench_score: float, cost: float) -> int:
 
 
 def cmd_measure(args) -> int:
-    global GATES, ADMITTED, BASE, KEY_ENV
+    global GATES, ADMITTED, BASE, KEY_ENV, PROVIDER
     GATES, ADMITTED = load_policy()
     BASE, KEY_ENV = GATEWAYS[args.provider]
+    PROVIDER = args.provider
     if not args.model:
         return check()
     if args.tbench is None or args.cost is None:
