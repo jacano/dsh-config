@@ -17,7 +17,7 @@ python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 | `data/plans.json` | the plans, what they publish, and the catalogue they price from |
 | `data/tbench.json` | the board: what each model does on Terminal-Bench |
 | `models-policy.yml` | the gates, and what is admitted |
-| `models.csv` | the measured rows, medians of three rounds |
+| `models.csv` | the measured rows: one line per route, with the eight numbers the gates read and the price it was charged at |
 
 Nothing here edits the DSH configuration; that is a separate change in
 [`../dsh/`](../dsh/).
