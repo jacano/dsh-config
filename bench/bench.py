@@ -267,6 +267,24 @@ def command_code_page() -> dict:
     deals = re.search(r"(Limited-time bonus[^.]{0,160})", clean)
     if deals:
         out["note_seen"] = deals.group(1).strip()
+
+    # The page sells several tiers and, since 2026-11-16, prints a per-model
+    # allowance under each and a processing fee beside the price.
+    tiers = re.findall(r"(Go|GOAT|Pro|Max)\s*\$\s*(\d+)\s*/month[^$]{0,40}\$(\d+)\s*in credits", clean)
+    if tiers:
+        out["tiers_seen"] = [{"plan": p, "fee_usd": float(f), "credits_usd": float(c)}
+                             for p, f, c in tiers]
+    # Each tier prints its own list, so the allowances only mean anything sliced to
+    # the GOAT block: the page puts every plan's caps in one run of text.
+    card = re.search(r"GOAT\s*\$\s*10\s*/month", clean)      # the card, not the nav link
+    goat = card.start() if card else -1
+    end = clean.find("+ 33 more models")
+    if goat >= 0 and end > goat:
+        allowances = re.findall(r"\$\s*(\d+)\s*on\s+([A-Za-z0-9][A-Za-z0-9 .\-]{2,32})",
+                                clean[goat:end])
+        if allowances:
+            out["allowances_usd"] = {name.strip(): float(usd) for usd, name in allowances}
+    out["processing_fee"] = bool(re.search(r"processing fee", clean, re.I))
     return out
 
 
@@ -335,13 +353,15 @@ def refresh_plans(store: dict, write: bool) -> None:
         for promo in fresh.get("promos", []):
             print(f"  promo: {promo['model']} {promo['multiplier']:g}x  "
                   f"{promo['from']} -> {promo['until']}")
-        for field in ("credits_row", "note_seen", "error"):
+        for field in ("credits_row", "note_seen", "tiers_seen", "allowances_usd",
+                      "processing_fee", "error"):
             if field in fresh:
                 value = fresh[field]
                 shown = f"{value[:100]}…" if isinstance(value, str) and len(value) > 100 else value
                 print(f"  {field}: {shown}")
         if write:
-            for field in ("fee_usd", "credits_usd", "windows", "credits_row", "promos"):
+            for field in ("fee_usd", "credits_usd", "windows", "credits_row", "promos",
+                          "tiers_seen", "allowances_usd", "processing_fee"):
                 if field in fresh:
                     plan[field] = fresh[field]
         print()

@@ -1,6 +1,6 @@
 {
- "updated": "2026-11-15",
- "refreshed_at": "2026-11-15T21:39:03+01:00",
+ "updated": "2026-11-16",
+ "refreshed_at": "2026-11-16T19:07:05+01:00",
  "about": "Plans a provider sells, the prices it publishes (evidence: nothing reads them), and the catalogue Command Code prices its models from. The turn (91.500 tokens) and the exchange rate are constants in bench.py, where they are commented.",
  "catalog": {
   "claude-fable-5-2": {
@@ -1132,7 +1132,7 @@
    "billing": "monthly",
    "fee_usd": 10.0,
    "credits_usd": 100.0,
-   "note": "every row of catalog-2026-11-10.csv; list prices are off-peak (17 h/day), weekdays 01-04 and 06-10 UTC double. The plan sells $100 of usage for $10, so a dollar of usage costs ten cents",
+   "note": "every row of catalog-2026-11-10.csv; list prices are off-peak (17 h/day), weekdays 01-04 and 06-10 UTC double. The plan sells $100 of usage for $10, so a dollar of usage costs ten cents. Since 2026-11-16 the page also prints a per-model allowance - $100 on DeepSeek V4.1 Flash, GLM-5.3 Flash and Ling 3.1 Flash, $70 on Hy3 and Qwen 3.8 27B - and a processing fee on top of the $10, unquantified. The same catalogue is sold at $1 for $10 of usage, also ten cents a dollar: at a thousand requests a month the cheap tier is enough and costs a tenth.",
    "models": "catalog",
    "credits_row": [
     10,
@@ -1145,7 +1145,32 @@
     "claude-haiku-5-5": 0.125,
     "gpt-6-luna": 0.125
    },
-   "usd_per_usage_dollar": 0.1
+   "usd_per_usage_dollar": 0.1,
+   "tiers_seen": [
+    {
+     "plan": "Go",
+     "fee_usd": 1.0,
+     "credits_usd": 10.0
+    },
+    {
+     "plan": "GOAT",
+     "fee_usd": 10.0,
+     "credits_usd": 100.0
+    },
+    {
+     "plan": "Max",
+     "fee_usd": 100.0,
+     "credits_usd": 150.0
+    }
+   ],
+   "allowances_usd": {
+    "Ling 3.1 Flash": 100.0,
+    "DeepSeek V4.1 Flash": 100.0,
+    "GLM-5.3 Flash": 100.0,
+    "Tencent Hy3": 70.0,
+    "Qwen 3.8 27B": 70.0
+   },
+   "processing_fee": true
   },
   "open-design": {
    "plan": "Go",
