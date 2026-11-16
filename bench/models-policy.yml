@@ -27,12 +27,10 @@ criteria:
       errors_per_10_max: 1
       tools_valid_min: 0.90
 
-# `provider` is the block in dsh/cordis.patch.yml that serves the id. The same
-# model on another route is another admission, and a bare id does not say which.
+# An id is the route, as the config names it: the block it sits in is its provider.
+# If two blocks ever serve the same id, measure says so instead of guessing.
 admitted:
   - id: deepseek-v4.1-flash
-    provider: opendesign
     note: cheapest route on a cold cache, completions
   - id: claude-haiku-5.5
-    provider: opendesign-anthropic
     note: fastest writer measured, Anthropic route

@@ -173,8 +173,7 @@ def tbench() -> dict:
 def load_policy() -> tuple[dict, set]:
     """The gates and the admitted ids, as models-policy.yml states them."""
     gates: dict[str, dict[str, float]] = {}
-    admitted: dict[str, str | None] = {}
-    current: str | None = None
+    admitted: set[str] = set()
     phase = None
     section = None
     for line in POLICY.read_text(encoding="utf-8").splitlines():
@@ -191,12 +190,7 @@ def load_policy() -> tuple[dict, set]:
             continue
         m = re.match(r"^  - id:\s*(\S+)", line)
         if m and section == "admitted":
-            current = m.group(1)
-            admitted[current] = None
-            continue
-        m = re.match(r"^    provider:\s*(\S+)", line)
-        if m and section == "admitted" and current:
-            admitted[current] = m.group(1)
+            admitted.add(m.group(1))
     return gates, admitted
 
 
@@ -865,11 +859,27 @@ def fails_fitness(m, g):
     return f
 
 
+def config_routes() -> dict[str, list[str]]:
+    """Model id -> the provider blocks that serve it.
+
+    The id is the route only while it is unique: the same id in two blocks would
+    make `admitted:` mean two different things, so this counts them.
+    """
+    routes: dict[str, list[str]] = {}
+    provider = ""
+    for line in CONFIG.read_text(encoding="utf-8").splitlines():
+        block = re.match(r"^      ([a-z][a-z0-9-]*):$", line)
+        if block:
+            provider = block.group(1)
+            continue
+        model = re.match(r"^\s+- (?:\{\s*)?id:\s*([^,\s}]+)", line)
+        if model and provider:
+            routes.setdefault(model.group(1), []).append(provider)
+    return routes
+
+
 def config_ids() -> set[str]:
-    """Model ids in the patch file, in either block or flow style."""
-    text = CONFIG.read_text(encoding="utf-8")
-    block = text.split("models:", 1)[1]
-    return set(re.findall(r"^\s+- (?:\{\s*)?id:\s*([^,\s}]+)", block, re.M))
+    return set(config_routes())
 
 
 def unpriced(models: dict) -> list[str]:
@@ -926,7 +936,10 @@ def menu(models: dict) -> list[str]:
     """The policy, the measured table and the DSH config must name the same rows."""
     problems = [f"{i} is admitted but has no row in models.csv"
                 for i in ADMITTED if i not in models]
-    configured = config_ids()
+    routes = config_routes()
+    configured = set(routes)
+    problems += [f"{i} is served by {', '.join(p)}: an id has to name one route"
+                 for i, p in routes.items() if len(p) > 1]
     problems += [f"{i} is in the policy but not in dsh/cordis.patch.yml"
                  for i in set(ADMITTED) - configured]
     # Only rows this repo has measured are governed here. An id the benchmark has
