@@ -163,6 +163,12 @@ def load_policy() -> tuple[dict, set]:
         m = re.match(r"^  - id:\s*(\S+)", line)
         if m and section == "admitted":
             admitted.add(m.group(1))
+    # A gate that fails to parse is worse than no gate: the helper that reads it
+    # crashes on the key and the crash says nothing about the file. Say it here.
+    for phase in ("static", "measured", "fitness"):
+        if not gates.get(phase):
+            raise SystemExit(f"{POLICY.name}: no '{phase}' gates. The file is indented "
+                             f"with two spaces per level; the parser expects that.")
     return gates, admitted
 
 
@@ -239,9 +245,8 @@ def plan_lookup(cat: dict, model_id: str) -> dict:
     return {}
 
 
-def plan_rows(day: date, want: str) -> list[dict]:
+def plan_rows(store: dict, day: date, want: str) -> list[dict]:
     """How many turns of `want` a month buys, for each plan that sells it."""
-    store = plans()
     cat = store["catalog"]
     target = norm(want)
     out: list[dict] = []
@@ -279,7 +284,7 @@ def cmd_plan(args) -> int:
     plan goes. One row per model, one column per plan, turns of the same workload.
     """
     day = args.today or date.today()
-    store = plans()
+    store, boards = plans(), tbench()
 
     if args.model:
         wanted = [args.model]
@@ -288,7 +293,6 @@ def cmd_plan(args) -> int:
         for plan in store["providers"].values():
             ids = store["catalog"] if plan["models"] == "catalog" else plan["models"]
             every |= {m if isinstance(m, str) else m["id"] for m in ids}
-        boards = tbench()
         wanted = [i for i in every
                   if (board_score(boards, i) or 0) >= GATES["static"]["tbench_min"]]
         wanted.sort()
@@ -301,10 +305,9 @@ def cmd_plan(args) -> int:
     print(f"turns of {TURN:,} tokens that one month buys, on {day.isoformat()}")
     print("  a plan cannot be overdrawn past a model's ceiling; when it is gone it is gone\n")
     print(header)
-    boards = tbench()
     seen: dict[str, dict] = {}
     for mid in wanted:
-        per = {r["provider"]: r["turns"] for r in plan_rows(day, mid)}
+        per = {r["provider"]: r["turns"] for r in plan_rows(store, day, mid)}
         if not per:
             if args.model:
                 print(f"  no plan serves {mid}; try an id from data/plans.json")

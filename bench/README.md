@@ -177,9 +177,13 @@ that runs it and grades the result. Two sources, and neither one is the seller.
    python bench/bench.py measure --model <id> --tbench <board score> --cost <usd per turn>
    ```
 
-4. **If it clears everything:** append the row to `models.csv`, add the id to
-   `admitted:`, and add the model to `models:` in
-   [`../dsh/cordis.patch.yml`](../dsh/cordis.patch.yml).
+   `--cost` is the plan's price for that turn as `plan` reports it. It is written
+   into the row and printed next to the numbers; it does not decide anything.
+
+4. **If it clears everything:** paste the row `measure` printed into `models.csv`,
+   add the id to `admitted:`, and add the model to `models:` in
+   [`../dsh/cordis.patch.yml`](../dsh/cordis.patch.yml). `measure` prints the row in
+   the table's own column order for exactly that.
 5. **Prove it:** `python bench/bench.py measure` must exit 0.
 
 
