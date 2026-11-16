@@ -56,7 +56,6 @@ SNAPSHOTS = BENCH / "snapshots"
 CREDS = Path.home() / ".dsh" / ".credentials.yaml"
 
 TURN = 91_500          # 89k cache + 1k fresh + 1.5k written, one agent turn
-FX = 6.714             # CNY per USD, the rate a Chinese price list is read at
 DAYS = 30.0            # a month, for the windows
 LANES = ("fast", "eco", "ultrafast", "preview", "latest", "sync", "max", "high", "xhigh")
 UA = {"User-Agent": "curl/8.5.0"}
@@ -598,20 +597,20 @@ def cmd_plan(args) -> int:
     print(f"what a million tokens cost on {day.isoformat()}, blend and promo inside\n")
     cheapest = got[0]["usd_per_m"]
     print(f"  {'plan':30s} {'fee':>4s} {'buys':>6s} {'caps at':>8s} {'$/M':>11s} "
-          f"{'tokens/¥':>10s}  {'promo':<6s} {'vs best':>7s}  status")
+          f"{'tokens/$1':>11s}  {'promo':<6s} {'vs best':>7s}  status")
     for r in got:
         fee = f"${r['fee']:.0f}" if r["fee"] else "-"
         buys = f"${r['buys']:.0f}" if r["buys"] else "-"
-        tokens = 1e6 / (FX * r["usd_per_m"]) / 1e6
+        tokens = 1 / r["usd_per_m"]        # millions of tokens one dollar buys
         print(f"  {r['plan'][:30]:30s} {fee:>4s} {buys:>6s} {r['caps at']:>8s} "
-              f" ${r['usd_per_m']:>10.6f} {tokens:>9,.1f}M  {r['promo']:<6s} "
+              f" ${r['usd_per_m']:>10.6f} {tokens:>10,.1f}M  {r['promo']:<6s} "
               f"{r['usd_per_m'] / cheapest:>6.1f}x  {r['status']}")
 
     blend = blend_of(plans()["catalog"].get(args.model, {}))
     print(f"\n  turn {TURN:,} tokens (89k cache + 1k fresh + 1.5k written) · "
-          f"peak {blend - 1:.1%} of the week, priced x{blend:.2f} on the blend · "
-          f"1 ¥ = ${1 / FX:.4f}")
-    print("  tokens/¥ = what 1 CNY buys at that plan's blended marginal price")
+          f"peak {blend - 1:.1%} of the week, priced x{blend:.2f} on the blend")
+    print("  tokens/$1 = millions of tokens one dollar buys at the plan's blended "
+          "marginal price")
 
     if args.write:
         path = snapshot(f"plan-cost-{day.isoformat()}.csv", got)

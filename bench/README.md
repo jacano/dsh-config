@@ -60,8 +60,9 @@ subscription into one number:
 - **the window** — weekly and five-hour caps limit the *rate*, not the total.
   When one bites, the plan buys less than its credits and the price climbs.
 
-`tokens/¥` is what one yuan buys at the plan's blended marginal price — the only
-axis a $10 plan and a ¥500 plan can be put on together.
+`tokens/$1` is what one dollar buys at the plan's blended marginal price. It is the
+same number as `$/M`, upside down, and it is the one that answers the question you
+actually have: for the money, how much model do I get.
 
 ```bash
 python bench/bench.py plan --today 2026-10-22    # the day a promo was live
