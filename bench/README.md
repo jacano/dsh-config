@@ -130,7 +130,7 @@ Claude rows go through `/messages` with a `cache_control` breakpoint: they refus
 
 ```bash
 python bench/bench.py measure                    # the stored table against the gates
-python bench/bench.py measure --model <id> --tbench 38.5 --cost 0.0013  # recorded, not gated
+python bench/bench.py measure --model <id> --tbench 38.5
 python bench/bench.py measure --provider opendesign --model deepseek-v4.1-flash
 ```
 
