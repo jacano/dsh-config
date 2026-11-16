@@ -773,7 +773,6 @@ GATES: dict[str, dict[str, float]] = {}
 ADMITTED: set[str] = set()
 BASE = ""
 KEY_ENV = ""
-PROVIDER = ""
 KEY = ""
 
 
@@ -986,7 +985,6 @@ def call(model: str, prompt: str, max_tokens: int, tools: list | None = None,
             body["tool_choice"] = "auto"
         url, headers = f"{BASE}/chat/completions", {"Authorization": f"Bearer {KEY}"}
     headers.update({"Content-Type": "application/json", "User-Agent": "curl/8.5.0"})
-    headers.update(GATEWAY_HEADERS.get(PROVIDER, {}))
     req = Request(url, data=json.dumps(body).encode(), headers=headers, method="POST")
     with urlopen(req, timeout=300) as resp:
         return json.loads(resp.read().decode())
@@ -1120,10 +1118,9 @@ def live(model: str, tbench_score: float, cost: float) -> int:
 
 
 def cmd_measure(args) -> int:
-    global GATES, ADMITTED, BASE, KEY_ENV, PROVIDER
+    global GATES, ADMITTED, BASE, KEY_ENV
     GATES, ADMITTED = load_policy()
     BASE, KEY_ENV = GATEWAYS[args.provider]
-    PROVIDER = args.provider
     if not args.model:
         return check()
     if args.tbench is None or args.cost is None:

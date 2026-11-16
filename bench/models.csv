@@ -1,6 +1,6 @@
 slug,catalog_slug,name,speed_tps,ttft_s,cache_hit,prefill_ms_per_1k,cache_loop_hit,retention_4x,errors_10,tools_valid,cost_override,rounds
 deepseek/deepseek-v4.1-flash-fast,deepseek-v4-1-flash-fast,DeepSeek V4.1 Flash Fast,114,1.44,1.000,8.4,1.00,0.80,0,1.00,0.0002965,3
 claude-haiku-5-5,claude-haiku-5-5,Claude Haiku 5.5,146,1.48,1.000,17.8,1.00,0.88,0,1.00,0.0001740,3
-deepseek-v4.1-flash,,DeepSeek V4.1 Flash (OpenDesign),105,2.45,1.000,35.6,1.00,0.76,0,1.00,0.0000599,1
-opendesign/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco (OpenDesign),59,2.37,1.000,76.6,1.00,0.94,0,1.00,0.0000324,1
-claude-haiku-5.5,,Claude Haiku 5.5 (OpenDesign),149,1.5,1.000,24.4,1.00,0.93,0,1.00,0.000158,1
+deepseek-v4.1-flash,,DeepSeek V4.1 Flash (OpenDesign),100,2.28,1.000,19.0,1.00,0.89,0,1.00,0.0000599,3
+opendesign/deepseek-v4.1-flash-eco,,DeepSeek V4.1 Flash Eco (OpenDesign),59,2.52,1.000,87.7,1.00,1.00,0,1.00,0.0000324,1
+claude-haiku-5.5,,Claude Haiku 5.5 (OpenDesign),145,1.32,1.000,17.4,1.00,1.28,0,1.00,0.000158,1
