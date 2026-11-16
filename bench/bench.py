@@ -574,6 +574,7 @@ def plan_rows(day: date, want: str) -> list[dict]:
                 "plan": f"{provider} {plan['plan']}",
                 "fee": float(plan["fee_usd"]),
                 "buys": usable, "caps at": bound,
+            "turns": (usable / unit) if usable and unit else None,
                 "status": "ready" if plan.get("active") is not False else "prepared",
                 "promo": f"{offer:g}x" if offer else "-",
                 "usd_per_turn": per_turn,
@@ -610,13 +611,14 @@ def cmd_plan(args) -> int:
     print(f"what a million tokens cost on {day.isoformat()}, blend and promo inside\n")
     cheapest = got[0]["usd_per_m"]
     print(f"  {'plan':30s} {'fee':>4s} {'buys':>6s} {'caps at':>9s} {'$/M':>11s} "
-          f"{'tokens/$1':>11s}  {'promo':<6s} {'vs best':>7s}  status")
+          f"{'tokens/$1':>11s} {'turns/mo':>9s}  {'promo':<6s} {'vs best':>7s}  status")
     for r in got:
         fee = f"${r['fee']:.0f}" if r["fee"] else "-"
         buys = f"${r['buys']:.0f}" if r["buys"] else "-"
         tokens = 1 / r["usd_per_m"]        # millions of tokens one dollar buys
+        turns = f"{r['turns']:,.0f}" if r.get("turns") else "-"
         print(f"  {r['plan'][:30]:30s} {fee:>4s} {buys:>6s} {r['caps at']:>9s} "
-              f" ${r['usd_per_m']:>10.6f} {tokens:>10,.1f}M  {r['promo']:<6s} "
+              f" ${r['usd_per_m']:>10.6f} {tokens:>10,.1f}M {turns:>9s}  {r['promo']:<6s} "
               f"{r['usd_per_m'] / cheapest:>6.1f}x  {r['status']}")
 
     blend = blend_of(plans()["catalog"].get(args.model, {}))
