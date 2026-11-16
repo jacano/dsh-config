@@ -130,12 +130,6 @@ def plans() -> dict:
     return read_json(PLANS_FILE)
 
 
-def catalogue() -> dict:
-    """slug -> what the catalogue says it costs and how it lands on the board."""
-    return {slug: {"name": row["name"], "cost": row.get("turn")}
-            for slug, row in plans()["catalog"].items()}
-
-
 def tbench() -> dict:
     """The board: model + agent, one row per model, the best run it got."""
     return read_json(TBENCH_FILE)["models"]
@@ -393,7 +387,7 @@ def load_measured() -> dict:
             "speed": num("speed_tps"), "ttft": num("ttft_s"), "cache": num("cache_hit"),
             "prefill": num("prefill_ms_per_1k"), "cache_loop": num("cache_loop_hit"),
             "retention": num("retention_4x"), "errors": num("errors_10"),
-            "tools": num("tools_valid"), "cost_override": num("cost_override"),
+            "tools": num("tools_valid"),
         }
     return out
 
@@ -482,25 +476,14 @@ def config_routes() -> dict[str, list[str]]:
     return routes
 
 
-def unpriced(models: dict) -> list[str]:
-    """A measured row with no price cannot be shown next to the others, and `plan`
-    cannot put it in a column: it has a cost somewhere and nobody wrote it down."""
-    return [f"{m['id']} is measured but has no price: add a cost_override, or the "
-            f"catalog_slug it is sold under"
-            for m in models.values() if m["cost_override"] is None and not m["catalog"]]
-
-
-def measured_gates(models: dict, catalog: dict) -> list[str]:
+def measured_gates(models: dict) -> list[str]:
     """Measured and fitness, row by row, against the admitted set."""
     print("measured:  " + "  ".join(f"{k}={v}" for k, v in GATES["measured"].items()))
     print("fitness:   " + "  ".join(f"{k}={v}" for k, v in GATES["fitness"].items()))
     problems = []
     board = tbench()
     for m in models.values():
-        row = catalog.get(m["catalog"], {})
         tb = board_score(board, m["id"])
-        # a model sold on another plan has its own price: the catalogue is Command Code's
-        cost = m["cost_override"] if m["cost_override"] is not None else row.get("cost")
         f2 = fails_measured(m, tb, GATES["measured"])
         f3 = fails_fitness(m, GATES["fitness"])
         admitted = m["id"] in ADMITTED
@@ -508,10 +491,9 @@ def measured_gates(models: dict, catalog: dict) -> list[str]:
         if admitted:
             shown = ""
             if all(m[k] is not None for k in ("speed", "ttft", "prefill")):
-                price = f"${cost:.4f}" if cost is not None else "-"
                 shown = (f"{m['speed']:.0f} t/s  {m['ttft']:.2f} s  "
-                         f"{m['prefill']:.1f} ms/1k  {turn_time(m):.1f} s  {price}  tb {tb or 0:.1f}")
-            print(f"  {verdict:4s} {m['name'][:30]:30s} {shown:46s} {', '.join(f2 + f3)}")
+                         f"{m['prefill']:.1f} ms/1k  {turn_time(m):.1f} s  tb {tb or 0:.1f}")
+            print(f"  {verdict:4s} {m['name'][:30]:30s} {shown:44s} {', '.join(f2 + f3)}")
             if f2 or f3:
                 problems.append(f"{m['name']} is admitted but misses: {', '.join(f2 + f3)}")
         elif not f2 and not f3:
@@ -537,9 +519,8 @@ def menu(models: dict) -> list[str]:
 
 
 def check() -> int:
-    models, catalog = load_measured(), catalogue()
-    problems = unpriced(models)
-    problems += measured_gates(models, catalog)
+    models = load_measured()
+    problems = measured_gates(models)
     problems += menu(models)
     if not problems:
         print(f"\nOK: {len(ADMITTED)} rows clear every gate, and the menu matches the policy")
@@ -700,7 +681,7 @@ def measure_route(model: str) -> dict:
     }
 
 
-def live(model: str, tbench_score: float, cost: float) -> int:
+def live(model: str, tbench_score: float) -> int:
     global KEY
     # Phase 1 first, and it is free: a row that fails it costs nothing to reject,
     # so it must not need a credential to be rejected.
@@ -710,7 +691,7 @@ def live(model: str, tbench_score: float, cost: float) -> int:
         return 1
 
     KEY = api_key()
-    print(f"{model}: clears the floor (tbench {tbench_score:.1f}); recording ${cost:.4f}/turn")
+    print(f"{model}: clears the floor (tbench {tbench_score:.1f})")
     values = measure_route(model)
     row = {"id": model, "name": model, **values, "catalog": ""}
 
@@ -725,7 +706,7 @@ def live(model: str, tbench_score: float, cost: float) -> int:
     print("\n  FIT")
     print(f"\n  {model},,{model},{values['speed']},{values['ttft']},{values['cache']:.3f},"
           f"{values['prefill']},{values['cache_loop']:.2f},{values['retention']},"
-          f"{values['errors']},{values['tools']:.2f},{cost}")
+          f"{values['errors']},{values['tools']:.2f}")
     return 0
 
 
@@ -735,9 +716,9 @@ def cmd_measure(args) -> int:
     BASE, KEY_ENV = GATEWAYS[args.provider]
     if not args.model:
         return check()
-    if args.tbench is None or args.cost is None:
-        raise SystemExit("--model needs --tbench and --cost (the cost is recorded, not gated)")
-    return live(args.model, args.tbench, args.cost)
+    if args.tbench is None:
+        raise SystemExit("--model needs --tbench: it is the floor this model has to clear")
+    return live(args.model, args.tbench)
 
 
 # --------------------------------------------------------------------------- agentic
@@ -865,7 +846,6 @@ def main() -> int:
     m = sub.add_parser("measure", help="the stored table against the gates")
     m.add_argument("--model")
     m.add_argument("--tbench", type=float)
-    m.add_argument("--cost", type=float)
     m.add_argument("--provider", default="command-code", choices=sorted(GATEWAYS))
     m.set_defaults(fn=cmd_measure)
 

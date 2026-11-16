@@ -16,7 +16,7 @@ python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 | `data/plans.json` | the plans, what they publish, and the catalogue they price from |
 | `data/tbench.json` | the board: what each model does on Terminal-Bench |
 | `models-policy.yml` | the gates, and what is admitted |
-| `models.csv` | the measured rows: one line per route, with the eight numbers the gates read and the price it was charged at |
+| `models.csv` | the measured rows: one line per route, with the eight numbers the gates read. No price - that is `plan`'s table |
 
 Nothing here edits the DSH configuration; that is a separate change in
 [`../dsh/`](../dsh/).
@@ -173,11 +173,11 @@ that runs it and grades the result. Two sources, and neither one is the seller.
 3. **Live, only for rows `filter` keeps:**
 
    ```bash
-   python bench/bench.py measure --model <id> --tbench <board score> --cost <usd per turn>
+   python bench/bench.py measure --model <id> --tbench <board score>
    ```
 
-   `--cost` is what a turn of the reference shape costs; it is written into the row
-   and printed next to the numbers, and it does not decide anything.
+   Nothing about money is asked or recorded here: the price of a route is `plan`'s
+   table, and what this measures is how it behaves on the wire.
 
 4. **If it clears everything:** paste the row `measure` printed into `models.csv`,
    add the id to `admitted:`, and add the model to `models:` in
