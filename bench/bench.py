@@ -623,7 +623,10 @@ def model_rows(plan: dict, catalog: dict, board: dict) -> list[dict]:
         usable, _ = plan_caps(plan, monthly)
         leverage = float(plan.get("usd_per_usage_dollar")
                          or (float(plan["fee_usd"]) / usable if plan.get("fee_usd") and usable else 1.0))
-        usage = listed * factor if listed is not None else None
+        # The same week `plan` prices: Command Code charges double for 20,8 % of it,
+        # and gating on the off-peak list would flatter that plan by a fifth.
+        hourly = blend_of(plans()["catalog"].get(m.get("catalog") or "", {}))
+        usage = listed * factor * hourly if listed is not None else None
         out.append({
             "model": m["id"],
             "real_turn_usd": usage * leverage if usage is not None else None,
