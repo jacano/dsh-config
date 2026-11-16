@@ -175,6 +175,11 @@ def load_policy() -> tuple[dict, set]:
     return gates, admitted
 
 
+# Read once at import: the gate helpers below use them, and so does anything that
+# imports this file rather than running it.
+GATES, ADMITTED = load_policy()
+
+
 MONTHS = {name: i for i, name in enumerate(
     ("January", "February", "March", "April", "May", "June", "July", "August",
      "September", "October", "November", "December"), 1)}
@@ -319,8 +324,6 @@ def cmd_plan(args) -> int:
     ceiling stops the damage: the question is not what a token costs but how far the
     plan goes. One row per model, one column per plan, turns of the same workload.
     """
-    global GATES
-    GATES, _ = load_policy()
     day = args.today or date.today()
     store = plans()
 
@@ -447,6 +450,7 @@ def cmd_select(args) -> int:
     static = gates["static"]
     cost_max, cap_min = float(static["cost_max"]), float(static["tbench_min"])
     catalog, board = catalogue(), tbench()
+    measured = load_measured()
 
     print(f"fold 1 · Terminal-Bench >= {cap_min:.1f} · price <= ${cost_max:.4f}/turn\n")
     rows = []
@@ -459,10 +463,18 @@ def cmd_select(args) -> int:
         credits = f" + ${plan['credits_usd']:.0f} credits" if plan.get("credits_usd") else ""
         print(f"{pname}  [{plan['plan']} {money}{credits}]")
 
-        buckets = {"battery": [], "human": [], "out": []}
+        buckets = {"battery": [], "human": [], "out": [], "settled": []}
         for row in model_rows(plan, catalog, board):
             row["provider"] = pname        # before the gates: an exclusion is per lane
             bucket, why = classify(row, cost_max, cap_min)
+            # Fold 1 decides what to measure; the measured table already answered for
+            # some of it. A row it rejected is not a candidate, and one it accepted is
+            # in the menu - proposing either again would be to forget the work.
+            prior = measured.get(row["model"])
+            if bucket == "battery" and prior:
+                fails = fails_measured(prior, row["tb"], row["real_turn_usd"], gates["measured"])
+                fails += fails_fitness(prior, gates["fitness"])
+                bucket, why = ("out", "measured: " + " · ".join(fails)) if fails else ("settled", "")
             row.update(plan=plan["plan"], plan_fee_usd=plan.get("fee_usd"),
                        plan_credits_usd=plan.get("credits_usd"), bucket=bucket, why=why,
                        cold_call_usd=cold_call(row))
@@ -479,7 +491,9 @@ def cmd_select(args) -> int:
             score = "-" if row["tb"] is None else f"{row['tb']:.1f}"
             print(f"  ????  {pname:13s} {row['model'].split('/')[-1][:26]:26s} "
                   f"tb {score:>5}  real ${row['real_turn_usd']:.6f}  {row['why']}")
-        print(f"  ({len(buckets['out'])} out)")
+        settled = len(buckets["settled"])
+        tail = f", {settled} already admitted" if settled else ""
+        print(f"  ({len(buckets['out'])} out{tail})")
 
     print("  tb = Terminal-Bench 4.1: terminal tasks, model + agent, best run per model")
 
@@ -522,7 +536,6 @@ def corpus(start: int, lines: int) -> str:
 CONTEXT_K = 60
 ANSWER_TOKENS = 1500
 
-GATES: dict[str, dict[str, float]] = {}
 ADMITTED: set[str] = set()
 BASE = ""
 KEY_ENV = ""
@@ -1017,7 +1030,6 @@ def main() -> int:
     pl.add_argument("--today", type=date.fromisoformat,
                    help="a date (YYYY-MM-DD), for the promos of that day")
     pl.add_argument("--model", help="one model; without it, every model worth a plan")
-    pl.add_argument("--write", action="store_true", help="save a snapshot")
     pl.set_defaults(fn=cmd_plan)
 
     s = sub.add_parser("select", help="fold 1: what is worth calling at all")
