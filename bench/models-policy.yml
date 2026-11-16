@@ -58,8 +58,14 @@ criteria:
       #
       # So the 60k gates are gone from here. They are still printed by
       # `bench.py measure`, as information, and fold 3 decides.
-      speed_min: 95
-      latency_max: 2.60
+      #
+      # Each floor sits two deviations under the worst admitted row rather than on
+      # top of it. Three runs of the same route on 2026-11-16 moved retention
+      # between 0,74 and 0,99, speed by ±4 and prefill by ±10; a gate at the
+      # envelope turns that noise into a verdict, and a verdict that flips on a
+      # rerun is not a verdict. The margin is the measurement error, not kindness.
+      speed_min: 90
+      latency_max: 2.80
       cache_min: 0.80
 
   # Third phase: does the route serve the model well enough for a loop?
@@ -67,11 +73,15 @@ criteria:
   # and enforced by bench/bench.py measure. One run per model for now; re-run it
   # when a provider changes something.
     fitness:
-      # 100 ms/1k is "this model cannot be used", not "this model is not optimal".
+      # 125 ms/1k is "this model cannot be used", not "this model is not optimal".
       # The old 20 rejected routes that work; the agentic fold is the judge now.
-      prefill_ms_per_1k_max: 100
+      # 125 keeps a route that measures near 100 from flipping on a rerun.
+      prefill_ms_per_1k_max: 125
       cache_hit_min: 0.80
-      retention_4x_min: 0.75
+      # 0,65 leaves 0,15 under the worst admitted (0,80) for a metric that moved
+      # 0,25 across three runs. Below 0,5 the route is serialising and the number
+      # is telling the truth; between 0,65 and 0,80 it is just load.
+      retention_4x_min: 0.65
       errors_per_10_max: 1
       tools_valid_min: 0.90
 
