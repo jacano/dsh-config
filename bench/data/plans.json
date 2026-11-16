@@ -1184,90 +1184,76 @@
    "note": "credit multiplier per model, applied to the price OpenDesign publishes; $10 buys $220 of usage, so a dollar costs 4.5 cents. Go has a 7-day and a 5-hour window",
    "models": [
     {
-     "id": "deepseek/deepseek-v4.1-flash",
+     "id": "deepseek-v4.1-flash",
      "factor": 0.5,
-     "list_turn_usd": 0.002634,
-     "open_design_name": "deepseek-v4.1-flash"
+     "list_turn_usd": 0.002634
     },
     {
-     "id": "deepseek/deepseek-v4.1-flash-eco",
+     "id": "deepseek-v4.1-flash-eco",
      "factor": 0.27,
-     "list_turn_usd": 0.002634,
-     "open_design_name": "deepseek-v4.1-flash-eco"
+     "list_turn_usd": 0.002634
     },
     {
-     "id": "minimax/minimax-m3.1-flash",
+     "id": "minimax-m3.1-flash",
      "factor": 1.0,
-     "list_turn_usd": 0.002385,
-     "open_design_name": "minimax-m3.1-flash"
+     "list_turn_usd": 0.002385
     },
     {
-     "id": "xiaomi/mimo-v2.6-pro",
+     "id": "mimo-v2.6-pro",
      "factor": 1.0,
-     "list_turn_usd": 0.00206,
-     "open_design_name": "mimo-v2.6-pro"
+     "list_turn_usd": 0.00206
     },
     {
-     "id": "xiaomi/mimo-v2.6-flash",
+     "id": "mimo-v2.6-flash",
      "factor": 1.0,
-     "list_turn_usd": 0.000809,
-     "open_design_name": "mimo-v2.6-flash"
+     "list_turn_usd": 0.000809
     },
     {
-     "id": "deepseek/deepseek-v4-pro",
+     "id": "deepseek-v4-pro",
      "factor": 1.0,
-     "list_turn_usd": 0.011176,
-     "open_design_name": "deepseek-v4-pro"
+     "list_turn_usd": 0.011176
     },
     {
-     "id": "deepseek/deepseek-v4-flash",
+     "id": "deepseek-v4-flash",
      "factor": 1.0,
-     "list_turn_usd": 0.003666,
-     "open_design_name": "deepseek-v4-flash"
+     "list_turn_usd": 0.003666
     },
     {
      "id": "glm-5.3-flash",
      "factor": 1.0,
-     "list_turn_usd": 0.001785,
-     "open_design_name": "glm-5.3-flash"
+     "list_turn_usd": 0.001785
     },
     {
-     "id": "glm-5.3-flash-x",
+     "id": "glm-5.3-flashx",
      "factor": 2.0,
-     "list_turn_usd": 0.00892,
-     "open_design_name": "glm-5.3-flashx"
+     "list_turn_usd": 0.00892
     },
     {
-     "id": "claude-haiku-5-5",
+     "id": "claude-haiku-5.5",
      "factor": 4.0,
      "list_turn_usd": 0.00174,
-     "open_design_name": "claude-haiku-5.5",
      "billed_factor": 2.0,
      "billed_note": "console, 2026-11-16: 2.888 in / 16 out billed 0,0006 credits against a list of 0,0003, so the plan charges x2. The page's multiplier table still says 4x; refresh keeps writing 4 into `factor`, and `billed_factor` is what the cost uses."
     },
     {
      "id": "gpt-6-luna",
      "factor": 4.0,
-     "list_turn_usd": 0.00174,
-     "open_design_name": "gpt-6-luna"
+     "list_turn_usd": 0.00174
     },
     {
-     "id": "kimi/k2.7-code",
+     "id": "kimi-k2.7-code",
      "factor": 1.0,
-     "list_turn_usd": 0.02386,
-     "open_design_name": "kimi-k2.7-code"
+     "list_turn_usd": 0.02386
     },
     {
      "id": "hy4-preview",
      "factor": 1.0,
-     "list_turn_usd": 0.008323,
-     "open_design_name": "hy4-preview"
+     "list_turn_usd": 0.008323
     },
     {
-     "id": "deepseek/deepseek-v4-flash-vision-exp",
+     "id": "deepseek-v4-flash-vision-exp",
      "factor": 1.0,
-     "list_turn_usd": 0.003666,
-     "open_design_name": "deepseek-v4-flash-vision-exp"
+     "list_turn_usd": 0.003666
     }
    ],
    "usd_per_usage_dollar": 0.0455,
