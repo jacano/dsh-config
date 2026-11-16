@@ -37,6 +37,7 @@ import shutil
 import statistics
 import subprocess
 import sys
+import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime
@@ -237,6 +238,7 @@ def plan_lookup(cat: dict, model_id: str) -> dict:
 
 
 def plan_rows(day: date, want: str) -> list[dict]:
+    """How many turns of `want` a month buys, for each plan that sells it."""
     store = plans()
     cat = store["catalog"]
     target = norm(want)
@@ -245,13 +247,7 @@ def plan_rows(day: date, want: str) -> list[dict]:
     for provider, plan in store["providers"].items():
         entries = ([{"id": slug, "catalog": slug} for slug in cat]
                    if plan["models"] == "catalog" else plan["models"])
-        # A plan that sells the peak lane as its own row is telling us the price
-        # moves with the hour; the blend weighs it, so that row is not a second
-        # purchase and is not counted twice.
-        moves = any("(peak)" in e["id"].lower() for e in entries)
         for m in entries:
-            if "(peak)" in m["id"].lower():
-                continue
             bare = norm(re.sub(r"\([^)]*\)", "", m["id"]))
             if target not in (norm(m["id"]), norm(m["id"].split("/")[-1]), bare):
                 continue
@@ -261,41 +257,16 @@ def plan_rows(day: date, want: str) -> list[dict]:
                 continue
             monthly = m.get("monthly_limit_usd")
             monthly = monthly if isinstance(monthly, (int, float)) else plan.get("credits_usd")
-            usable, bound = plan_caps(plan, monthly, row.get("name") or m["id"])
+            usable, _bound = plan_caps(plan, monthly, row.get("name") or m["id"])
             offer = live_promo(plan, m["id"], day)
-            hourly = blend_of(row) if (moves or "list_turn_usd" not in m) else 1.0
-            unit = float(listed) * float(m.get("billed_factor") or m.get("factor", 1.0)) \
-                * (offer or 1.0) * hourly
-            per_turn = unit if not usable else float(plan["fee_usd"]) / usable * unit
-            out.append({
-                "plan": f"{provider} {plan['plan']}",
-                "fee": float(plan["fee_usd"]),
-                "buys": usable, "caps at": bound,
-            "turns": (usable / unit) if usable and unit else None,
-                "status": "ready" if plan.get("active") is not False else "prepared",
-                "promo": f"{offer:g}x" if offer else "-",
-                "usd_per_turn": per_turn,
-                "usd_per_m": per_turn / TURN * 1e6,
-            })
-
-    row = cat.get(want)
-    if row and row.get("turn"):
-        per_turn = float(row["turn"]) * blend_of(row)
-        name = row["name"]
-        out.append({
-            "plan": f"{name} (list, pay as you go)",
-            "fee": None, "buys": None, "caps at": "-", "status": "metered",
-            "promo": "-", "usd_per_turn": per_turn, "usd_per_m": per_turn / TURN * 1e6,
-        })
-
-    # One line per plan: a plan that offers the model in several lanes is bought
-    # once, and the lane that matters is the cheapest one it grants.
-    best: dict[str, dict] = {}
-    for r in out:
-        cur = best.get(r["plan"])
-        if cur is None or r["usd_per_m"] < cur["usd_per_m"]:
-            best[r["plan"]] = r
-    return sorted(best.values(), key=lambda r: r["usd_per_m"])
+            # A plan that publishes one price per model gets no blend: only the
+            # catalogue's own note about peak hours earns one.
+            hourly = 1.0 if "list_turn_usd" in m else blend_of(row)
+            unit = (float(listed) * float(m.get("billed_factor") or m.get("factor", 1.0))
+                    * (offer or 1.0) * hourly)
+            out.append({"provider": provider,
+                        "turns": (usable / unit) if usable and unit else None})
+    return out
 
 
 def cmd_plan(args) -> int:
@@ -331,7 +302,7 @@ def cmd_plan(args) -> int:
     boards = tbench()
     seen: dict[str, dict] = {}
     for mid in wanted:
-        per = {r["plan"].split()[0]: r.get("turns") for r in plan_rows(day, mid)}
+        per = {r["provider"]: r["turns"] for r in plan_rows(day, mid)}
         if not per:
             if args.model:
                 print(f"  no plan serves {mid}; try an id from data/plans.json")
@@ -394,7 +365,7 @@ def cmd_filter(args) -> int:
             print(f"  ({out} out: not on the board, or under the floor)")
         print()
 
-    print(f"{len(keep_all)} models clear the floor · {off} are not ranked · {low} rank below it")
+    print(f"{len(keep_all)} routes clear the floor · {off} are not ranked · {low} rank below it")
 
     return 0
 
@@ -443,7 +414,7 @@ def load_measured() -> dict:
     return out
 
 
-def fails_static(tb, cost, g):
+def fails_static(tb, g):
     f = []
     if tb is None:
         f.append("not on Terminal-Bench")
@@ -466,8 +437,8 @@ def turn_time(m):
     return ttft + ANSWER_TOKENS / m["speed"]
 
 
-def fails_measured(m, tb, cost, g):
-    f = fails_static(tb, cost, GATES["static"])
+def fails_measured(m, tb, g):
+    f = fails_static(tb, GATES["static"])
     if m["speed"] is None or m["speed"] < g["speed_min"]:
         f.append(f"speed {m['speed'] or 0:.0f} < {g['speed_min']:.0f}")
     if m["ttft"] is None or m["ttft"] > g["latency_max"]:
@@ -528,14 +499,14 @@ def config_routes() -> dict[str, list[str]]:
 
 
 def unpriced(models: dict) -> list[str]:
-    """A measured row without a price is invisible to the gates: it fails static
-    for a cost of nothing and never says so, because it is not admitted either."""
+    """A measured row with no price cannot be shown next to the others, and `plan`
+    cannot put it in a column: it has a cost somewhere and nobody wrote it down."""
     return [f"{m['id']} is measured but has no price: add a cost_override, or the "
             f"catalog_slug it is sold under"
             for m in models.values() if m["cost_override"] is None and not m["catalog"]]
 
 
-def phase_two(models: dict, catalog: dict) -> list[str]:
+def measured_gates(models: dict, catalog: dict) -> list[str]:
     """Measured and fitness, row by row, against the admitted set."""
     print("measured:  " + "  ".join(f"{k}={v}" for k, v in GATES["measured"].items()))
     print("fitness:   " + "  ".join(f"{k}={v}" for k, v in GATES["fitness"].items()))
@@ -546,15 +517,16 @@ def phase_two(models: dict, catalog: dict) -> list[str]:
         tb = board_score(board, m["id"])
         # a model sold on another plan has its own price: the catalogue is Command Code's
         cost = m["cost_override"] if m["cost_override"] is not None else row.get("cost")
-        f2 = fails_measured(m, tb, cost, GATES["measured"])
+        f2 = fails_measured(m, tb, GATES["measured"])
         f3 = fails_fitness(m, GATES["fitness"])
         admitted = m["id"] in ADMITTED
         verdict = "PASS" if not f2 and not f3 else "FAIL"
         if admitted:
             shown = ""
             if all(m[k] is not None for k in ("speed", "ttft", "prefill")):
+                price = f"${cost:.4f}" if cost is not None else "-"
                 shown = (f"{m['speed']:.0f} t/s  {m['ttft']:.2f} s  "
-                         f"{m['prefill']:.1f} ms/1k  {turn_time(m):.1f} s  ${cost:.4f}  tb {tb or 0:.1f}")
+                         f"{m['prefill']:.1f} ms/1k  {turn_time(m):.1f} s  {price}  tb {tb or 0:.1f}")
             print(f"  {verdict:4s} {m['name'][:30]:30s} {shown:46s} {', '.join(f2 + f3)}")
             if f2 or f3:
                 problems.append(f"{m['name']} is admitted but misses: {', '.join(f2 + f3)}")
@@ -583,7 +555,7 @@ def menu(models: dict) -> list[str]:
 def check() -> int:
     models, catalog = load_measured(), catalogue()
     problems = unpriced(models)
-    problems += phase_two(models, catalog)
+    problems += measured_gates(models, catalog)
     problems += menu(models)
     if not problems:
         print(f"\nOK: {len(ADMITTED)} rows clear every gate, and the menu matches the policy")
@@ -748,17 +720,17 @@ def live(model: str, tbench_score: float, cost: float) -> int:
     global KEY
     # Phase 1 first, and it is free: a row that fails it costs nothing to reject,
     # so it must not need a credential to be rejected.
-    static_fail = fails_static(tbench_score, cost, GATES["static"])
+    static_fail = fails_static(tbench_score, GATES["static"])
     if static_fail:
-        print(f"{model}: fails phase 1 - {', '.join(static_fail)}. Nothing measured.")
+        print(f"{model}: the board does not clear it - {', '.join(static_fail)}. Nothing measured.")
         return 1
 
     KEY = api_key()
-    print(f"{model}: phase 1 clear (tbench {tbench_score:.1f}, ${cost:.4f}/turn)")
+    print(f"{model}: clears the floor (tbench {tbench_score:.1f}); recording ${cost:.4f}/turn")
     values = measure_route(model)
     row = {"id": model, "name": model, **values, "catalog": ""}
 
-    f2 = fails_measured({**row, "cache": values["cache"]}, tbench_score, cost, GATES["measured"])
+    f2 = fails_measured({**row, "cache": values["cache"]}, tbench_score, GATES["measured"])
     f3 = fails_fitness(row, GATES["fitness"])
     print(f"\n  speed {values['speed']} tok/s   ttft {values['ttft']} s   cache {values['cache']:.0%}")
     print(f"  prefill {values['prefill']} ms/1k   loop cache {values['cache_loop']:.0%}   "
@@ -769,7 +741,7 @@ def live(model: str, tbench_score: float, cost: float) -> int:
     print("\n  FIT")
     print(f"\n  {model},,{model},{values['speed']},{values['ttft']},{values['cache']:.3f},"
           f"{values['prefill']},{values['cache_loop']:.2f},{values['retention']},"
-          f"{values['errors']},{values['tools']:.2f},{cost},{1}")
+          f"{values['errors']},{values['tools']:.2f},{cost}")
     return 0
 
 
@@ -780,7 +752,7 @@ def cmd_measure(args) -> int:
     if not args.model:
         return check()
     if args.tbench is None or args.cost is None:
-        raise SystemExit("--model needs --tbench and --cost (the static phase)")
+        raise SystemExit("--model needs --tbench and --cost (the cost is recorded, not gated)")
     return live(args.model, args.tbench, args.cost)
 
 
@@ -860,7 +832,10 @@ def agentic_solved() -> bool:
 
 
 def cmd_agentic(args) -> int:
-    patch = BENCH / "_agentic-patch.yml"
+    # Out of the repo and out of WORK: agentic_reset wipes WORK every round, and a
+    # stray file in bench/ is one `git add` away from being committed.
+    scratch = Path(tempfile.mkdtemp(prefix="bench-agentic-"))
+    patch = scratch / "patch.yml"
     patch.write_text(PATCH.format(provider=args.provider, model=args.model), encoding="utf-8")
 
     print(f"{args.provider}/{args.model}: {args.rounds} rounds")
@@ -879,7 +854,7 @@ def cmd_agentic(args) -> int:
             print(f"  round {n}: {'solved' if ok else 'FAILED'} in {elapsed:.1f} s"
                   f"   {tail[-1][:60] if tail else ''}")
     finally:
-        patch.unlink(missing_ok=True)
+        shutil.rmtree(scratch, ignore_errors=True)
 
     times.sort()
     median = times[len(times) // 2]

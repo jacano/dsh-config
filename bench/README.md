@@ -139,10 +139,15 @@ python bench/bench.py measure --provider opendesign --model deepseek-v4.1-flash
 ## agentic — a real task
 
 Synthetic numbers say nothing about whether a model can read a repository, find the
-bug and fix it. This runs a 1.600-line module with two failing tests through DSH
-headless, rebuilding the workspace every round, and lets pytest decide. Three of
-three or it did not pass. A fixed repository makes the next round trivial and the
-numbers meaningless; that mistake was made once.
+bug and fix it. This runs a small module with one failing test through DSH headless,
+rebuilding the workspace every round, and lets pytest decide. Three of three or it
+did not pass. A fixed repository makes the next round trivial and the numbers
+meaningless; that mistake was made once.
+
+The module is deliberately small - three functions, one of them wrong - so the run
+measures the loop (read the failure, change the code, run the tests again) and not
+the model's ability to hold a large codebase. It is the cheapest question that still
+uses the real harness.
 
 ## Where every number comes from
 

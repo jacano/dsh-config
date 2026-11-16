@@ -48,6 +48,10 @@
 # The blocks are kept verbatim: to bring one back, paste it above under
 # `providers:` and uncomment. Nothing here is read by anything.
 #
+# Restoring Command Code needs COMMANDCODE_API_KEY in the credential store, which
+# is still there. Restoring OpenCode needs OPENCODE_API_KEY, which is not: it was
+# deleted with the subscription.
+#
 # Command Code (GOAT)
 #      command-code:
 #        displayName: Command Code
