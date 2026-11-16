@@ -23,7 +23,7 @@
         defaultContextWindow: 1000000
         defaultInput: [text, image]
         models:
-          - { id: deepseek/deepseek-v4.1-flash-fast, name: DeepSeek V4.1 Flash Fast, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
+          - { id: deepseek/deepseek-v4.1-flash-fast, name: DeepSeek V4.1 Flash Fast (Command Code), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
       command-code-anthropic:
         displayName: Command Code (Claude)
         api: anthropic-messages
@@ -33,7 +33,7 @@
         defaultMaxTokens: 32768
         compat: { forceAdaptiveThinking: true }
         models:
-          - { id: claude-haiku-5-5, name: Claude Haiku 5.5, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+          - { id: claude-haiku-5-5, name: Claude Haiku 5.5 (Command Code), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
       opendesign:
         displayName: OpenDesign
         api: openai-completions
@@ -42,7 +42,7 @@
         defaultContextWindow: 1000000
         defaultInput: [text, image]
         models:
-          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
       opendesign-anthropic:
         displayName: OpenDesign (Claude)
         api: anthropic-messages
@@ -60,4 +60,4 @@
         defaultContextWindow: 1000000
         defaultInput: [text, image]
         models:
-          - { id: deepseek/deepseek-v4.1-flash-eco, name: DeepSeek V4.1 Flash Eco, contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
+          - { id: deepseek/deepseek-v4.1-flash-eco, name: DeepSeek V4.1 Flash Eco (OpenGateway), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }

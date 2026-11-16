@@ -51,11 +51,11 @@ shows five groups:
 
 | Group | Rows | Protocol | Standing |
 | --- | --- | --- | --- |
-| **Command Code** | DeepSeek V4.1 Flash Fast | OpenAI | Admitted: cleared every gate. |
-| **Command Code (Claude)** | Claude Haiku 5.5 | Anthropic | Admitted: 146 t/s, 0,000174 a turn. |
-| **OpenDesign** | DeepSeek V4.1 Flash | OpenAI | Admitted: 105 t/s, 35,6 ms/1k, 0,000060 a turn. |
-| **OpenDesign (Claude)** | Claude Haiku 5.5 | Anthropic | Admitted: 149 t/s, 0,000158 a turn. |
-| **OpenGateway** | DeepSeek V4.1 Flash Eco | OpenAI | **Exception, only here.** Not in the benchmark: no plan, no measured row, not in `admitted:`. |
+| **Command Code** | DeepSeek V4.1 Flash Fast (Command Code) | OpenAI | Admitted: cleared every gate. |
+| **Command Code (Claude)** | Claude Haiku 5.5 (Command Code) | Anthropic | Admitted: 146 t/s, 0,000174 a turn. |
+| **OpenDesign** | DeepSeek V4.1 Flash (OpenDesign) | OpenAI | Admitted: 105 t/s, 35,6 ms/1k, 0,000060 a turn. |
+| **OpenDesign (Claude)** | Claude Haiku 5.5 (OpenDesign) | Anthropic | Admitted: 149 t/s, 0,000158 a turn. |
+| **OpenGateway** | DeepSeek V4.1 Flash Eco (OpenGateway) | OpenAI | **Exception, only here.** Not in the benchmark: no plan, no measured row, not in `admitted:`. |
 
 The two Command Code rows are unreachable while that subscription is lapsed
 (2026-11-16: every call answers *insufficient credits*, the key is fine). They stay
