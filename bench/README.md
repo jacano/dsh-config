@@ -5,7 +5,7 @@ by itself: it prices, it filters, it measures, it runs a task, and it says what 
 could not.
 
 ```bash
-python bench/bench.py plan               # how many turns a month buys
+python bench/bench.py plan               # what a million tokens costs
 python bench/bench.py filter             # what Terminal-Bench actually ranks
 python bench/bench.py measure            # the stored table against the gates
 python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
@@ -24,7 +24,7 @@ Nothing here edits the DSH configuration; that is a separate change in
 ## Three questions, not a pipeline
 
 ```
-plan     what a subscription buys: turns per month, per model, per plan
+plan     what a million tokens of each kind costs, per model, per plan
    │     a number to look at, never a veto
 filter   does Terminal-Bench rank it, and does it clear the floor
    │     free, calls no model
@@ -51,12 +51,18 @@ python bench/bench.py plan --today 2026-10-22     # the day a promo was live
 ```
 
 ```
-  model                            tb plan                input  cache read     output
-  deepseek-v4.1-flash-eco        38.5 open-design       0.00368     0.00007    0.01473
-  deepseek/deepseek-v4.1-flash-e 38.5 opengateway       0.00670     0.00060    0.12000
-  deepseek-v4.1-flash            38.5 open-design       0.00682     0.00014    0.02727
-  deepseek-v4-1-flash            38.5 command-code      0.01812     0.00036    0.07250
+  model                            tb plan                input  cache read  cache write     output
+  deepseek-v4.1-flash-eco        38.5 open-design       0.00368     0.00007      0.00368    0.01473
+  deepseek/deepseek-v4.1-flash-e 38.5 opengateway       0.00670     0.00060      0.00670    0.12000
+  deepseek-v4.1-flash            38.5 open-design       0.00682     0.00014      0.00682    0.02727
+  claude-haiku-5.5               40.0 open-design       0.00909     0.00091      0.01136    0.04545
+  deepseek-v4-1-flash            38.5 command-code      0.01812     0.00036            -    0.07250
 ```
+
+A dash in the write column is not a zero: it is a provider that prices writing as it
+prices reading, or does not say. Anthropic's convention is 1,25x input, which Haiku
+shows - and a turn that writes a prefix pays it once, so a workload that changes its
+prompt often carries a cost the read column does not show.
 
 A subscription turns fee and ceiling into a rate: `fee / what it lets you spend`,
 times the provider's multiplier. A metered plan has no ceiling to divide by, so its
@@ -158,7 +164,8 @@ that runs it and grades the result. Two sources, and neither one is the seller.
 
 1. **A new provider** is a block in `data/plans.json` under `providers`: plan, fee,
    credits, its two pages under `sources`, and its models with either a `catalog`
-   slug or their own `list_turn_usd` plus a `factor`. Then
+   slug or their own `input`, `cache`, `cache_write` and `output` per million plus
+   a `factor`. Then
    `python bench/bench.py plan` shows how far it goes.
 2. **A new model on an existing provider** is one entry in that list. Run
    `python bench/bench.py filter`: if the board does not rank it, that is the whole
@@ -169,8 +176,8 @@ that runs it and grades the result. Two sources, and neither one is the seller.
    python bench/bench.py measure --model <id> --tbench <board score> --cost <usd per turn>
    ```
 
-   `--cost` is the plan's price for that turn as `plan` reports it. It is written
-   into the row and printed next to the numbers; it does not decide anything.
+   `--cost` is what a turn of the reference shape costs; it is written into the row
+   and printed next to the numbers, and it does not decide anything.
 
 4. **If it clears everything:** paste the row `measure` printed into `models.csv`,
    add the id to `admitted:`, and add the model to `models:` in

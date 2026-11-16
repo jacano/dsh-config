@@ -276,7 +276,10 @@ def plan_rows(store: dict, day: date, want: str | None = None) -> list[dict]:
             factor = float(m.get("billed_factor") or m.get("factor", 1.0))
             factor *= (offer or 1.0) * hourly * scale
             out.append({"provider": provider, "model": m["id"], "caps at": bound,
-                        **{k: float(rates[k]) * factor for k in ("input", "cache", "output")}})
+                        **{k: float(rates[k]) * factor for k in ("input", "cache", "output")
+                           if rates.get(k) is not None},
+                        **({"cache_write": float(rates["cache_write"]) * factor}
+                           if rates.get("cache_write") is not None else {})})
     return out
 
 
@@ -297,11 +300,13 @@ def cmd_plan(args) -> int:
 
     print(f"dollars per million tokens, on {day.isoformat()}")
     print("  the multiplier, the ceiling and the hour are already in these numbers\n")
-    print(f"  {'model':34s} {'tb':>4s} {'plan':14s} {'input':>10s} {'cache read':>11s} {'output':>10s}")
+    print(f"  {'model':34s} {'tb':>4s} {'plan':14s} {'input':>10s} {'cache read':>11s} "
+          f"{'cache write':>12s} {'output':>10s}")
     for r in sorted(rows, key=lambda x: (x["input"], x["provider"])):
         tb = board_score(boards, r["model"])
+        write = f"{r['cache_write']:>12.5f}" if "cache_write" in r else f"{'-':>12s}"
         print(f"  {r['model'][:34]:34s} {('%.1f' % tb) if tb else '-':>4s} {r['provider']:14s} "
-              f"{r['input']:>10.5f} {r['cache']:>11.5f} {r['output']:>10.5f}")
+              f"{r['input']:>10.5f} {r['cache']:>11.5f} {write} {r['output']:>10.5f}")
     return 0
 
 
