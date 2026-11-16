@@ -1,110 +1,38 @@
-# Model policy — what may enter dsh/cordis.patch.yml
+# Model policy — what may enter dsh/cordis.patch.yml.
 #
-# The menu is a curated list, not a catalog window: a row is admitted only while
-# it clears every gate below. `python bench/bench.py measure` enforces the list; run it before
-# every commit.
-#
-# Two folds. The first costs nothing and lives in `python bench/bench.py select`: it
-# prices every model a provider sells, applies that plan's discount or credit
-# multiplier, and keeps the rows the board ranks and the plan sells cheaply enough.
-# The second is `python bench/bench.py measure`: it measures the survivors, and that is the
-# only part that spends tokens.
-#
-# Nothing here trusts the shop. Capability comes from Terminal-Bench 4.1, which
-# runs the tasks and grades whether they got done; prices come from each provider's
-# own published catalogue. A provider grading its own product is not evidence.
+# Every number lives in models.csv (measured) or data/plans.json (priced). This
+# file only says which ids are in, so it cannot go stale on a provider's Tuesday.
 
 version: 1
 updated: 2026-11-16
 
 criteria:
-  # Thresholds are the envelope of the admitted set: no row may be worse than the
-  # current worst on any axis, so nothing enters without a threshold moving on
-  # purpose, in a commit that names the number.
-  #
-  # The capability floor moved on 2026-11-15, when the source changed from AA's
-  # index to Terminal-Bench's resolution rate. One scale replaced another, so the
-  # number moved with it (30,0 -> 38,0) and the two are not comparable: exactly
-  # the mistake this file is supposed to prevent.
-  method: "price and Terminal-Bench, then the agentic fold; synthetic metrics inform, they do not veto"
-
+  method: "price and Terminal-Bench, then the agentic fold"
   phases:
     static:
-      # One source for capability, one for money, and no overlap between them.
-      #
-      # Terminal-Bench 4.1 answers "can it do the work": terminal tasks that are
-      # executed and graded by whether they got done, ranked per model and agent
-      # ("38,5 with Claude Code" is a different claim from "38,5 alone"). It is
-      # the only capability scale here. A model the board does not rank is not
-      # bought - a purchase rule, not a verdict about the model.
-      #
-      # The provider is not asked: a shop grades its own product.
-      #
-      # The floor is the envelope of what the menu runs on: DeepSeek V4.1 Flash
-      # resolves 38,5 %, and nothing enters under it.
       tbench_min: 38.0
-      # Money, not usage. A plan that sells $100 of usage for $10 makes a dollar
-      # cost ten cents; OpenDesign sells $220 for $10, so 4.5. Gating on usage
-      # flatters prepaid routes and punishes the generous plans, which is the
-      # opposite of what the wallet says.
       cost_max: 0.0006
-
     measured:
-      # These are floors for "broken", not targets for "good". A real agent run
-      # with DSH showed why the tighter numbers were wrong: on ten runs across
-      # three task sizes, two routes that miss them by 2-3x solved every task in
-      # the same time as the ones that pass, because an agent greps and reads
-      # fragments — it rarely puts 60k into one call. The time goes on reasoning.
-      #
-      # So the 60k gates are gone from here. They are still printed by
-      # `bench.py measure`, as information, and fold 3 decides.
-      #
-      # Each floor now sits about three deviations under the worst admitted row rather than on
-      # top of it. Three runs of the same route on 2026-11-16 moved retention
-      # between 0,74 and 0,99, speed by ±4 and prefill by ±10; a gate at the
-      # envelope turns that noise into a verdict, and a verdict that flips on a
-      # rerun is not a verdict. The margin is the measurement error, not kindness.
+      # Floors for "broken", not targets for "good"; about three deviations of
+      # their own jitter under the worst admitted row. A gate on the envelope
+      # turns measurement noise into a verdict, and a verdict that flips on a
+      # rerun is not one.
       speed_min: 85
       latency_max: 3.00
       cache_min: 0.80
-
-  # Third phase: does the route serve the model well enough for a loop?
-  # Measured by `python bench/bench.py measure` and recorded in models.csv
-  # and enforced by bench/bench.py measure. One run per model for now; re-run it
-  # when a provider changes something.
     fitness:
-      # 125 ms/1k is "this model cannot be used", not "this model is not optimal".
-      # The old 20 rejected routes that work; the agentic fold is the judge now.
-      # 150 keeps a route that measures near 100 from flipping on a rerun.
       prefill_ms_per_1k_max: 150
       cache_hit_min: 0.80
-      # 0,55 leaves 0,25 under the worst admitted (0,80) for a metric that moved
-      # 0,25 across three runs. Below 0,5 the route is serialising and the number
-      # is telling the truth; between 0,65 and 0,80 it is just load.
       retention_4x_min: 0.55
       errors_per_10_max: 1
       tools_valid_min: 0.90
 
-  protocol:
-    speed: "median of three 1,600-token generations"
-    latency: "median of three warm passes, after two priming requests"
-    cache: "works if any warm pass reads cached tokens; a 3-pass hit rate is noise, not signal"
-
-  notes:
-    cache: "hit rate over >= 4 warm requests; a two-pass probe reports 0 on rows that do cache"
-    access: "no 403 MODEL_NOT_IN_PLAN"
-
-# Decisions only. Every number lives in models.csv (measured) or
-# catalog-2026-11-10.csv (priced), so this file cannot go stale: it says which
-# ids are in and why, never how fast they were last Tuesday.
+# `provider` is the block in dsh/cordis.patch.yml that serves the id. The same
+# model on another route is another admission, and a bare id does not say which.
 admitted:
-    note: default; cheapest on a cold cache, only row on the completions route
-    note: fastest writer measured; keeps the Anthropic route alive
   - id: deepseek-v4.1-flash
+    provider: opendesign
+    note: cheapest route on a cold cache, completions
   - id: claude-haiku-5.5
-    note: OpenDesign; cleared the gates after they were relaxed, and solved the agentic fold 3/3
-    note: OpenGateway; 121 tok/s, 3/3 agentic, fastest of the four. Priced from a real invoice, not the advertised -90%: that bill came to 1.94x the promo, so the effective discount is about -80%
-
-# Measured and rejected. The numbers here are as of the drop date and stay put
-# on purpose: they are the reason, not the current state. Live numbers for any
-# of these models are in models.csv when they were measured.
+    provider: opendesign-anthropic
+    note: fastest writer measured, Anthropic route

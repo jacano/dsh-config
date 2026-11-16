@@ -78,18 +78,18 @@ written**, which is what an agent call looks like after the prefix is warm:
 cost = (89.000 × cache_read + 1.000 × input + 1.500 × output) / 1.000.000
 ```
 
-Then the plan's multiplier applies. The same model is not the same price twice:
-DeepSeek V4.1 Flash is $0,0013 a turn on Command Code and $0,001317 on OpenDesign,
-because OpenDesign lists double and then halves it with a 0,5× multiplier. The eco
-lane there is 0,27×, which is the only real saving.
+Then the plan's multiplier applies, and the same model is not the same price twice:
+one plan lists double and halves it with a 0,5× multiplier, another takes a tenth
+off the list, a third charges double for a fifth of the week. The block's `factor`
+and `billed_factor` are the whole of that, and no two plans have to agree.
 
 What fold 1 will not do:
 
 - price a model from another provider's catalogue, unless no catalogue exists and
   that is written down;
 - judge capability from a provider's own claim;
-- keep a list of models it has judged. There is no `excluded:` any more: a row that
-  the gate rejects is rejected again on the next run, and writing it down was a
+- keep a list of models it has judged. There is no such list: a row the gate
+  rejects is rejected again on the next run, and writing it down would be a
   snapshot of yesterday wearing a decision's clothes.
 
 **One scale, and nothing else about the model.** Terminal-Bench 4.1 (`tb`) is the
@@ -105,12 +105,11 @@ row — a purchase rule, not a judgement about the model. Everything else a mode
 removed on 2026-11-15: it gated nothing, and a number that gates nothing ends up
 being quoted as if it did.
 
-Two rows in the shortlist are the same model on different routes, and the filter
-does not merge them: it prices both and lets the number speak. That is how
-OpenDesign's Haiku turned out cheaper than Command Code's after the console showed
-the plan billing ×2 where the page prints ×4 — `billed_factor` carries the bill,
-`factor` keeps what the page says, and a refresh can no longer overwrite the
-observation with the brochure.
+Two rows in the shortlist can be the same model on different routes, and the filter
+does not merge them: it prices both and lets the number speak. The console is the
+bill, not the page: one plan billed a model at ×2 while its own table printed ×4,
+so `billed_factor` carries what was charged, `factor` keeps what was published, and
+a refresh cannot overwrite the observation with the brochure.
 
 ## measure — fold 2
 
@@ -187,11 +186,11 @@ calls, concurrency — use [jacano/llm-endpoint-bench](https://github.com/jacano
 
 ## Re-baselining
 
-The gates are the envelope of the admitted rows. When the source of a gate
-changes, the floor moves with it: it went 38 -> 30,0 when the catalogue's claim was
-replaced by AA's index, and 30,0 -> 38,0 when AA was replaced by Terminal-Bench.
-Each move is a different scale, and pretending otherwise would have admitted
-nothing.
+The gates are the envelope of the admitted rows, less their own jitter. When the
+source of a gate changes the floor moves with it, and the number has to move too:
+two changes of source have already re-based it, 38 -> 30,0 -> 38,0, because each
+scale measures something else and carrying the old number over would have admitted
+nothing or everything.
 
 ## Still open
 

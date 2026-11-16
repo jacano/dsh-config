@@ -1,7 +1,7 @@
 # dsh — the DSH configuration
 
-This half of the repo is only the configuration: what makes DeepSeek Harness
-speak to Command Code, and which models appear in the menu. It carries no
+This half of the repo is only the configuration: which providers DeepSeek Harness
+may speak to, and which models appear in the menu. It carries no
 benchmark, no measurements and no history — that is [`../bench/`](../bench/).
 
 ## Install
@@ -20,9 +20,9 @@ format, so re-read this file when the app moves on.
 
 Install from the table, then:
 
-**1. Set the key**, once per machine. Settings → Models → **Command Code** takes
-it and stores it in `~/.dsh/.credentials.yaml`, which is resolved per request, so
-nothing needs a restart.
+**1. Set the key**, once per machine. Settings → Models takes it under the group
+that needs it and stores it in `~/.dsh/.credentials.yaml`, resolved per request, so
+nothing needs a restart. The reference each group uses is its block's `apiKeyEnv`.
 
 By hand, that file is:
 
@@ -46,25 +46,17 @@ Copy-Item "dsh\cordis.patch.yml" "$HOME\.dsh\" -Force
 mkdir -p ~/.dsh && cp dsh/cordis.patch.yml ~/.dsh/
 ```
 
-**3. Run** the desktop app — or `dsh web` if you took the web line. The model menu
-shows three groups:
+**3. Run** the desktop app — or `dsh web` if you took the web line. The menu shows
+one group per provider block in the config, and nothing else. What is in it, what it
+costs and what it measured is printed by
 
-| Group | Rows | Protocol | Standing |
-| --- | --- | --- | --- |
-| **OpenDesign** | DeepSeek V4.1 Flash (OpenDesign) | OpenAI | Admitted: 105 t/s, 35,6 ms/1k, 0,000060 a turn. |
-| **OpenDesign (Claude)** | Claude Haiku 5.5 (OpenDesign) | Anthropic | Admitted: 149 t/s, 0,000158 a turn. |
-| **OpenGateway** | DeepSeek V4.1 Flash Eco (OpenGateway) | OpenAI | **Exception, only here.** Not in the benchmark: no plan, no measured row, not in `admitted:`. |
+```bash
+python bench/bench.py measure
+```
 
-Command Code's two groups and OpenCode's one are commented out at the end of
-`cordis.patch.yml`, verbatim: the first lapsed and the second was cancelled on
-2026-11-16. Uncommenting one is the whole of restoring it.
-
-Two of the three are admitted by `bench/models.csv` and `admitted:` in
-`bench/models-policy.yml`, and `python bench/bench.py measure` fails if those two
-drift apart. OpenGateway is deliberately outside that check: a spare route the owner keeps in
-the menu only, so the benchmark neither admits it nor governs it. Claude
-models go through an `anthropic-messages` route because that is the protocol their
-gateways document; everything else is OpenAI-compatible.
+which also exits non-zero when the menu and the policy disagree. This file does not
+repeat that list, or its prices, or its speeds: every one of those goes stale the
+moment a subscription lapses, and this page cannot know that.
 
 The group name says which models are behind it; the protocol lives in each node's
 `api:` field, where it belongs.
@@ -72,8 +64,11 @@ The group name says which models are behind it; the protocol lives in each node'
 ## The one file
 
 `dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`. Every profile reads it and it
-outranks the profile's own layer, so one file covers both flavours. The file carries no comments and one line per model on purpose: it is
-configuration, and everything that needs explaining is in this README. It is a YAML
+outranks the profile's own layer, so one file covers both flavours. The active part
+carries one line per model and no comment on purpose: it is configuration, and
+everything that needs explaining is in this README. Paused providers sit commented
+at the end of the file, verbatim, which is the one exception — restoring one is
+uncommenting it. It is a YAML
 array of loader patch entries: `id` names the row, `name` the plugin, `config`
 replaces that row's config whole.
 
@@ -95,33 +90,21 @@ Everything here is written in English.
 
 ## Models
 
-Command Code — `https://api.commandcode.ai/provider/v1`, `openai-completions`, key
-`COMMANDCODE_API_KEY`:
+A route is one block under `providers:` in [`cordis.patch.yml`](cordis.patch.yml):
+an `api`, a `baseURL`, the `apiKeyEnv` that resolves through the credential store,
+and a `models:` list. The file is the list; this one does not repeat it, because a
+second copy drifts from the first and `python bench/bench.py measure` prints the
+current one with its numbers whenever you want to see it.
 
-The rows are the `models:` list in [`cordis.patch.yml`](cordis.patch.yml). This
-file does not repeat them: a second copy of the menu drifts from the first, and
-`python bench/bench.py measure` prints the list with its current numbers whenever you
-want to see it.
+Two protocols cover everything here. `openai-completions` is the default shape.
+`anthropic-messages` is for a gateway that only accepts the Anthropic one, and it
+names the API root rather than a versioned path because pi-ai appends
+`/v1/messages` itself. A `claude-*` id that earns a 400 on the OpenAI shape wants
+that second route: the block's `api` is where to look, not the model.
 
-Claude does not speak Chat Completions on this provider: every `claude-*` id in
-`GET /provider/v1/models` advertises only `/messages`, so it rides a second route
-— `api: anthropic-messages`, base URL the API root
-(`https://api.commandcode.ai/provider`, no `/v1`, because pi-ai appends
-`/v1/messages`) — with `compat.forceAdaptiveThinking: true`, because Claude 5.5
-answers 400 to `thinking.type.enabled` and wants adaptive thinking plus
-`output_config.effort`.
-
-The default model is `deepseek-v4.1-flash` on OpenDesign: 0,000060 a turn and
-105 t/s, the cheapest route the menu has. It sits on the completions route, so an
-Anthropic outage leaves a working model behind, and it is the last thing standing
-now that the Command Code subscription has lapsed. Each label
-is the `name` the provider's catalog returns for that id, copied verbatim,
-parentheses included.
-
-Which rows are here and why is decided in [../bench/](../bench/). This file records
-only the result, never the metrics: the numbers live in
-[`models.csv`](../bench/models.csv) and the menu in
-[`cordis.patch.yml`](cordis.patch.yml). `python bench/bench.py measure` prints both.
+Which route is the default is `agent-default-model`'s `config`. It should name the
+subscription that is being paid for this month, which is a fact the file cannot
+know: read the line, not the prose around it.
 
 ## Notes
 

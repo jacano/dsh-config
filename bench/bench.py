@@ -173,7 +173,8 @@ def tbench() -> dict:
 def load_policy() -> tuple[dict, set]:
     """The gates and the admitted ids, as models-policy.yml states them."""
     gates: dict[str, dict[str, float]] = {}
-    admitted: set[str] = set()
+    admitted: dict[str, str | None] = {}
+    current: str | None = None
     phase = None
     section = None
     for line in POLICY.read_text(encoding="utf-8").splitlines():
@@ -190,7 +191,12 @@ def load_policy() -> tuple[dict, set]:
             continue
         m = re.match(r"^  - id:\s*(\S+)", line)
         if m and section == "admitted":
-            admitted.add(m.group(1))
+            current = m.group(1)
+            admitted[current] = None
+            continue
+        m = re.match(r"^    provider:\s*(\S+)", line)
+        if m and section == "admitted" and current:
+            admitted[current] = m.group(1)
     return gates, admitted
 
 
@@ -922,11 +928,11 @@ def menu(models: dict) -> list[str]:
                 for i in ADMITTED if i not in models]
     configured = config_ids()
     problems += [f"{i} is in the policy but not in dsh/cordis.patch.yml"
-                 for i in ADMITTED - configured]
+                 for i in set(ADMITTED) - configured]
     # Only rows this repo has measured are governed here. An id the benchmark has
     # never measured is the owner's arrangement, not this file's business.
     problems += [f"{i} is configured but not admitted"
-                 for i in configured - ADMITTED if i in models]
+                 for i in configured - set(ADMITTED) if i in models]
     return problems
 
 
