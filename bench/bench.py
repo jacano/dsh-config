@@ -484,11 +484,24 @@ def blend_of(row: dict) -> float:
     return 1.0 + (hours / 24) * (5 / 7) * (mult - 1.0)
 
 
-def plan_caps(plan: dict, monthly: float | None) -> tuple[float | None, str]:
+def allowance(plan: dict, name: str) -> float | None:
+    """A plan may cap a single model below its total: "an allowance"."""
+    best = None
+    target = norm(name)
+    for model, usd in (plan.get("allowances_usd") or {}).items():
+        if norm(model) and norm(model) in target and (best is None or len(model) > len(best[0])):
+            best = (model, float(usd))
+    return best[1] if best else None
+
+
+def plan_caps(plan: dict, monthly: float | None, name: str = "") -> tuple[float | None, str]:
     """The usage the plan can actually be spent at, and what stops it first."""
     limit: dict[str, float] = {}
     if monthly:
         limit["credits"] = monthly
+    per_model = allowance(plan, name)
+    if per_model:
+        limit["allowance"] = per_model
     w = plan.get("windows") or {}
     if "week_usd" in w:
         limit["week"] = w["week_usd"] * DAYS / 7
@@ -551,7 +564,7 @@ def plan_rows(day: date, want: str) -> list[dict]:
                 continue
             monthly = m.get("monthly_limit_usd")
             monthly = monthly if isinstance(monthly, (int, float)) else plan.get("credits_usd")
-            usable, bound = plan_caps(plan, monthly)
+            usable, bound = plan_caps(plan, monthly, row.get("name") or m["id"])
             offer = live_promo(plan, m["id"], day)
             hourly = blend_of(row) if (moves or "list_turn_usd" not in m) else 1.0
             unit = float(listed) * float(m.get("billed_factor") or m.get("factor", 1.0)) \
@@ -596,13 +609,13 @@ def cmd_plan(args) -> int:
 
     print(f"what a million tokens cost on {day.isoformat()}, blend and promo inside\n")
     cheapest = got[0]["usd_per_m"]
-    print(f"  {'plan':30s} {'fee':>4s} {'buys':>6s} {'caps at':>8s} {'$/M':>11s} "
+    print(f"  {'plan':30s} {'fee':>4s} {'buys':>6s} {'caps at':>9s} {'$/M':>11s} "
           f"{'tokens/$1':>11s}  {'promo':<6s} {'vs best':>7s}  status")
     for r in got:
         fee = f"${r['fee']:.0f}" if r["fee"] else "-"
         buys = f"${r['buys']:.0f}" if r["buys"] else "-"
         tokens = 1 / r["usd_per_m"]        # millions of tokens one dollar buys
-        print(f"  {r['plan'][:30]:30s} {fee:>4s} {buys:>6s} {r['caps at']:>8s} "
+        print(f"  {r['plan'][:30]:30s} {fee:>4s} {buys:>6s} {r['caps at']:>9s} "
               f" ${r['usd_per_m']:>10.6f} {tokens:>10,.1f}M  {r['promo']:<6s} "
               f"{r['usd_per_m'] / cheapest:>6.1f}x  {r['status']}")
 
@@ -639,7 +652,7 @@ def model_rows(plan: dict, catalog: dict, board: dict) -> list[dict]:
         # says so. Reading only the latter prices a monthly-limit plan at list.
         monthly = m.get("monthly_limit_usd")
         monthly = monthly if isinstance(monthly, (int, float)) else plan.get("credits_usd")
-        usable, _ = plan_caps(plan, monthly)
+        usable, _ = plan_caps(plan, monthly, cat.get("name") or m["id"])
         leverage = float(plan.get("usd_per_usage_dollar")
                          or (float(plan["fee_usd"]) / usable if plan.get("fee_usd") and usable else 1.0))
         # The same week `plan` prices: Command Code charges double for 20,8 % of it,

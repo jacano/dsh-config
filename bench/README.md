@@ -46,19 +46,30 @@ threshold moves in one place.
 ## plan — what a plan costs per token
 
 `select` asks whether a model is worth calling; this asks what the plan selling it
-really charges. It is the only table that folds the four things that decide a
-subscription into one number:
+really charges. There is no single shape: each plan declares its own, in
+`data/plans.json`, and the number for that plan is built from what it declares and
+from nothing else.
 
-- **the money** — fee ÷ the usage it buys, times the model's multiplier;
-- **the promo** — inside its window only. The number goes back up the day the
-  offer closes, because a discount that never ends is a price, and this script
-  refuses to treat one as the other;
-- **the week** — five weekdays of seven peak hours are 20,8 % of the week at the
-  peak price, and the catalogue says so itself ("Off-peak shown (17h/day) · peak
-  $0.30 / $1.20"). A plan that publishes a flat price gets no blend; one that
-  sells the peak lane as its own row is blended, not counted twice;
-- **the window** — weekly and five-hour caps limit the *rate*, not the total.
-  When one bites, the plan buys less than its credits and the price climbs.
+| Plan | Buys | Price moves with the hour | Caps | Promo |
+| --- | --- | --- | --- | --- |
+| `command-code` | monthly credits, with a per-model allowance | **yes** — the catalogue's own note says which hours and by how much, and the multiplier is read from the two prices it prints | the month, or the model's own allowance when that is lower | none |
+| `open-design` | monthly credits, at a per-model multiplier | no, one price per model | the month, **plus** a 7-day and a 5-hour window | one dated offer |
+
+What that means in practice:
+
+- **Only `command-code` is blended by the hour.** Its catalogue prints an off-peak
+  price and a peak one and says when the peak applies; the plan's price is the week
+  weighted by that share. A plan with one price gets no blend, and one that sells
+  the peak lane as its own row is blended rather than counted twice.
+- **Only `open-design` has windows.** A 7-day or 5-hour cap limits the *rate*, not
+  the total: when one binds, the plan buys less than its credits and the price per
+  token climbs. Which cap binds is the `caps at` column.
+- **Only `open-design` has a promo, and only inside its dates.** Outside them the
+  offer does not exist; a discount with no end date is a price, and this script
+  refuses to treat one as the other. `--today` asks the question for another day.
+- **Money is fee ÷ usage**, times the model's multiplier, for both. A plan that
+  sells `$220` for `$10` and one that sells `$100` for `$10` differ there and
+  nowhere else.
 
 `tokens/$1` is what one dollar buys at the plan's blended marginal price. It is the
 same number as `$/M`, upside down, and it is the one that answers the question you
