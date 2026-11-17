@@ -42,6 +42,7 @@ token cost" on its own, but "for the same money, how much of which model do I ge
 | See why a model was dropped | [bench/models-policy.yml](bench/models-policy.yml) for the gates, [bench/models.csv](bench/models.csv) for the numbers |
 | See what was decided, and with which numbers | [bench/decisions.md](bench/decisions.md) |
 | Ask the four questions again | [bench/README.md](bench/README.md) |
+| Let an agent drive the Chrome you are already signed in to | [skills/chrome-cdp/SKILL.md](skills/chrome-cdp/SKILL.md) |
 
 ## The picture, and the menu
 
