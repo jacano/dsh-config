@@ -271,6 +271,9 @@ def plan_rows(store: dict, day: date, want: str | None = None) -> list[dict]:
             factor = float(m.get("billed_factor") or m.get("factor", 1.0))
             factor *= (offer or 1.0) * hourly * scale
             out.append({"provider": provider, "model": m["id"], "caps at": bound,
+                        "list": {k: float(rates[k]) for k in
+                                 ("input", "cache", "output", "cache_write")
+                                 if rates.get(k) is not None},
                         **{k: float(rates[k]) * factor for k in ("input", "cache", "output")
                            if rates.get(k) is not None},
                         **({"cache_write": float(rates["cache_write"]) * factor}
@@ -338,6 +341,233 @@ def pareto(rows: list[dict]) -> list[dict]:
                 and (a["tb"] > b["tb"] or a["cost"] < b["cost"]))
     return sorted((r for r in rows if not any(beats(o, r) for o in rows if o is not r)),
                   key=lambda r: r["cost"])
+
+
+PAGE = r"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal-Bench against price</title>
+<style>
+  :root { --bg:#0b0e13; --panel:#11151c; --line:#1d232c; --ink:#e6edf3; --dim:#8b949e;
+          --front:#4ade80; --floor:#ef4444; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:14px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif; }
+  header { display:flex; align-items:flex-end; justify-content:space-between;
+           gap:24px; padding:26px 34px 10px; }
+  h1 { margin:0; font-size:26px; letter-spacing:-.3px; }
+  .sub { color:var(--dim); font-size:13px; margin-top:6px; }
+  .brand { text-align:right; color:var(--dim); font-size:12px; }
+  .brand b { display:block; color:var(--ink); font-size:15px; letter-spacing:.2px; }
+  .controls { display:flex; flex-wrap:wrap; gap:10px; padding:14px 34px 6px; align-items:center; }
+  .seg { display:flex; border:1px solid var(--line); border-radius:9px; overflow:hidden;
+         background:var(--panel); }
+  .seg button { background:none; border:0; color:var(--dim); padding:8px 14px; cursor:pointer;
+                font:inherit; font-size:13px; }
+  .seg button + button { border-left:1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background:#1b2230; color:var(--ink); }
+  .seg button:hover { color:var(--ink); }
+  .legend { display:flex; gap:18px; margin-left:auto; color:var(--dim); font-size:12.5px; }
+  .legend i { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:7px; }
+  .plot { padding:6px 20px 20px; position:relative; }
+  svg { width:100%; height:auto; display:block; }
+  .grid { stroke:var(--line); stroke-width:1; }
+  .axis { fill:var(--dim); font-size:12px; }
+  .floor { stroke:var(--floor); stroke-width:1.5; }
+  .floortext { fill:var(--floor); font-size:12px; }
+  .front { stroke:var(--front); stroke-width:2.5; fill:none; }
+  .dot { cursor:pointer; }
+  .dot:hover { stroke:#fff; stroke-width:2; }
+  #tip { position:absolute; pointer-events:none; opacity:0; transition:opacity .12s;
+         background:#161b22; border:1px solid #30363d; border-radius:12px; padding:14px 16px;
+         min-width:250px; box-shadow:0 12px 32px rgba(0,0,0,.55); z-index:5; }
+  #tip h3 { margin:0 0 2px; font-size:15px; }
+  #tip .who { color:var(--dim); font-size:12.5px; margin-bottom:11px; }
+  #tip table { border-collapse:collapse; width:100%; font-size:12.5px; }
+  #tip td { padding:3px 0; color:var(--dim); }
+  #tip td:last-child { text-align:right; color:var(--ink); font-variant-numeric:tabular-nums; }
+  #tip .sep td { border-top:1px solid #30363d; padding-top:8px; }
+  footer { color:var(--dim); font-size:12px; padding:4px 34px 30px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Terminal-Bench against price</h1>
+    <div class="sub" id="subject"></div>
+    <div class="sub">our cost: the plan's list rate &times; its multiplier, divided by the
+      ceiling that plan puts on the model</div>
+  </div>
+  <div class="brand"><b>dsh-config</b>bench.py chart --html</div>
+</header>
+
+<div class="controls">
+  <div class="seg" id="basis"><button data-v="eff" aria-pressed="true">Sub</button>
+    <button data-v="list">API</button></div>
+  <div class="seg" id="scale"><button data-v="log" aria-pressed="true">Log</button>
+    <button data-v="linear">Linear</button></div>
+  <div class="seg" id="dir"><button data-v="asc" aria-pressed="true">Low &rarr; High</button>
+    <button data-v="desc">High &rarr; Low</button></div>
+  <div class="seg" id="extra"><button data-v="front" aria-pressed="true">Frontier</button>
+    <button data-v="floor" aria-pressed="true">Floor</button>
+    <button data-v="labels" aria-pressed="true">Labels</button></div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<div class="plot" id="plot">
+  <svg id="chart" viewBox="0 0 1400 720" preserveAspectRatio="xMidYMid meet"></svg>
+  <div id="tip"></div>
+</div>
+<footer>Every model every plan in <code>data/plans.json</code> that Terminal-Bench ranks.
+  Hover a point for its rates. Generated __GENERATED__.</footer>
+
+<script>
+const ROWS = __DATA__;
+const COLOURS = __COLOURS__;
+const FLOOR = __FLOOR__;
+const PLANS = __PLANS__;
+const state = { basis: "eff", scale: "log", dir: "asc", front: true, floor: true,
+                labels: true };
+const W = 1400, H = 720, M = { l: 78, r: 26, t: 26, b: 62 };
+const svg = document.getElementById("chart");
+const tip = document.getElementById("tip");
+const cost = r => state.basis === "eff" ? r.eff.input : r.list.input;
+const fmt = v => (v >= 0.01 ? "$" + v.toFixed(3) : "$" + v.toFixed(5));
+
+function frontier(rows) {
+  const beats = (a, b) => a.tb >= b.tb && cost(a) <= cost(b) &&
+                          (a.tb > b.tb || cost(a) < cost(b));
+  return rows.filter(r => !rows.some(o => o !== r && beats(o, r)))
+             .sort((a, b) => cost(a) - cost(b));
+}
+
+function render() {
+  const rows = ROWS.slice();
+  const costs = rows.map(cost);
+  const lo = Math.min.apply(null, costs), hi = Math.max.apply(null, costs);
+  const xs = l => state.scale === "log"
+    ? M.l + (Math.log10(l) - Math.log10(lo * 0.8)) /
+            (Math.log10(hi * 1.35) - Math.log10(lo * 0.8)) * (W - M.l - M.r)
+    : M.l + (l - lo * 0.9) / (hi * 1.1 - lo * 0.9) * (W - M.l - M.r);
+  const xOf = r => { const x = xs(cost(r)); return state.dir === "desc" ? W - M.r - (x - M.l) : x; };
+  const tbs = rows.map(r => r.tb);
+  const y0 = Math.min.apply(null, tbs) - 4, y1 = Math.max.apply(null, tbs) + 5;
+  const ys = t => H - M.b - (t - y0) / (y1 - y0) * (H - M.t - M.b);
+
+  let out = "";
+  for (let t = Math.ceil(y0 / 10) * 10; t <= y1; t += 10) {
+    out += '<line class="grid" x1="' + M.l + '" y1="' + ys(t) + '" x2="' + (W - M.r) +
+           '" y2="' + ys(t) + '"/>';
+    out += '<text class="axis" x="' + (M.l - 12) + '" y="' + (ys(t) + 4) +
+           '" text-anchor="end">' + t + '</text>';
+  }
+  const ticks = state.scale === "log"
+    ? [0.001,0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.5,1,2,5,10]
+    : [0,0.05,0.1,0.2,0.3,0.4,0.5,0.75,1,1.5,2,3];
+  ticks.filter(t => t >= lo * 0.8 && t <= hi * 1.35).forEach(t => {
+    const x = xs(t);
+    out += '<line class="grid" x1="' + x + '" y1="' + M.t + '" x2="' + x + '" y2="' +
+           (H - M.b) + '"/>';
+    out += '<text class="axis" x="' + x + '" y="' + (H - M.b + 22) +
+           '" text-anchor="middle">' + fmt(t) + '</text>';
+  });
+  if (state.floor) {
+    out += '<line class="floor" x1="' + M.l + '" y1="' + ys(FLOOR) + '" x2="' + (W - M.r) +
+           '" y2="' + ys(FLOOR) + '"/>';
+    out += '<text class="floortext" x="' + (W - M.r) + '" y="' + (ys(FLOOR) - 8) +
+           '" text-anchor="end">Terminal-Bench floor ' + FLOOR.toFixed(1) + '</text>';
+  }
+  if (state.front) {
+    out += '<polyline class="front" points="' +
+           frontier(rows).map(r => xOf(r) + "," + ys(r.tb)).join(" ") + '"/>';
+  }
+  const front = frontier(rows);
+  rows.forEach(r => {
+    out += '<circle class="dot" data-i="' + ROWS.indexOf(r) + '" cx="' + xOf(r) + '" cy="' +
+           ys(r.tb) + '" r="6.5" fill="' + (COLOURS[r.provider] || "#94a3b8") + '"/>';
+  });
+  if (state.labels) {
+    const placed = [];
+    front.forEach(function (r) {
+      const text = r.model.split("/").pop() + "  " + r.tb.toFixed(1);
+      const w = text.length * 6.1 + 16, h = 20;
+      let x = xOf(r) + 14, y = ys(r.tb) - 26;
+      if (x + w > W - M.r) x = xOf(r) - w - 14;
+      if (y < M.t) y = ys(r.tb) + 12;
+      for (let i = 0; i < 10; i++) {
+        const clash = placed.some(function (p) {
+          return !(x + w < p.x || x > p.x + p.w || y + h < p.y || y > p.y + p.h);
+        });
+        if (!clash) break;
+        y += h + 6;
+      }
+      placed.push({ x: x, y: y, w: w, h: h });
+      out += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h +
+             '" rx="5" fill="#161b22" stroke="#4ade80"/>';
+      out += '<text x="' + (x + 8) + '" y="' + (y + 14) + '" fill="#e6edf3" ' +
+             'font-size="11.5">' + text + '</text>';
+    });
+  }
+  svg.innerHTML = out;
+  svg.querySelectorAll(".dot").forEach(function (dot) {
+    dot.addEventListener("mouseenter", function (e) { show(ROWS[+dot.dataset.i], e); });
+    dot.addEventListener("mousemove", move);
+    dot.addEventListener("mouseleave", function () { tip.style.opacity = 0; });
+  });
+}
+
+function show(r, e) {
+  const rows = [
+    ["Terminal-Bench", r.tb.toFixed(1)],
+    ["Cost / M input", fmt(r.eff.input)],
+    ["cache read", fmt(r.eff.cache)],
+    ["cache write", r.eff.cache_write == null ? "—" : fmt(r.eff.cache_write)],
+    ["output", fmt(r.eff.output)]
+  ];
+  tip.innerHTML = '<h3>' + r.model.split("/").pop() + '</h3><div class="who">' + r.plan +
+    ' · ' + (r.fee ? "$" + r.fee + "/mo" : "pay as you go") + '</div><table>' +
+    rows.map(function (kv) { return '<tr><td>' + kv[0] + '</td><td>' + kv[1] + '</td></tr>'; }).join("") +
+    '<tr class="sep"><td>List input</td><td>' + fmt(r.list.input) + '</td></tr>' +
+    '<tr><td>List output</td><td>' + fmt(r.list.output) + '</td></tr>' +
+    '<tr class="sep"><td>State</td><td>' + r.state + '</td></tr></table>';
+  tip.style.opacity = 1;
+  move(e);
+}
+
+function move(e) {
+  const box = document.getElementById("plot").getBoundingClientRect();
+  let x = e.clientX - box.left + 18, y = e.clientY - box.top + 14;
+  if (x + 280 > box.width) x = e.clientX - box.left - 292;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+
+document.querySelectorAll(".seg button").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    const group = btn.parentElement.id;
+    if (group === "basis") state.basis = btn.dataset.v;
+    if (group === "scale") state.scale = btn.dataset.v;
+    if (group === "dir") state.dir = btn.dataset.v;
+    if (group === "extra") state[btn.dataset.v] = !state[btn.dataset.v];
+    btn.parentElement.querySelectorAll("button").forEach(function (b) {
+      b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+    });
+    render();
+  });
+});
+
+document.getElementById("legend").innerHTML = Object.keys(COLOURS).map(function (k) {
+  const p = PLANS[k] || {};
+  const who = p.fee ? k + "  " + p.plan + "  $" + p.fee + "/mo" : k + "  pay as you go";
+  return '<span><i style="background:' + COLOURS[k] + '"></i>' + who + '</span>';
+}).join("");
+document.getElementById("subject").textContent = __SUBJECT__;
+render();
+</script>
+</body>
+</html>
+"""
 
 
 def cmd_chart(args) -> int:
@@ -454,6 +684,32 @@ def cmd_chart(args) -> int:
         dr.ellipse([lx, 145, lx + 13, 158], fill=colour)
         dr.text((lx + 20, 151), text, font=f_tick, fill=dim, anchor="lm")
         lx += dr.textbbox((0, 0), text, font=f_tick)[2] + 60
+
+    if args.html:
+        payload = []
+        for r in rows:
+            plan = store["providers"][r["provider"]]
+            payload.append({
+                "model": r["model"], "provider": r["provider"],
+                "plan": plan["plan"], "fee": plan.get("fee_usd"),
+                "tb": round(r["tb"], 2), "state": r.get("state", "unmeasured"),
+                "eff": {k: round(v, 6) for k, v in r.items()
+                        if k in ("input", "cache", "cache_write", "output")},
+                "list": {k: round(v, 6) for k, v in (r.get("list") or {}).items()},
+            })
+        html = (PAGE.replace("__DATA__", json.dumps(payload))
+                    .replace("__COLOURS__", json.dumps({k: "#%02x%02x%02x" % v
+                                                        for k, v in CHART_COLOURS.items()}))
+                    .replace("__FLOOR__", f"{floor:.1f}")
+                    .replace("__PLANS__", json.dumps(
+                        {name: {"plan": p["plan"], "fee": p.get("fee_usd")}
+                         for name, p in store["providers"].items()}))
+                    .replace("__SUBJECT__", json.dumps(subject))
+                    .replace("__GENERATED__", date.today().isoformat()))
+        page = Path(args.html)
+        page.write_text(html, encoding="utf-8")
+        print(f"written: {page}  ({len(rows)} models)")
+        return 0
 
     out = Path(args.out)
     img.save(out)
@@ -955,6 +1211,7 @@ def main() -> int:
 
     ch = sub.add_parser("chart", help="the Pareto picture: price against the board")
     ch.add_argument("--out", default="bench/frontier.png", help="where to write the png")
+    ch.add_argument("--html", help="write an interactive page instead of the png")
     ch.add_argument("--mix", help="fresh,cache,out - price a request of that shape")
     ch.add_argument("--today", type=date.fromisoformat,
                     help="a date (YYYY-MM-DD), for the promos of that day")

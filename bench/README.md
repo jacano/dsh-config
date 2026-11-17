@@ -7,6 +7,7 @@ could not.
 ```bash
 python bench/bench.py plan               # what a million tokens costs
 python bench/bench.py chart              # the Pareto picture of the same table
+python bench/bench.py chart --html bench/frontier.html   # the same, interactive
 python bench/bench.py measure            # the stored table against the gates
 python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 ```
