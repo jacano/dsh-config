@@ -330,7 +330,16 @@ def chart_rows(store: dict, boards: dict, day: date, mix=None) -> list[dict]:
             cost = (fresh * r["input"] + cache * r["cache"] + written * r["output"]) / 1e6
         else:
             cost = r["input"]
-        out.append({**r, "tb": tb, "cost": cost})
+        m = load_measured().get(r["model"])
+        if r["model"] in ADMITTED:
+            state = "admitted"
+        elif m is None:
+            state = "unmeasured"
+        elif fails_measured(m, tb, GATES["measured"]) + fails_fitness(m, GATES["fitness"]):
+            state = "measured, fails"
+        else:
+            state = "measured, passes"
+        out.append({**r, "tb": tb, "cost": cost, "state": state})
     return out
 
 
@@ -481,32 +490,48 @@ function render() {
            frontier(rows).map(r => xOf(r) + "," + ys(r.tb)).join(" ") + '"/>';
   }
   const front = frontier(rows);
-  rows.forEach(r => {
-    out += '<circle class="dot" data-i="' + ROWS.indexOf(r) + '" cx="' + xOf(r) + '" cy="' +
-           ys(r.tb) + '" r="6.5" fill="' + (COLOURS[r.provider] || "#94a3b8") + '"/>';
-  });
+  const dots = rows.map(function (r) { return { x: xOf(r), y: ys(r.tb) }; });
   if (state.labels) {
     const placed = [];
+    const fits = function (x, y, w, h, own) {
+      for (let i = 0; i < placed.length; i++) {
+        const p = placed[i];
+        if (!(x + w < p.x || x > p.x + p.w || y + h < p.y || y > p.y + p.h)) return false;
+      }
+      for (let i = 0; i < dots.length; i++) {
+        if (dots[i] === own) continue;
+        if (Math.abs(dots[i].x - (x + w / 2)) < w / 2 + 11 &&
+            Math.abs(dots[i].y - (y + h / 2)) < h / 2 + 11) return false;
+      }
+      return true;
+    };
     front.forEach(function (r) {
       const text = r.model.split("/").pop() + "  " + r.tb.toFixed(1);
       const w = text.length * 6.1 + 16, h = 20;
-      let x = xOf(r) + 14, y = ys(r.tb) - 26;
-      if (x + w > W - M.r) x = xOf(r) - w - 14;
-      if (y < M.t) y = ys(r.tb) + 12;
-      for (let i = 0; i < 10; i++) {
-        const clash = placed.some(function (p) {
-          return !(x + w < p.x || x > p.x + p.w || y + h < p.y || y > p.y + p.h);
-        });
-        if (!clash) break;
-        y += h + 6;
+      const own = { x: xOf(r), y: ys(r.tb) };
+      const options = [[14, -26], [14, 12], [-w - 14, -26], [-w - 14, 12]];
+      let spot = null;
+      for (let dy = 0; dy < 10 && !spot; dy++) {
+        for (let k = 0; k < options.length && !spot; k++) {
+          const x = Math.min(Math.max(own.x + options[k][0], M.l), W - M.r - w);
+          const y = own.y + options[k][1] + dy * (h + 6);
+          if (y < M.t || y + h > H - M.b) continue;
+          if (fits(x, y, w, h, own)) spot = { x: x, y: y };
+        }
       }
-      placed.push({ x: x, y: y, w: w, h: h });
-      out += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h +
+      if (!spot) spot = { x: Math.min(own.x + 14, W - M.r - w), y: Math.max(own.y - 26, M.t) };
+      placed.push({ x: spot.x, y: spot.y, w: w, h: h });
+      out += '<rect x="' + spot.x + '" y="' + spot.y + '" width="' + w + '" height="' + h +
              '" rx="5" fill="#161b22" stroke="#4ade80"/>';
-      out += '<text x="' + (x + 8) + '" y="' + (y + 14) + '" fill="#e6edf3" ' +
+      out += '<text x="' + (spot.x + 8) + '" y="' + (spot.y + 14) + '" fill="#e6edf3" ' +
              'font-size="11.5">' + text + '</text>';
     });
   }
+  rows.forEach(r => {
+    out += '<circle class="dot" data-i="' + ROWS.indexOf(r) + '" cx="' + xOf(r) + '" cy="' +
+           ys(r.tb) + '" r="7" fill="' + (COLOURS[r.provider] || "#94a3b8") +
+           '" stroke="#0b0e13" stroke-width="1.5"/>';
+  });
   svg.innerHTML = out;
   svg.querySelectorAll(".dot").forEach(function (dot) {
     dot.addEventListener("mouseenter", function (e) { show(ROWS[+dot.dataset.i], e); });
