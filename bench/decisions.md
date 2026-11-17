@@ -90,3 +90,18 @@ draw them, measure what survives** - and the order matters: the first two cost n
 and the last is the only one that spends a token. A provider that stops before it is
 unmeasured, not rejected, and the chart shows it as a point with nothing behind it.
 
+## 2026-11-17 · everything re-read and recomputed, and it holds
+
+The sources were fetched again and diffed against what is stored: Command Code's
+windows ($20 per 5 h, $50 per 7 d) unchanged and 57 of its 62 model credits identical,
+OpenDesign's pool (220), its windows (55 and 18) and its 14 multipliers unchanged.
+
+Every one of the 112 priced rows was then recomputed by hand from `data/plans.json` -
+fee over ceiling, times the list rate, times the multiplier, times the peak hour - and
+compared to what `plan` prints: **no discrepancies**. OpenGateway's stored rates
+reproduce its own invoice to a cent: $4,60 against $4,61 for 1.163M tokens.
+
+The frontier is five models - the two eco lanes are one, and the line now stops at the
+floor instead of running through a row under it. Three rows are admitted, all three
+measured, all three in the menu.
+
