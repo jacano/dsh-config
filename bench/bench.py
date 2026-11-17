@@ -43,6 +43,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 BENCH = Path(__file__).resolve().parent
@@ -365,10 +366,13 @@ def cmd_chart(args) -> int:
     store, boards = plans(), tbench()
     mix = None
     if args.mix:
+        parts = args.mix.replace(" ", "").split(",")
         try:
-            mix = tuple(int(x) for x in args.mix.replace(" ", "").split(","))
+            mix = tuple(int(x) for x in parts)
         except ValueError:
             raise SystemExit("--mix wants fresh,cache,out as three integers")
+        if len(mix) != 3 or min(mix) < 0:
+            raise SystemExit("--mix wants three token counts, fresh,cache,out")
     rows = chart_rows(store, boards, args.today or date.today(), mix)
     if not rows:
         print("nothing to draw")
@@ -402,6 +406,7 @@ def cmd_chart(args) -> int:
                     .replace("__SUBJECT__", json.dumps(subject))
                     .replace("__GENERATED__", date.today().isoformat()))
         page = Path(args.html)
+        page.parent.mkdir(parents=True, exist_ok=True)
         page.write_text(html, encoding="utf-8")
         print(f"written: {page}  ({len(rows)} models)")
         return 0
@@ -510,6 +515,7 @@ def cmd_chart(args) -> int:
 
 
     out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
     img.save(out)
     print(f"written: {out}  ({len(rows)} models, {len(front)} on the frontier)")
     return 0
@@ -859,7 +865,11 @@ def live(model: str, tbench_score: float) -> int:
 
     KEY = api_key()
     print(f"{model}: clears the floor (tbench {tbench_score:.1f})")
-    values = measure_route(model)
+    try:
+        values = measure_route(model)
+    except HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace").strip()[:200]
+        raise SystemExit(f"{model}: the route refused the call ({exc.code}). {body}")
     row = {"id": model, "name": model, **values, "catalog": ""}
 
     f2 = fails_measured({**row, "cache": values["cache"]}, tbench_score, GATES["measured"])
@@ -1004,7 +1014,7 @@ def main() -> int:
     pl = sub.add_parser("plan", help="what a million tokens costs")
     pl.add_argument("--today", type=date.fromisoformat,
                    help="a date (YYYY-MM-DD), for the promos of that day")
-    pl.add_argument("--model", help="one model; without it, every model worth a plan")
+    pl.add_argument("--model", help="one model; without it, everything the board ranks")
     pl.set_defaults(fn=cmd_plan)
 
     ch = sub.add_parser("chart", help="the Pareto picture: price against the board")
@@ -1015,16 +1025,19 @@ def main() -> int:
                     help="a date (YYYY-MM-DD), for the promos of that day")
     ch.set_defaults(fn=cmd_chart)
 
-    m = sub.add_parser("measure", help="the stored table against the gates")
-    m.add_argument("--model")
-    m.add_argument("--tbench", type=float)
-    m.add_argument("--provider", default="command-code", choices=sorted(GATEWAYS))
+    m = sub.add_parser("measure", help="the stored table against the gates, or one route")
+    m.add_argument("--model", help="one route to measure live; without it, the stored table "
+                                   "is checked against the gates")
+    m.add_argument("--tbench", type=float, help="that model's board score, for the floor")
+    m.add_argument("--provider", default="command-code", choices=sorted(GATEWAYS),
+                   help="which plan serves it")
     m.set_defaults(fn=cmd_measure)
 
     a = sub.add_parser("agentic", help="a real task, judged by pytest")
-    a.add_argument("--provider", required=True)
-    a.add_argument("--model", required=True)
-    a.add_argument("--rounds", type=int, default=3)
+    a.add_argument("--provider", required=True, help="which plan serves the model")
+    a.add_argument("--model", required=True, help="the id to run the task through")
+    a.add_argument("--rounds", type=int, default=3,
+                   help="fresh workspace every round; all of them must pass")
     a.set_defaults(fn=cmd_agentic)
 
     args = p.parse_args()
