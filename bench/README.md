@@ -7,7 +7,7 @@ could not.
 ```bash
 python bench/bench.py plan               # what a million tokens costs
 python bench/bench.py chart              # the Pareto picture of the same table
-python bench/bench.py chart --html bench/frontier.html   # the same, interactive
+python bench/bench.py chart --html docs/index.html       # the page the site serves
 python bench/bench.py measure            # the stored table against the gates
 python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 ```
@@ -18,6 +18,7 @@ python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 | `data/tbench.json` | the board: what each model does on Terminal-Bench |
 | `models-policy.yml` | the gates, and what is admitted |
 | `models.csv` | the measured rows: one line per route, with the eight numbers the gates read. No price - that is `plan`'s table |
+| `page.html` | the page `chart --html` fills in, served by Pages from `docs/` |
 
 Nothing here edits the DSH configuration; that is a separate change in
 [`../dsh/`](../dsh/).

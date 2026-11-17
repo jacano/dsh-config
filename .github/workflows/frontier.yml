@@ -9,6 +9,7 @@ on:
       - 'bench/models.csv'
       - 'bench/models-policy.yml'
       - 'bench/bench.py'
+      - 'bench/page.html'
   workflow_dispatch:
 
 permissions:

@@ -26,8 +26,11 @@ Which models are admitted is decided in one place,
 loads is [`dsh/cordis.patch.yml`](dsh/cordis.patch.yml). This file names neither
 the rows nor their numbers, because both would go stale here.
 
-For the live picture — who is in, what it measures, and whether the menu matches
-the policy — run:
+The picture is published, and regenerated whenever the data moves:
+**https://jacano.github.io/dsh-config/**
+
+For the live numbers — what each model costs, what it measures, and whether the menu
+matches the policy — run:
 
 ```bash
 python bench/bench.py measure
