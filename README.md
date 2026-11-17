@@ -63,3 +63,10 @@ python bench/bench.py measure
 It prints the admitted rows with their current numbers, and exits non-zero if
 anything in the repo disagrees. This file names no prices and no speeds: every one of
 those would go stale here.
+
+## License
+
+MIT — see [LICENSE](LICENSE). The prices under `bench/data/plans.json` are facts about
+other people's products, read from the pages named under `sources`; the measurements
+in `bench/models.csv` are taken here and carry the date they were taken.
+
