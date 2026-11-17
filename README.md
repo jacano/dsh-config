@@ -1,7 +1,7 @@
 # dsh-config
 
-My [DeepSeek Harness](https://github.com/deepseek-ai) configuration: one file, naming the
-providers it may speak to and the models in its menu.
+My DeepSeek Harness configuration: one file, naming the providers it may speak to and the
+models in its menu.
 
 | Repository | Holds |
 | --- | --- |
