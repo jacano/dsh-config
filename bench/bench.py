@@ -404,8 +404,6 @@ PAGE = r"""<!doctype html>
 </header>
 
 <div class="controls">
-  <div class="seg" id="basis"><button data-v="eff" aria-pressed="true">Sub</button>
-    <button data-v="list">API</button></div>
   <div class="seg" id="scale"><button data-v="log" aria-pressed="true">Log</button>
     <button data-v="linear">Linear</button></div>
   <div class="seg" id="dir"><button data-v="asc" aria-pressed="true">Low &rarr; High</button>
@@ -428,12 +426,11 @@ const ROWS = __DATA__;
 const COLOURS = __COLOURS__;
 const FLOOR = __FLOOR__;
 const PLANS = __PLANS__;
-const state = { basis: "eff", scale: "log", dir: "asc", front: true, floor: true,
-                labels: true };
+const state = { scale: "log", dir: "asc", front: true, floor: true, labels: true };
 const W = 1400, H = 720, M = { l: 78, r: 26, t: 26, b: 62 };
 const svg = document.getElementById("chart");
 const tip = document.getElementById("tip");
-const cost = r => state.basis === "eff" ? r.eff.input : r.list.input;
+const cost = r => r.cost;
 const fmt = v => (v >= 0.01 ? "$" + v.toFixed(3) : "$" + v.toFixed(5));
 
 function frontier(rows) {
@@ -524,14 +521,13 @@ function show(r, e) {
     ["Cost / M input", fmt(r.eff.input)],
     ["cache read", fmt(r.eff.cache)],
     ["cache write", r.eff.cache_write == null ? "—" : fmt(r.eff.cache_write)],
-    ["output", fmt(r.eff.output)]
+    ["output", fmt(r.eff.output)],
+    ["state", r.state]
   ];
   tip.innerHTML = '<h3>' + r.model.split("/").pop() + '</h3><div class="who">' + r.plan +
     ' · ' + (r.fee ? "$" + r.fee + "/mo" : "pay as you go") + '</div><table>' +
-    rows.map(function (kv) { return '<tr><td>' + kv[0] + '</td><td>' + kv[1] + '</td></tr>'; }).join("") +
-    '<tr class="sep"><td>List input</td><td>' + fmt(r.list.input) + '</td></tr>' +
-    '<tr><td>List output</td><td>' + fmt(r.list.output) + '</td></tr>' +
-    '<tr class="sep"><td>State</td><td>' + r.state + '</td></tr></table>';
+    rows.map(function (kv) { return '<tr><td>' + kv[0] + '</td><td>' + kv[1] +
+      '</td></tr>'; }).join("") + '</table>';
   tip.style.opacity = 1;
   move(e);
 }
@@ -546,7 +542,6 @@ function move(e) {
 document.querySelectorAll(".seg button").forEach(function (btn) {
   btn.addEventListener("click", function () {
     const group = btn.parentElement.id;
-    if (group === "basis") state.basis = btn.dataset.v;
     if (group === "scale") state.scale = btn.dataset.v;
     if (group === "dir") state.dir = btn.dataset.v;
     if (group === "extra") state[btn.dataset.v] = !state[btn.dataset.v];
@@ -693,9 +688,9 @@ def cmd_chart(args) -> int:
                 "model": r["model"], "provider": r["provider"],
                 "plan": plan["plan"], "fee": plan.get("fee_usd"),
                 "tb": round(r["tb"], 2), "state": r.get("state", "unmeasured"),
+                "cost": round(r["input"], 6),
                 "eff": {k: round(v, 6) for k, v in r.items()
                         if k in ("input", "cache", "cache_write", "output")},
-                "list": {k: round(v, 6) for k, v in (r.get("list") or {}).items()},
             })
         html = (PAGE.replace("__DATA__", json.dumps(payload))
                     .replace("__COLOURS__", json.dumps({k: "#%02x%02x%02x" % v
