@@ -5,8 +5,8 @@ providers it may speak to and the models in its menu.
 
 | Repository | Holds |
 | --- | --- |
-| **dsh-config** (here) | The configuration: providers and the model menu. |
-| [model-bench](https://github.com/jacano/model-bench) | The benchmark that chose the menu, and the page it publishes. |
+| **dsh-config** (here) | The DeepSeek Harness configuration: providers and the model menu. |
+| [model-bench](https://github.com/jacano/model-bench) | The benchmark that chooses the model menu, and the page it publishes. |
 | [agent-skills](https://github.com/jacano/agent-skills) | Procedures an agent follows, with the code they need. |
 
 ## Install
