@@ -140,17 +140,22 @@ know: read the line, not the prose around it.
   `ui-settings-account` are the account page, not the provider. The
   developer-tools switch behind the preset selector and the Trajectory tab is
   `ui-settings.enabled`, `true` by default.
-- **Retries.** Both `openai-completions` blocks carry a `retryPolicy` whose
-  `retryableCodes` adds `MALFORMED_RESPONSE` to the five defaults. The hosted
-  gateways intermittently give the first two parallel tool calls the same
-  `tool_calls[].index`, so their argument strings arrive concatenated
-  (`{"…"}{"…"}`); pi-ai reports that as `MALFORMED_RESPONSE` before any tool runs,
-  and the default policy does not retry it, so the turn dies instead of asking
-  again. The defect is server-side — the duplicate index is already in the opening
-  SSE deltas, reproduced from a plain `urllib` client with no DSH in the path — and
-  is tracked in [nexu-io/open-design#9369](https://github.com/nexu-io/open-design/issues/9369).
-  More parallel calls in one turn make it likelier, which is why the retry is worth
-  three attempts; drop the policy once the gateway is fixed.
+- **A gateway that repeats a tool-call index is not retried away.** The hosted
+  gateways give the first two parallel tool calls the same `tool_calls[].index`
+  whenever the model opens a turn with nothing but tool calls: with no reasoning
+  and no text first, the position is `-1`, clamps to `0`, and collides with the
+  second call. The argument strings arrive concatenated (`{"…"}{"…"}`) and pi-ai
+  reports `MALFORMED_RESPONSE` before any tool runs. A `retryPolicy` that adds that
+  code was tried here and **removed**: the re-request reproduces the same response
+  shape, so it exhausted its attempts and the turn still died — three of five
+  chains across the history survived, which is a coin flip, not a fix. Both
+  gateways stay on the default policy. The defect is server-side (the duplicate
+  index is already in the opening SSE deltas, reproduced from a plain `urllib`
+  client with no DSH in the path) and is tracked in
+  [nexu-io/open-design#9369](https://github.com/nexu-io/open-design/issues/9369).
+  What does work is the shape of the turn: any reasoning or text before the tool
+  calls keeps the position honest, so a turn that leads with a sentence never hits
+  it. Prefer that over a retry.
 - Never commit keys: they live in `~/.dsh/.credentials.yaml`, outside this repo,
   and the `.gitignore` here refuses the file.
 

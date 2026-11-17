@@ -22,11 +22,6 @@
         apiKeyEnv: OPENDESIGN_API_KEY
         defaultContextWindow: 1000000
         defaultInput: [text, image]
-        retryPolicy:
-          mode: normal
-          maxRetries: 3
-          retryableCodes: [MALFORMED_RESPONSE, EMPTY_RESPONSE, RATE_LIMIT, SERVER, TIMEOUT, TRANSPORT]
-          backoff: { initialDelayMs: 500, maxDelayMs: 8000, jitterRatio: 0.2 }
         models:
           - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
       opendesign-anthropic:
@@ -45,11 +40,6 @@
         apiKeyEnv: OPENGATEWAY_API_KEY
         defaultContextWindow: 1000000
         defaultInput: [text, image]
-        retryPolicy:
-          mode: normal
-          maxRetries: 3
-          retryableCodes: [MALFORMED_RESPONSE, EMPTY_RESPONSE, RATE_LIMIT, SERVER, TIMEOUT, TRANSPORT]
-          backoff: { initialDelayMs: 500, maxDelayMs: 8000, jitterRatio: 0.2 }
         models:
           - { id: deepseek/deepseek-v4.1-flash-eco, name: DeepSeek V4.1 Flash Eco (OpenGateway), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
 
