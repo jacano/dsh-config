@@ -17,7 +17,7 @@
     providers:
       opendesign:
         displayName: OpenDesign
-        api: openai-completions
+        api: openai-responses
         baseURL: https://amr-link.open-design.ai/v1
         apiKeyEnv: OPENDESIGN_API_KEY
         defaultContextWindow: 1000000

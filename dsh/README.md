@@ -99,11 +99,13 @@ and a `models:` list. The file is the list; this one does not repeat it, because
 second copy drifts from the first and `python bench/bench.py measure` prints the
 current one with its numbers whenever you want to see it.
 
-Two protocols cover everything here. `openai-completions` is the default shape.
-`anthropic-messages` is for a gateway that only accepts the Anthropic one, and it
-names the API root rather than a versioned path because pi-ai appends
-`/v1/messages` itself. A `claude-*` id that earns a 400 on the OpenAI shape wants
-that second route: the block's `api` is where to look, not the model.
+Two protocols cover everything here. `openai-responses` is the shape the OpenDesign
+route uses, for the reason in the Notes below. `anthropic-messages` is for a gateway
+that only accepts the Anthropic one, and it names the API root rather than a versioned
+path because pi-ai appends `/v1/messages` itself. A `claude-*` id that earns a 400 on
+the OpenAI shape wants that second route: the block's `api` is where to look, not the
+model. `openai-completions` is still the shape every other gateway here speaks, and the
+one to reach for on a route that only documents it.
 
 A block that runs out of credit or lapses is **commented out at the end of the file,
 verbatim**, with the date and what restoring it needs. The menu is what can be called
@@ -142,21 +144,28 @@ know: read the line, not the prose around it.
   developer-tools switch behind the preset selector and the Trajectory tab is
   `ui-settings.enabled`, `true` by default.
 - **A gateway that repeats a tool-call index is not retried away.** The hosted
-  gateways give the first two parallel tool calls the same `tool_calls[].index`
-  whenever the model opens a turn with nothing but tool calls: with no reasoning
-  and no text first, the position is `-1`, clamps to `0`, and collides with the
-  second call. The argument strings arrive concatenated (`{"…"}{"…"}`) and pi-ai
-  reports `MALFORMED_RESPONSE` before any tool runs. A `retryPolicy` that adds that
-  code was tried here and **removed**: the re-request reproduces the same response
-  shape, so it exhausted its attempts and the turn still died — three of five
-  chains across the history survived, which is a coin flip, not a fix. Both
-  gateways stay on the default policy. The defect is server-side (the duplicate
-  index is already in the opening SSE deltas, reproduced from a plain `urllib`
-  client with no DSH in the path) and is tracked in
+  gateways, on their `openai-completions` shape, give the first two parallel tool
+  calls the same `tool_calls[].index` whenever the model opens a turn with nothing
+  but tool calls: with no reasoning and no text first, the position is `-1`, clamps
+  to `0`, and collides with the second call. The argument strings arrive
+  concatenated (`{"…"}{"…"}`) and pi-ai reports `MALFORMED_RESPONSE` before any tool
+  runs. A `retryPolicy` that adds that code was tried here and **removed**: the
+  re-request reproduces the same response shape, so it exhausted its attempts and
+  the turn still died — three of five chains across the history survived, which is a
+  coin flip, not a fix. The defect is server-side (the duplicate index is already in
+  the opening SSE deltas, reproduced from a plain `urllib` client with no DSH in the
+  path) and is tracked in
   [nexu-io/open-design#9369](https://github.com/nexu-io/open-design/issues/9369).
-  What does work is the shape of the turn: any reasoning or text before the tool
-  calls keeps the position honest, so a turn that leads with a sentence never hits
-  it. Prefer that over a retry.
+- **That is why OpenDesign's route speaks `openai-responses` instead.** The defect
+  lives in the chat-completions conversion, which rebuilds a `tool_calls[]` array
+  from the upstream output items and derives `index` from the item position. The
+  Responses shape has no such array to rebuild: each call is its own output item with
+  its own `output_index` and `call_id`, and pi-ai keys its slots on that index, so a
+  collision cannot be constructed. Measured on 2026-11-17 with a plain client: 50
+  runs of 12 parallel calls and 8 runs of 20, no duplicate index, and the tool
+  round-trip (`function_call` + `function_call_output` back in the next request)
+  works. Same `baseURL`, same key, same model id — only `api` differs. The Notes on
+  the Anthropic route are where to look for the other protocol's own trouble, #8687.
 - Never commit keys: they live in `~/.dsh/.credentials.yaml`, outside this repo,
   and the `.gitignore` here refuses the file.
 
