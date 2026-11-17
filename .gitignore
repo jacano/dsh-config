@@ -7,7 +7,3 @@
 # Python bytecode
 __pycache__/
 *.pyc
-
-# Charts: the png is regenerated on demand, the page is versioned in docs/
-bench/frontier*.png
-bench/frontier.html

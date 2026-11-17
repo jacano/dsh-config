@@ -1,8 +1,8 @@
 # dsh — the DSH configuration
 
-This half of the repo is only the configuration: which providers DeepSeek Harness
+This directory is only the configuration: which providers DeepSeek Harness
 may speak to, and which models appear in the menu. It carries no
-benchmark, no measurements and no history — that is [`../bench/`](../bench/).
+benchmark, no measurements and no history — those are in [`model-bench`](https://github.com/jacano/model-bench).
 
 ## Install
 
@@ -54,7 +54,7 @@ one group per provider block in the config, and nothing else. What is in it, wha
 costs and what it measured is printed by
 
 ```bash
-python bench/bench.py measure
+python bench.py measure
 ```
 
 which also exits non-zero when the menu and the policy disagree. This file does not
@@ -96,7 +96,7 @@ Everything here is written in English.
 A route is one block under `providers:` in [`cordis.patch.yml`](cordis.patch.yml):
 an `api`, a `baseURL`, the `apiKeyEnv` that resolves through the credential store,
 and a `models:` list. The file is the list; this one does not repeat it, because a
-second copy drifts from the first and `python bench/bench.py measure` prints the
+second copy drifts from the first and `python bench.py measure` prints the
 current one with its numbers whenever you want to see it.
 
 Two protocols cover everything here. `openai-responses` is the shape the OpenDesign
@@ -128,7 +128,7 @@ know: read the line, not the prose around it.
 - **Cache.** The prefix cache is not automatic on the Anthropic route: without a
   `cache_control` breakpoint the same 60k prompt reads back 0 cached tokens and
   costs 3.2-3.5 s to first token. pi-ai marks the last message itself, so the row
-  needs no setting; the numbers in [models.csv](../bench/models.csv) were measured with that
+  needs no setting; the numbers in [models.csv](https://github.com/jacano/model-bench/blob/main/models.csv) were measured with that
   breakpoint in place.
 - **Images.** Every row reads images, declared once as `defaultInput: [text, image]`.
   A text-only model added later must declare `input: [text]`, or its images are
