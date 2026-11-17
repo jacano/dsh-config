@@ -359,57 +359,40 @@ PAGE_FILE = BENCH / "page.html"
 
 
 
-def cmd_chart(args) -> int:
-    """Draw the two axes that decide it: what a token costs, and what the board says."""
+def write_page(rows: list[dict], store: dict, floor: float, subject: str,
+               path: Path) -> None:
+    """Fill the template and write it: the page the site serves."""
+    payload = []
+    for r in rows:
+        plan = store["providers"][r["provider"]]
+        payload.append({
+            "model": r["model"], "provider": r["provider"],
+            "plan": plan["plan"], "fee": plan.get("fee_usd"),
+            "tb": round(r["tb"], 2), "state": r.get("state", "unmeasured"),
+            "cost": round(r["input"], 6),
+            "eff": {k: round(v, 6) for k, v in r.items()
+                    if k in ("input", "cache", "cache_write", "output")},
+        })
+    template = PAGE_FILE.read_text(encoding="utf-8")
+    html = (template.replace("__DATA__", json.dumps(payload))
+                .replace("__COLOURS__", json.dumps({k: "#%02x%02x%02x" % v
+                                                    for k, v in CHART_COLOURS.items()}))
+                .replace("__FLOOR__", f"{floor:.1f}")
+                .replace("__PLANS__", json.dumps(
+                    {name: {"plan": p["plan"], "fee": p.get("fee_usd")}
+                     for name, p in store["providers"].items()}))
+                .replace("__SUBJECT__", json.dumps(subject))
+                .replace("__GENERATED__", date.today().isoformat()))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(html, encoding="utf-8")
+    print(f"written: {path}  ({len(rows)} models)")
+
+
+
+def draw_png(rows: list[dict], front: list[dict], store: dict, floor: float,
+             subject: str, path: Path) -> None:
+    """The same table as a picture, with Pillow and no other dependency."""
     import math
-
-    store, boards = plans(), tbench()
-    mix = None
-    if args.mix:
-        parts = args.mix.replace(" ", "").split(",")
-        try:
-            mix = tuple(int(x) for x in parts)
-        except ValueError:
-            raise SystemExit("--mix wants fresh,cache,out as three integers")
-        if len(mix) != 3 or min(mix) < 0:
-            raise SystemExit("--mix wants three token counts, fresh,cache,out")
-    rows = chart_rows(store, boards, args.today or date.today(), mix)
-    if not rows:
-        print("nothing to draw")
-        return 1
-    front = pareto(rows)
-    floor = GATES["static"]["tbench_min"]
-
-    subject = ("dollars per million input tokens" if not mix else
-               f"dollars per request of {mix[0]:,} fresh + {mix[1]:,} cache + {mix[2]:,} out")
-
-    if args.html:
-        payload = []
-        for r in rows:
-            plan = store["providers"][r["provider"]]
-            payload.append({
-                "model": r["model"], "provider": r["provider"],
-                "plan": plan["plan"], "fee": plan.get("fee_usd"),
-                "tb": round(r["tb"], 2), "state": r.get("state", "unmeasured"),
-                "cost": round(r["input"], 6),
-                "eff": {k: round(v, 6) for k, v in r.items()
-                        if k in ("input", "cache", "cache_write", "output")},
-            })
-        template = PAGE_FILE.read_text(encoding="utf-8")
-        html = (template.replace("__DATA__", json.dumps(payload))
-                    .replace("__COLOURS__", json.dumps({k: "#%02x%02x%02x" % v
-                                                        for k, v in CHART_COLOURS.items()}))
-                    .replace("__FLOOR__", f"{floor:.1f}")
-                    .replace("__PLANS__", json.dumps(
-                        {name: {"plan": p["plan"], "fee": p.get("fee_usd")}
-                         for name, p in store["providers"].items()}))
-                    .replace("__SUBJECT__", json.dumps(subject))
-                    .replace("__GENERATED__", date.today().isoformat()))
-        page = Path(args.html)
-        page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(html, encoding="utf-8")
-        print(f"written: {page}  ({len(rows)} models)")
-        return 0
 
     from PIL import Image, ImageDraw, ImageFont
 
@@ -501,7 +484,7 @@ def cmd_chart(args) -> int:
                              fill=(22, 27, 34), outline=(74, 222, 128))
         dr.text((bx, by), text, font=f_dot, fill=ink)
 
-    # La leyenda son las suscripciones: qué color es cada una y qué cuesta al mes.
+    # The legend is the subscriptions: which colour is which, and what it costs a month.
     entries = []
     for name, plan in store["providers"].items():
         fee = plan.get("fee_usd")
@@ -514,10 +497,37 @@ def cmd_chart(args) -> int:
         lx += dr.textbbox((0, 0), text, font=f_tick)[2] + 60
 
 
-    out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    img.save(out)
-    print(f"written: {out}  ({len(rows)} models, {len(front)} on the frontier)")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    img.save(path)
+    print(f"written: {path}  ({len(rows)} models, {len(front)} on the frontier)")
+
+
+def cmd_chart(args) -> int:
+    """Draw the two axes that decide it: what a token costs, and what the board says."""
+    store, boards = plans(), tbench()
+    mix = None
+    if args.mix:
+        parts = args.mix.replace(" ", "").split(",")
+        try:
+            mix = tuple(int(x) for x in parts)
+        except ValueError:
+            raise SystemExit("--mix wants fresh,cache,out as three integers")
+        if len(mix) != 3 or min(mix) < 0:
+            raise SystemExit("--mix wants three token counts, fresh,cache,out")
+    rows = chart_rows(store, boards, args.today or date.today(), mix)
+    if not rows:
+        print("nothing to draw")
+        return 1
+    front = pareto(rows)
+    floor = GATES["static"]["tbench_min"]
+
+    subject = ("dollars per million input tokens" if not mix else
+               f"dollars per request of {mix[0]:,} fresh + {mix[1]:,} cache + {mix[2]:,} out")
+
+    if args.html:
+        write_page(rows, store, floor, subject, Path(args.html))
+        return 0
+    draw_png(rows, front, store, floor, subject, Path(args.out))
     return 0
 
 
