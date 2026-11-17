@@ -388,6 +388,8 @@ def cmd_chart(args) -> int:
     dr.text((M, 44), "Terminal-Bench against price, every model every plan sells",
             font=f_title, fill=ink)
     dr.text((M, 84), subject, font=f_lab, fill=dim)
+    dr.text((M, 112), "our cost: the plan's list rate x its multiplier, divided by the ceiling "
+                      "that plan puts on the model", font=f_tick, fill=dim)
 
     for tb in range(int(y0) // 10 * 10, int(y1) + 1, 10):
         if tb < y0:
