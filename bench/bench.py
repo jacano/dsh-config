@@ -4,8 +4,7 @@
     python bench/bench.py plan               # what a million tokens costs
     python bench/bench.py plan --model claude-haiku-5.5
     python bench/bench.py plan --today 2026-10-22
-    python bench/bench.py pick               # the ones nothing beats on both axes
-    python bench/bench.py filter             # what Terminal-Bench actually ranks
+    python bench/bench.py chart              # the Pareto picture of the same table
     python bench/bench.py measure            # the stored table against the gates
     python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 
@@ -308,118 +307,155 @@ def cmd_plan(args) -> int:
 
 # --------------------------------------------------------------------------- pick
 
-def cmd_pick(args) -> int:
-    """The models nothing else beats on both price and capability.
-
-    A model is out of the running when another one is at least as good on the board
-    and at least as cheap per million input tokens - the two axes that decide a
-    purchase. What survives that is the frontier, and everything else is dominated by
-    a named row rather than by a feeling.
-    """
-    store, boards = plans(), tbench()
-    floor = GATES["static"]["tbench_min"]
-    measured = load_measured()
-    day = args.today or date.today()
-
-    rows = []
-    for r in plan_rows(store, day):
-        tb = board_score(boards, r["model"])
-        if tb is None or tb < floor:
-            continue
-        m = measured.get(r["model"])
-        if r["model"] in ADMITTED:
-            state = "admitted"
-        elif m is None:
-            state = "unmeasured"
-        elif fails_measured(m, tb, GATES["measured"]) + fails_fitness(m, GATES["fitness"]):
-            state = "measured, fails"
-        else:
-            state = "measured, passes"
-        rows.append({**r, "tb": tb, "state": state})
-    if not rows:
-        print("nothing on the board clears the floor")
-        return 1
-
-    def dominates(a, b):
-        return (a["tb"] >= b["tb"] and a["input"] <= b["input"]
-                and (a["tb"] > b["tb"] or a["input"] < b["input"]))
-
-    front = [r for r in rows if not any(dominates(o, r) for o in rows if o is not r)]
-    front.sort(key=lambda r: r["tb"])
-
-    print(f"the frontier on {day.isoformat()}: Terminal-Bench against dollars per million "
-          f"of input\n")
-    print(f"  {'model':32s} {'plan':13s} {'tb':>5s} {'input':>9s} {'cache':>9s} "
-          f"{'write':>9s} {'output':>9s}  state")
-    for r in front:
-        write = f"{r['cache_write']:9.5f}" if "cache_write" in r else f"{'-':>9s}"
-        print(f"  {r['model'][:32]:32s} {r['provider']:13s} {r['tb']:5.1f} "
-              f"{r['input']:9.5f} {r['cache']:9.5f} {write} {r['output']:9.5f}  {r['state']}")
-
-    print(f"\n  {len(front)} of {len(rows)} survive: the rest are beaten by one of these\n")
-    print("  dominated by, per model:")
-    for r in sorted((x for x in rows if x not in front), key=lambda x: -x["tb"]):
-        better = min((o for o in front if dominates(o, r)), key=lambda o: o["input"])
-        print(f"    {r['model'][:34]:34s} {r['tb']:5.1f} {r['input']:9.5f}  <- "
-              f"{better['model'][:28]} ({better['tb']:.1f})")
-
-    bad = [r for r in front if r["state"] == "measured, fails"]
-    if bad:
-        print(f"\n  {len(bad)} frontier row{'s' if len(bad) > 1 else ''} fails a measured gate: "
-              f"cheap for a reason. `measure` says which.")
-    print("\n  what each provider contributes to that frontier:")
-    for provider in store["providers"]:
-        mine = [r for r in front if r["provider"] == provider]
-        if not mine:
-            print(f"    {provider:13s} nothing - every model it sells is dominated")
-            continue
-        for r in mine:
-            print(f"    {provider:13s} {r['model'][:32]:32s} tb {r['tb']:5.1f} "
-                  f"at {r['input']:.5f}  ({r['state']})")
-    return 0
-
-
 # ------------------------------------------------------------------ filter: the board
 
-def cmd_filter(args) -> int:
-    """Keep the models Terminal-Bench ranks, and say what it does not.
+# --------------------------------------------------------------------------- chart
 
-    One question, asked of every model on every plan: does the board rank it, and
-    does it clear the floor. Price is not asked here - that is `plan`'s job, and a
-    number to look at, not a gate to pass.
-    """
-    store, board = plans(), tbench()
-    floor = GATES["static"]["tbench_min"]
-    print(f"Terminal-Bench >= {floor:.1f} · everything the board does not rank is out\n")
+CHART_COLOURS = {"open-design": (96, 165, 250), "opengateway": (167, 139, 250),
+                 "command-code": (251, 146, 60)}
 
-    keep_all: list[tuple[str, str, float]] = []
-    off, low = 0, 0
-    for pname, plan in store["providers"].items():
-        if plan.get("active") is False:
+
+def chart_rows(store: dict, boards: dict, day: date, mix=None) -> list[dict]:
+    """Every priced model of every plan, with its board score and one cost."""
+    out = []
+    for r in plan_rows(store, day):
+        tb = board_score(boards, r["model"])
+        if tb is None:
             continue
-        ids = ([m for m in store["catalog"]]
-               if plan["models"] == "catalog" else [m["id"] for m in plan["models"]])
-        keep, out = [], 0
-        for mid in ids:
-            tb = board_score(board, mid)
-            if tb is None:
-                off += 1
-                out += 1
-            elif tb < floor:
-                low += 1
-                out += 1
-            else:
-                keep.append((pname, mid, tb))
-        keep_all += keep
-        print(f"{pname}  [{plan['plan']}]")
-        for _p, mid, tb in sorted(keep, key=lambda r: -r[2]):
-            print(f"  keep  {mid[:34]:34s} tb {tb:5.1f}")
-        if out:
-            print(f"  ({out} out: not on the board, or under the floor)")
-        print()
+        if mix:
+            fresh, cache, written = mix
+            cost = (fresh * r["input"] + cache * r["cache"] + written * r["output"]) / 1e6
+        else:
+            cost = r["input"]
+        out.append({**r, "tb": tb, "cost": cost})
+    return out
 
-    print(f"{len(keep_all)} routes clear the floor · {off} are not ranked · {low} rank below it")
 
+def pareto(rows: list[dict]) -> list[dict]:
+    """Nothing beats these on both axes: cheaper and at least as capable."""
+    def beats(a, b):
+        return (a["tb"] >= b["tb"] and a["cost"] <= b["cost"]
+                and (a["tb"] > b["tb"] or a["cost"] < b["cost"]))
+    return sorted((r for r in rows if not any(beats(o, r) for o in rows if o is not r)),
+                  key=lambda r: r["cost"])
+
+
+def cmd_chart(args) -> int:
+    """Draw the two axes that decide it: what a token costs, and what the board says."""
+    import math
+    from PIL import Image, ImageDraw, ImageFont
+
+    store, boards = plans(), tbench()
+    mix = None
+    if args.mix:
+        try:
+            mix = tuple(int(x) for x in args.mix.replace(" ", "").split(","))
+        except ValueError:
+            raise SystemExit("--mix wants fresh,cache,out as three integers")
+    rows = chart_rows(store, boards, args.today or date.today(), mix)
+    if not rows:
+        print("nothing to draw")
+        return 1
+    front = pareto(rows)
+    floor = GATES["static"]["tbench_min"]
+
+    W, H, M = 1600, 1040, 150
+    bg, ink, dim = (13, 17, 23), (230, 237, 243), (110, 118, 129)
+    img = Image.new("RGB", (W, H), bg)
+    dr = ImageDraw.Draw(img)
+
+    def font(size, bold=False):
+        for name in (("segoeuib.ttf" if bold else "segoeui.ttf"), "arialbd.ttf", "arial.ttf"):
+            try:
+                return ImageFont.truetype(f"C:/Windows/Fonts/{name}", size)
+            except OSError:
+                continue
+        return ImageFont.load_default()
+
+    f_title, f_lab, f_tick, f_dot = font(30, True), font(17), font(15), font(14)
+
+    costs = [r["cost"] for r in rows]
+    lo, hi = min(costs), max(costs)
+    x0, x1 = math.log10(lo * 0.7), math.log10(hi * 1.4)
+    tbs = [r["tb"] for r in rows]
+    y0, y1 = min(tbs) - 6, max(tbs) + 6
+
+    px = lambda c: M + (math.log10(c) - x0) / (x1 - x0) * (W - 2 * M)
+    py = lambda t: H - M - (t - y0) / (y1 - y0) * (H - 2 * M)
+
+    subject = ("dollars per million input tokens" if not mix else
+               f"dollars per request of {mix[0]:,} fresh + {mix[1]:,} cache + {mix[2]:,} out")
+    dr.text((M, 44), "Terminal-Bench against price, every model every plan sells",
+            font=f_title, fill=ink)
+    dr.text((M, 84), subject, font=f_lab, fill=dim)
+
+    for tb in range(int(y0) // 10 * 10, int(y1) + 1, 10):
+        if tb < y0:
+            continue
+        y = py(tb)
+        dr.line([(M, y), (W - M, y)], fill=(30, 36, 44))
+        dr.text((M - 18, y), f"{tb:.0f}", font=f_tick, fill=dim, anchor="rm")
+
+    decade = 10 ** math.floor(x0)
+    while decade < 10 ** x1:
+        for mult in (1, 2, 5):
+            c = decade * mult
+            if lo * 0.7 <= c <= hi * 1.4:
+                x = px(c)
+                dr.line([(x, M), (x, H - M)], fill=(30, 36, 44))
+                shown = f"${c:g}" if c >= 0.001 else f"${c:.5f}"
+                dr.text((x, H - M + 14), shown, font=f_tick, fill=dim, anchor="mt")
+        decade *= 10
+
+    dr.line([(M, py(floor)), (W - M, py(floor))], fill=(239, 68, 68))
+    dr.text((W - M - 8, py(floor) - 9), f"Terminal-Bench floor {floor:.1f}", font=f_tick,
+            fill=(239, 68, 68), anchor="rb")
+
+    if len(front) > 1:
+        dr.line([(px(r["cost"]), py(r["tb"])) for r in front], fill=(74, 222, 128), width=3)
+
+    for r in rows:
+        x, y = px(r["cost"]), py(r["tb"])
+        colour = CHART_COLOURS.get(r["provider"], (200, 200, 200))
+        on = any(r is f for f in front)
+        d = 9 if on else 6
+        dr.ellipse([x - d, y - d, x + d, y + d], fill=colour,
+                   outline=(255, 255, 255) if on else None, width=2 if on else 0)
+
+    placed: list[tuple[float, float, float, float]] = []
+    for r in sorted(front, key=lambda r: r["tb"]):
+        x, y = px(r["cost"]), py(r["tb"])
+        text = f"{r['model'].split('/')[-1]}  {r['tb']:.1f}"
+        box = dr.textbbox((0, 0), text, font=f_dot)
+        w, h = box[2] - box[0], box[3] - box[1]
+        bx = min(x + 16, W - M - w - 20)
+        by = max(y - h - 18, M + 40)
+        for _ in range(12):                     # baja hasta encontrar hueco
+            clash = any(not (bx + w + 8 < l or bx - 8 > r2 or by + h + 6 < t or by - 6 > b)
+                        for l, t, r2, b in placed)
+            if not clash:
+                break
+            by += h + 14
+        placed.append((bx - 8, by - 6, bx + w + 8, by + h + 6))
+        dr.rounded_rectangle([bx - 8, by - 6, bx + w + 8, by + h + 6], radius=6,
+                             fill=(22, 27, 34), outline=(74, 222, 128))
+        dr.text((bx, by), text, font=f_dot, fill=ink)
+
+    # La leyenda son las suscripciones: qué color es cada una y qué cuesta al mes.
+    entries = []
+    for name, plan in store["providers"].items():
+        fee = plan.get("fee_usd")
+        label = f"{name}  {plan['plan']}  ${fee:.0f}/mo" if fee else f"{name}  pay as you go"
+        entries.append((label, CHART_COLOURS.get(name, (200, 200, 200))))
+    lx = M
+    for text, colour in entries:
+        dr.ellipse([lx, 118, lx + 13, 131], fill=colour)
+        dr.text((lx + 20, 124), text, font=f_tick, fill=dim, anchor="lm")
+        lx += dr.textbbox((0, 0), text, font=f_tick)[2] + 60
+
+    out = Path(args.out)
+    img.save(out)
+    print(f"written: {out}  ({len(rows)} models, {len(front)} on the frontier)")
     return 0
 
 
@@ -915,13 +951,12 @@ def main() -> int:
     pl.add_argument("--model", help="one model; without it, every model worth a plan")
     pl.set_defaults(fn=cmd_plan)
 
-    pk = sub.add_parser("pick", help="the models nothing beats on price and capability")
-    pk.add_argument("--today", type=date.fromisoformat,
+    ch = sub.add_parser("chart", help="the Pareto picture: price against the board")
+    ch.add_argument("--out", default="bench/frontier.png", help="where to write the png")
+    ch.add_argument("--mix", help="fresh,cache,out - price a request of that shape")
+    ch.add_argument("--today", type=date.fromisoformat,
                     help="a date (YYYY-MM-DD), for the promos of that day")
-    pk.set_defaults(fn=cmd_pick)
-
-    s = sub.add_parser("filter", help="what Terminal-Bench ranks, and what it does not")
-    s.set_defaults(fn=cmd_filter)
+    ch.set_defaults(fn=cmd_chart)
 
     m = sub.add_parser("measure", help="the stored table against the gates")
     m.add_argument("--model")

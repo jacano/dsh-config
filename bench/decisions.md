@@ -2,7 +2,7 @@
 
 Dated on purpose: each entry is what was decided with the numbers of that day, not a
 rule that follows from the code. The live numbers are in `data/plans.json`,
-`data/tbench.json` and `models.csv`; `plan`, `filter` and `measure` print them.
+`data/tbench.json` and `models.csv`; `plan`, `chart` and `measure` print them.
 
 ## 2026-11-16 · OpenDesign Go is the subscription to pay for
 
@@ -62,7 +62,7 @@ recorded here and not just in the commit.
 
 ## 2026-11-16 · three questions and an agentic run, no pipeline
 
-`plan` says what a token costs, `filter` says what Terminal-Bench ranks, `measure`
+`plan` says what a token costs, `chart` draws price against Terminal-Bench, `measure`
 puts what is left against the gates, and `agentic` runs one real task. Each answers
 its own question and none of them chains into the next: there is no stage that
 decides for the following one. The numbers are read by hand from the pages named
@@ -80,12 +80,13 @@ is used.
 ## 2026-11-17 · the analysis is a command, and a provider arrives by data
 
 The reasoning that picked five models out of twenty-three was done by hand once, and a
-conclusion nobody can re-run is a conclusion that rots. It is `pick` now: the frontier
-of Terminal-Bench against dollars per million of input, every row that is not on it
-named with the row that beats it, and what each provider contributes.
+conclusion nobody can re-run is a conclusion that rots. It is `chart` now: price across,
+Terminal-Bench up, the floor as a red line, and the frontier drawn through whatever
+nothing beats - `--mix` when the cost axis should be a request of a given shape rather
+than a million tokens.
 
 That closes the loop a new subscription goes through - **give the numbers, price them,
-filter them, rank them, measure what survives** - and the order matters: the first
-three cost nothing and the fourth is the only one that spends a token. A provider that
-stops before the last step is unmeasured, not rejected, and `pick` says so on the row.
+draw them, measure what survives** - and the order matters: the first two cost nothing
+and the last is the only one that spends a token. A provider that stops before it is
+unmeasured, not rejected, and the chart shows it as a point with nothing behind it.
 

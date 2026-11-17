@@ -1,12 +1,12 @@
 # bench — choosing the models
 
 One script, three data files, four questions. The script does not decide anything
-by itself: it prices, it filters, it measures, it runs a task, and it says what it
+by itself: it prices, it draws, it measures, it runs a task, and it says what it
 could not.
 
 ```bash
 python bench/bench.py plan               # what a million tokens costs
-python bench/bench.py filter             # what Terminal-Bench actually ranks
+python bench/bench.py chart              # the Pareto picture of the same table
 python bench/bench.py measure            # the stored table against the gates
 python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 ```
@@ -26,8 +26,8 @@ Nothing here edits the DSH configuration; that is a separate change in
 ```
 plan     what a million tokens of each kind costs, per model, per plan
    │     a number to look at, never a veto
-filter   does Terminal-Bench rank it, and does it clear the floor
-   │     free, calls no model
+chart    the same rows as a picture: price across, the board up, the frontier
+   │     drawn through whatever nothing beats        free, writes a png
 measure  the ones left, against the gates the policy states
    │     and against the menu, which has to agree
    ↓
@@ -85,10 +85,10 @@ Adding a subscription is one block with those two URLs and its numbers already
 filled in. This repo makes no network call: the numbers are read from the pages
 above when someone asks, not on a schedule.
 
-## filter — the board
+## chart — the board, drawn
 
 **One scale, and nothing else about the model.** Terminal-Bench 4.1 (`tb`) is the
-only thing `filter` knows about a model: it runs terminal tasks and grades whether
+only thing the chart knows about a model: it runs terminal tasks and grades whether
 they got done, and it ranks model **and agent** — "38,5 with Claude Code" is a
 different claim from "38,5 alone", which is why the agent is stored with the
 number. `tbench_min` is the floor, and a model the board does not rank is out with
@@ -175,17 +175,17 @@ The work is in the data, and the four commands read it. In order:
 3. **Price it:** `python bench/bench.py plan`. Every rate already has the multiplier,
    the ceiling and the peak hour inside it, so what it prints is what a million tokens
    costs - check those against the provider's own arithmetic.
-4. **Filter it:** `python bench/bench.py filter`. What the board does not rank is out,
-   with that reason on its row.
-5. **Rank it:** `python bench/bench.py pick`. The frontier of price against
-   capability, and for everything that is not on it, the row that beats it. This is
-   the answer to "is anything here worth buying", before a token is spent.
-6. **Measure what survived:** `measure --model <id> --tbench <score>` for the rows
+4. **Draw it:** `python bench/bench.py chart`. Price across, Terminal-Bench up, the
+   board's floor as a red line and the frontier drawn through whatever nothing beats.
+   The picture answers "is anything here worth buying" before a token is spent, and
+   `--mix fresh,cache,out` prices a request of your own shape instead of a million.
+5. **Measure what survived:** `measure --model <id> --tbench <score>` for the rows
    worth the call. It prints a line in `models.csv`'s own shape; paste it, add the id
    to `admitted:`, add the model to the menu, and `measure` must then exit 0.
 
-A provider that never reaches step 6 is unmeasured, not rejected - `pick` says so on
-the row, and it is the difference between "not worth it" and "nobody tried".
+A provider that never reaches step 5 is unmeasured, not rejected - the chart shows it
+as a point with no gate behind it, and that is the difference between "not worth it"
+and "nobody tried".
 
 ## Re-baselining
 
