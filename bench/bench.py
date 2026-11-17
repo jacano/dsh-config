@@ -616,6 +616,35 @@ def cmd_chart(args) -> int:
     front = pareto(rows)
     floor = GATES["static"]["tbench_min"]
 
+    subject = ("dollars per million input tokens" if not mix else
+               f"dollars per request of {mix[0]:,} fresh + {mix[1]:,} cache + {mix[2]:,} out")
+
+    if args.html:
+        payload = []
+        for r in rows:
+            plan = store["providers"][r["provider"]]
+            payload.append({
+                "model": r["model"], "provider": r["provider"],
+                "plan": plan["plan"], "fee": plan.get("fee_usd"),
+                "tb": round(r["tb"], 2), "state": r.get("state", "unmeasured"),
+                "cost": round(r["input"], 6),
+                "eff": {k: round(v, 6) for k, v in r.items()
+                        if k in ("input", "cache", "cache_write", "output")},
+            })
+        html = (PAGE.replace("__DATA__", json.dumps(payload))
+                    .replace("__COLOURS__", json.dumps({k: "#%02x%02x%02x" % v
+                                                        for k, v in CHART_COLOURS.items()}))
+                    .replace("__FLOOR__", f"{floor:.1f}")
+                    .replace("__PLANS__", json.dumps(
+                        {name: {"plan": p["plan"], "fee": p.get("fee_usd")}
+                         for name, p in store["providers"].items()}))
+                    .replace("__SUBJECT__", json.dumps(subject))
+                    .replace("__GENERATED__", date.today().isoformat()))
+        page = Path(args.html)
+        page.write_text(html, encoding="utf-8")
+        print(f"written: {page}  ({len(rows)} models)")
+        return 0
+
     from PIL import Image, ImageDraw, ImageFont
 
     W, H, M = 1600, 1060, 178
@@ -642,8 +671,6 @@ def cmd_chart(args) -> int:
     px = lambda c: M + (math.log10(c) - x0) / (x1 - x0) * (W - 2 * M)
     py = lambda t: H - M - (t - y0) / (y1 - y0) * (H - 2 * M)
 
-    subject = ("dollars per million input tokens" if not mix else
-               f"dollars per request of {mix[0]:,} fresh + {mix[1]:,} cache + {mix[2]:,} out")
     dr.text((M, 44), "Terminal-Bench against price, every model every plan sells",
             font=f_title, fill=ink)
     dr.text((M, 84), subject, font=f_lab, fill=dim)
@@ -714,31 +741,6 @@ def cmd_chart(args) -> int:
         dr.text((lx + 20, 151), text, font=f_tick, fill=dim, anchor="lm")
         lx += dr.textbbox((0, 0), text, font=f_tick)[2] + 60
 
-    if args.html:
-        payload = []
-        for r in rows:
-            plan = store["providers"][r["provider"]]
-            payload.append({
-                "model": r["model"], "provider": r["provider"],
-                "plan": plan["plan"], "fee": plan.get("fee_usd"),
-                "tb": round(r["tb"], 2), "state": r.get("state", "unmeasured"),
-                "cost": round(r["input"], 6),
-                "eff": {k: round(v, 6) for k, v in r.items()
-                        if k in ("input", "cache", "cache_write", "output")},
-            })
-        html = (PAGE.replace("__DATA__", json.dumps(payload))
-                    .replace("__COLOURS__", json.dumps({k: "#%02x%02x%02x" % v
-                                                        for k, v in CHART_COLOURS.items()}))
-                    .replace("__FLOOR__", f"{floor:.1f}")
-                    .replace("__PLANS__", json.dumps(
-                        {name: {"plan": p["plan"], "fee": p.get("fee_usd")}
-                         for name, p in store["providers"].items()}))
-                    .replace("__SUBJECT__", json.dumps(subject))
-                    .replace("__GENERATED__", date.today().isoformat()))
-        page = Path(args.html)
-        page.write_text(html, encoding="utf-8")
-        print(f"written: {page}  ({len(rows)} models)")
-        return 0
 
     out = Path(args.out)
     img.save(out)
