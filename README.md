@@ -50,8 +50,8 @@ Six rules worth knowing before editing it:
 - **Never commit a key.** `.gitignore` refuses the file.
 
 What each row costs and measured, and why the menu holds what it holds, is in
-[model-bench](https://github.com/jacano/model-bench). Nothing here repeats those numbers: a
-price copied into a configuration file goes stale, and this file cannot know when.
+[model-bench](https://github.com/jacano/model-bench). No number is copied into this
+repository: it would go stale here and nobody would notice.
 
 ## License
 
