@@ -359,7 +359,7 @@ def cmd_chart(args) -> int:
     front = pareto(rows)
     floor = GATES["static"]["tbench_min"]
 
-    W, H, M = 1600, 1040, 150
+    W, H, M = 1600, 1060, 178
     bg, ink, dim = (13, 17, 23), (230, 237, 243), (110, 118, 129)
     img = Image.new("RGB", (W, H), bg)
     dr = ImageDraw.Draw(img)
@@ -451,8 +451,8 @@ def cmd_chart(args) -> int:
         entries.append((label, CHART_COLOURS.get(name, (200, 200, 200))))
     lx = M
     for text, colour in entries:
-        dr.ellipse([lx, 118, lx + 13, 131], fill=colour)
-        dr.text((lx + 20, 124), text, font=f_tick, fill=dim, anchor="lm")
+        dr.ellipse([lx, 145, lx + 13, 158], fill=colour)
+        dr.text((lx + 20, 151), text, font=f_tick, fill=dim, anchor="lm")
         lx += dr.textbbox((0, 0), text, font=f_tick)[2] + 60
 
     out = Path(args.out)
