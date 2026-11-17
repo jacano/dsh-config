@@ -601,7 +601,6 @@ render();
 def cmd_chart(args) -> int:
     """Draw the two axes that decide it: what a token costs, and what the board says."""
     import math
-    from PIL import Image, ImageDraw, ImageFont
 
     store, boards = plans(), tbench()
     mix = None
@@ -616,6 +615,8 @@ def cmd_chart(args) -> int:
         return 1
     front = pareto(rows)
     floor = GATES["static"]["tbench_min"]
+
+    from PIL import Image, ImageDraw, ImageFont
 
     W, H, M = 1600, 1060, 178
     bg, ink, dim = (13, 17, 23), (230, 237, 243), (110, 118, 129)
