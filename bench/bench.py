@@ -348,7 +348,11 @@ def pareto(rows: list[dict]) -> list[dict]:
     def beats(a, b):
         return (a["tb"] >= b["tb"] and a["cost"] <= b["cost"]
                 and (a["tb"] > b["tb"] or a["cost"] < b["cost"]))
-    return sorted((r for r in rows if not any(beats(o, r) for o in rows if o is not r)),
+    # A model under the floor is not a candidate, so it cannot be on the frontier:
+    # a line that recommends what the chart rules out is a line nobody trusts.
+    eligible = [r for r in rows if r["tb"] >= GATES["static"]["tbench_min"]]
+    return sorted((r for r in eligible
+                   if not any(beats(o, r) for o in eligible if o is not r)),
                   key=lambda r: r["cost"])
 
 
@@ -445,8 +449,9 @@ const fmt = v => (v >= 0.01 ? "$" + v.toFixed(3) : "$" + v.toFixed(5));
 function frontier(rows) {
   const beats = (a, b) => a.tb >= b.tb && cost(a) <= cost(b) &&
                           (a.tb > b.tb || cost(a) < cost(b));
-  return rows.filter(r => !rows.some(o => o !== r && beats(o, r)))
-             .sort((a, b) => cost(a) - cost(b));
+  const eligible = rows.filter(r => r.tb >= FLOOR);
+  return eligible.filter(r => !eligible.some(o => o !== r && beats(o, r)))
+                 .sort((a, b) => cost(a) - cost(b));
 }
 
 function render() {
@@ -509,18 +514,21 @@ function render() {
       const text = r.model.split("/").pop() + "  " + r.tb.toFixed(1);
       const w = text.length * 6.1 + 16, h = 20;
       const own = { x: xOf(r), y: ys(r.tb) };
-      const options = [[14, -26], [14, 12], [-w - 14, -26], [-w - 14, 12]];
+      const options = [[14, -26], [14, 12], [-w - 14, -26], [-w - 14, 12],
+                       [14, -50], [14, 36], [-w - 14, -50], [-w - 14, 36]];
       let spot = null;
-      for (let dy = 0; dy < 10 && !spot; dy++) {
-        for (let k = 0; k < options.length && !spot; k++) {
-          const x = Math.min(Math.max(own.x + options[k][0], M.l), W - M.r - w);
-          const y = own.y + options[k][1] + dy * (h + 6);
-          if (y < M.t || y + h > H - M.b) continue;
-          if (fits(x, y, w, h, own)) spot = { x: x, y: y };
-        }
+      for (let k = 0; k < options.length && !spot; k++) {
+        const x = Math.min(Math.max(own.x + options[k][0], M.l), W - M.r - w);
+        const y = own.y + options[k][1];
+        if (y < M.t || y + h > H - M.b) continue;
+        if (fits(x, y, w, h, own)) spot = { x: x, y: y };
       }
       if (!spot) spot = { x: Math.min(own.x + 14, W - M.r - w), y: Math.max(own.y - 26, M.t) };
       placed.push({ x: spot.x, y: spot.y, w: w, h: h });
+      const ax = Math.min(Math.max(own.x, spot.x), spot.x + w);
+      const ay = own.y < spot.y ? spot.y : (own.y > spot.y + h ? spot.y + h : own.y);
+      out += '<line x1="' + own.x + '" y1="' + own.y + '" x2="' + ax + '" y2="' + ay +
+             '" stroke="#4ade80" stroke-width="1" opacity=".45"/>';
       out += '<rect x="' + spot.x + '" y="' + spot.y + '" width="' + w + '" height="' + h +
              '" rx="5" fill="#161b22" stroke="#4ade80"/>';
       out += '<text x="' + (spot.x + 8) + '" y="' + (spot.y + 14) + '" fill="#e6edf3" ' +
