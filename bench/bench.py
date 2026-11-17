@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""bench — one script, two data files, three questions.
+"""bench — one script, what a subscription costs and what it can do.
 
     python bench/bench.py plan               # what a million tokens costs
     python bench/bench.py plan --model claude-haiku-5.5
@@ -8,20 +8,21 @@
     python bench/bench.py measure            # the stored table against the gates
     python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 
-Three questions, in the order they cost money:
+Four questions, in the order they cost money:
 
   plan     what a million tokens of each kind costs, after the plan's multiplier,
            its ceiling and its windows. Free, calls no model.
-  pick     of those, the ones nothing else beats on price and capability.
-  filter   does the board rank it, and does it clear the floor. Price is not asked
-           here: `plan` shows it, and a number to look at is not a gate. Free.
-  measure  speed, latency, cache, prefill, retention, errors, tool calls, and the
+  chart    price against Terminal-Bench, and the frontier through whatever nothing
+           beats. Free, writes a png or a page.
+  measure  speed, latency, cache, prefill, retention, errors, tool calls - and the
            menu has to agree with the policy.
   agentic  a real bug in a real repository, pytest decides.
 
 data/plans.json    the plans, what they publish, and the catalogue they price from
 data/tbench.json   the board: what each model does on Terminal-Bench, and through
                    which agent
+models.csv         what each route measured on the wire, one line per route
+models-policy.yml  the gates, and which ids are admitted
 
 Nothing here edits the DSH configuration; that is a separate change in ../dsh/.
 """
@@ -308,10 +309,6 @@ def cmd_plan(args) -> int:
     return 0
 
 
-# --------------------------------------------------------------------------- pick
-
-# ------------------------------------------------------------------ filter: the board
-
 # --------------------------------------------------------------------------- chart
 
 CHART_COLOURS = {"open-design": (96, 165, 250), "opengateway": (167, 139, 250),
@@ -321,6 +318,7 @@ CHART_COLOURS = {"open-design": (96, 165, 250), "opengateway": (167, 139, 250),
 def chart_rows(store: dict, boards: dict, day: date, mix=None) -> list[dict]:
     """Every priced model of every plan, with its board score and one cost."""
     out = []
+    measured = load_measured()
     for r in plan_rows(store, day):
         tb = board_score(boards, r["model"])
         if tb is None:
@@ -330,7 +328,7 @@ def chart_rows(store: dict, boards: dict, day: date, mix=None) -> list[dict]:
             cost = (fresh * r["input"] + cache * r["cache"] + written * r["output"]) / 1e6
         else:
             cost = r["input"]
-        m = load_measured().get(r["model"])
+        m = measured.get(r["model"])
         if r["model"] in ADMITTED:
             state = "admitted"
         elif m is None:
@@ -416,11 +414,17 @@ def cmd_chart(args) -> int:
     dr = ImageDraw.Draw(img)
 
     def font(size, bold=False):
-        for name in (("segoeuib.ttf" if bold else "segoeui.ttf"), "arialbd.ttf", "arial.ttf"):
-            try:
-                return ImageFont.truetype(f"C:/Windows/Fonts/{name}", size)
-            except OSError:
-                continue
+        # Windows first, then the usual Linux paths: the png is also drawn on a
+        # machine that is not this one, and a bitmap fallback is not a chart.
+        names = (("segoeuib.ttf", "arialbd.ttf", "DejaVuSans-Bold.ttf") if bold
+                 else ("segoeui.ttf", "arial.ttf", "DejaVuSans.ttf"))
+        for folder in ("C:/Windows/Fonts/", "/usr/share/fonts/truetype/dejavu/",
+                       "/usr/share/fonts/truetype/liberation/"):
+            for name in names:
+                try:
+                    return ImageFont.truetype(folder + name, size)
+                except OSError:
+                    continue
         return ImageFont.load_default()
 
     f_title, f_lab, f_tick, f_dot = font(30, True), font(17), font(15), font(14)

@@ -101,7 +101,8 @@ fee over ceiling, times the list rate, times the multiplier, times the peak hour
 compared to what `plan` prints: **no discrepancies**. OpenGateway's stored rates
 reproduce its own invoice to a cent: $4,60 against $4,61 for 1.163M tokens.
 
-The frontier is five models - the two eco lanes are one, and the line now stops at the
-floor instead of running through a row under it. Three rows are admitted, all three
-measured, all three in the menu.
+The frontier is five models, and the line stops at the floor instead of running
+through a row under it. OpenDesign's eco is on it; OpenGateway's is the same model at
+a higher price on all three rates, and so is dominated. Three rows are admitted, all
+three measured, all three in the menu.
 

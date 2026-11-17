@@ -79,22 +79,6 @@ times the provider's multiplier. A metered plan has no ceiling to divide by, so 
 price is simply the price. That is the whole of it - there is no turn, no blend of
 your own traffic, and no number standing in for one you have not measured.
 
-### Where the numbers come from
-
-Each provider carries the two pages that decide its cost, in `data/plans.json`
-under `sources`, because the card alone does not say how far a plan goes:
-
-| Provider | Card | The page with the detail |
-| --- | --- | --- |
-| `command-code` | `commandcode.ai/pricing` | `commandcode.ai/docs/plans/goat` — every model's monthly credit, plus the 5-hour and 7-day windows |
-| `open-design` | `open-design.ai/pricing/` | `open-design.ai/model-credits/` — the plan's pool, its windows, and the multiplier per model |
-| `opengateway` | `opengateway.ai/pricing` | the same page: a metered tier has no ceiling to look up, only a price and a discount that may end |
-
-The card is enough to know the fee; it is not enough to know how far the plan goes.
-Adding a subscription is one block with those two URLs and its numbers already
-filled in. This repo makes no network call: the numbers are read from the pages
-above when someone asks, not on a schedule.
-
 ## chart — the board, drawn
 
 **One scale, and nothing else about the model.** Terminal-Bench 4.1 (`tb`) is the
@@ -158,6 +142,20 @@ the model's ability to hold a large codebase. It is the cheapest question that s
 uses the real harness.
 
 ## Where every number comes from
+
+Each provider carries the two pages that decide its cost, in `data/plans.json`
+under `sources`, because the card alone does not say how far a plan goes:
+
+| Provider | Card | The page with the detail |
+| --- | --- | --- |
+| `command-code` | `commandcode.ai/pricing` | `commandcode.ai/docs/plans/goat` — every model's monthly credit, plus the 5-hour and 7-day windows |
+| `open-design` | `open-design.ai/pricing/` | `open-design.ai/model-credits/` — the plan's pool, its windows, and the multiplier per model |
+| `opengateway` | `opengateway.ai/pricing` | the same page: a metered tier has no ceiling to look up, only a price and a discount that may end |
+
+The card is enough to know the fee; it is not enough to know how far the plan goes.
+Adding a subscription is one block with those two URLs and its numbers already
+filled in. This repo makes no network call: the numbers are read from the pages
+above when someone asks, not on a schedule.
 
 | Question | Source | Where |
 | --- | --- | --- |
