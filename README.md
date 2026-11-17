@@ -52,6 +52,9 @@ What each row costs and measured, and why the menu holds what it holds, is in
 [model-bench](https://github.com/jacano/model-bench). No number is copied here: it would go
 stale, and nobody would notice.
 
+Changing a model id here is half a change: `model-bench` checks this file against its policy,
+and `measure` there exits non-zero until the two agree.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
