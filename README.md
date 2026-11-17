@@ -29,9 +29,8 @@ Release-candidate builds: a later one can change the configuration format.
 
 ## The file
 
-`dsh/cordis.patch.yml` → `~/.dsh/cordis.patch.yml`. A YAML array of loader patch entries:
-`id` names the row, `name` the plugin, `config` replaces that row's config whole. Every
-profile reads it, and it outranks the profile's own layer.
+A YAML array of loader patch entries: `id` names the row, `name` the plugin, `config` replaces
+that row's config whole. Every profile reads it, and it outranks the profile's own layer.
 
 Six rules worth knowing before editing it:
 
@@ -50,8 +49,8 @@ Six rules worth knowing before editing it:
 - **Never commit a key.** `.gitignore` refuses the file.
 
 What each row costs and measured, and why the menu holds what it holds, is in
-[model-bench](https://github.com/jacano/model-bench). No number is copied into this
-repository: it would go stale here and nobody would notice.
+[model-bench](https://github.com/jacano/model-bench). No number is copied here: it would go
+stale, and nobody would notice.
 
 ## License
 
