@@ -1,8 +1,15 @@
 # bench — choosing the models
 
-One script, three data files, four questions. The script does not decide anything
-by itself: it prices, it draws, it measures, it runs a task, and it says what it
-could not.
+One script, four data files, four questions. The script does not decide anything by
+itself: it prices, it draws, it measures, it runs a task, and it says what it could
+not.
+
+The shape of the exercise - a subscription's real price per token against a
+capability score, and a frontier through whatever nothing beats - is borrowed from
+[linearbench](https://linearbench.pages.dev/). What changed is the axis on the left:
+they plot an intelligence index against an estimated cost per task, and this plots
+Terminal-Bench against what the plan actually charges, with the multiplier and the
+ceiling already inside the number.
 
 ```bash
 python bench/bench.py plan               # what a million tokens costs
@@ -23,15 +30,16 @@ python bench/bench.py agentic --provider opendesign --model deepseek-v4.1-flash
 Nothing here edits the DSH configuration; that is a separate change in
 [`../dsh/`](../dsh/).
 
-## Three questions, not a pipeline
+## Four questions, not a pipeline
 
 ```
 plan     what a million tokens of each kind costs, per model, per plan
-   │     a number to look at, never a veto
-chart    the same rows as a picture: price across, the board up, the frontier
-   │     drawn through whatever nothing beats        free, writes a png
+   │     the multiplier, the ceiling and the peak hour are already inside
+chart    those rows as a picture: price across, the board up, the frontier drawn
+   │     through whatever nothing beats              free, a png and a page
 measure  the ones left, against the gates the policy states
-   │     and against the menu, which has to agree
+   │     speed, latency, prefill, cache, retention, errors, tool calls
+agentic  one real bug in one real repository, three rounds, pytest decides
    ↓
 admitted, and only then in the config
 ```
