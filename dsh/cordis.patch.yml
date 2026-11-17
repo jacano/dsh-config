@@ -16,7 +16,7 @@
   config:
     providers:
       opendesign:
-        displayName: OpenDesign
+        displayName: OpenDesign (Responses)
         api: openai-responses
         baseURL: https://amr-link.open-design.ai/v1
         apiKeyEnv: OPENDESIGN_API_KEY
@@ -25,7 +25,7 @@
         models:
           - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
       opendesign-anthropic:
-        displayName: OpenDesign (Claude)
+        displayName: OpenDesign (Messages)
         api: anthropic-messages
         baseURL: https://amr-link.open-design.ai
         apiKeyEnv: OPENDESIGN_API_KEY
@@ -45,7 +45,7 @@
 #
 # Command Code (GOAT)
 #      command-code:
-#        displayName: Command Code
+#        displayName: Command Code (Completions)
 #        api: openai-completions
 #        baseURL: https://api.commandcode.ai/provider/v1
 #        apiKeyEnv: COMMANDCODE_API_KEY
@@ -54,7 +54,7 @@
 #        models:
 #          - { id: deepseek/deepseek-v4.1-flash-fast, name: DeepSeek V4.1 Flash Fast (Command Code), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: *efforts }
 #      command-code-anthropic:
-#        displayName: Command Code (Claude)
+#        displayName: Command Code (Messages)
 #        api: anthropic-messages
 #        baseURL: https://api.commandcode.ai/provider
 #        apiKeyEnv: COMMANDCODE_API_KEY
@@ -66,7 +66,7 @@
 #
 # OpenCode Go
 #      opencode-go:
-#        displayName: OpenCode Go
+#        displayName: OpenCode Go (Completions)
 #        api: openai-completions
 #        baseURL: https://opencode.ai/inference/go/openai/v1
 #        apiKeyEnv: OPENCODE_API_KEY
@@ -79,7 +79,7 @@
 
 # OpenGateway (out of credit, 2026-11-17)
 #      opengateway:
-#        displayName: OpenGateway
+#        displayName: OpenGateway (Completions)
 #        api: openai-completions
 #        baseURL: https://apis.opengateway.ai/v1
 #        apiKeyEnv: OPENGATEWAY_API_KEY
