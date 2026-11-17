@@ -450,12 +450,16 @@ def draw_png(rows: list[dict], front: list[dict], store: dict, floor: float,
                 dr.text((x, H - M + 14), shown, font=f_tick, fill=dim, anchor="mt")
         decade *= 10
 
-    dr.line([(M, py(floor)), (W - M, py(floor))], fill=(239, 68, 68))
-    dr.text((W - M - 8, py(floor) - 9), f"Terminal-Bench floor {floor:.1f}", font=f_tick,
-            fill=(239, 68, 68), anchor="rb")
+    y_floor = py(floor)
+    for x in range(M, W - M, 16):
+        dr.line([(x, y_floor), (min(x + 9, W - M), y_floor)], fill=(248, 113, 113), width=2)
+    dr.text((W - M - 8, y_floor - 10), f"Terminal-Bench floor {floor:.1f}", font=f_tick,
+            fill=(248, 113, 113), anchor="rb")
 
     if len(front) > 1:
-        dr.line([(px(r["cost"]), py(r["tb"])) for r in front], fill=(74, 222, 128), width=3)
+        pts = [(px(r["cost"]), py(r["tb"])) for r in front]
+        for width, shade in ((13, (18, 44, 32)), (7, (30, 74, 51)), (3, (74, 222, 128))):
+            dr.line(pts, fill=shade, width=width, joint="curve")
 
     for r in rows:
         x, y = px(r["cost"]), py(r["tb"])
@@ -496,6 +500,13 @@ def draw_png(rows: list[dict], front: list[dict], store: dict, floor: float,
         dr.text((lx + 20, 151), text, font=f_tick, fill=dim, anchor="lm")
         lx += dr.textbbox((0, 0), text, font=f_tick)[2] + 60
 
+
+    dr.line([(M, H - 78), (W - M, H - 78)], fill=(30, 38, 50))
+    dr.text((M, H - 62), "Every model every plan in data/plans.json that Terminal-Bench "
+            "ranks. The chart and its controls are borrowed from linearbench.", font=f_tick,
+            fill=(110, 118, 129))
+    dr.text((W - M, H - 62), f"dsh-config · {date.today().isoformat()}", font=f_tick,
+            fill=(110, 118, 129), anchor="ra")
 
     path.parent.mkdir(parents=True, exist_ok=True)
     img.save(path)
