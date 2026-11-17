@@ -33,5 +33,3 @@ admitted:
     note: cheapest route on a cold cache, completions
   - id: claude-haiku-5.5
     note: fastest writer measured, Anthropic route
-  - id: deepseek/deepseek-v4.1-flash-eco
-    note: metered; the same model as OpenDesign's eco, 47% faster here

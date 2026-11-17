@@ -106,3 +106,11 @@ through a row under it. OpenDesign's eco is on it; OpenGateway's is the same mod
 a higher price on all three rates, and so is dominated. Three rows are admitted, all
 three measured, all three in the menu.
 
+## 2026-11-17 · OpenGateway, out of credit
+
+The $5 ran out. Its block is commented out at the end of `cordis.patch.yml` with the
+date, its row leaves `models.csv` and its id leaves `admitted:` - a route that cannot
+be called is not a route this repo should be recommending. The prices stay in
+`data/plans.json`, so `plan` still quotes it and the moment it is topped up the block
+goes back and its number is already there.
+
