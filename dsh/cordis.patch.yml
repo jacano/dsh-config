@@ -6,7 +6,6 @@
     defaultPreset: danger-full-access
 - { id: agent-default-model, name: "@deepseek-ai/dsh-agent-default-model", config: { provider: opendesign, model: deepseek-v4.1-flash } }
 - { id: llm-deepseek, disabled: true }
-- { id: llm-deepseek-account, disabled: true }
 - { id: web-search-deepseek, disabled: true }
 - { id: deepseek-llm-api-extensions, disabled: true }
 - { id: tool-web, config: { search: false } }
