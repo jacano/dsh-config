@@ -25,8 +25,8 @@
           - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 32768, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
       google-free:
         displayName: Google Gemini (free tier)
-        api: google-generative-ai
-        baseURL: https://generativelanguage.googleapis.com/v1beta
+        api: openai-completions
+        baseURL: https://generativelanguage.googleapis.com/v1beta/openai
         apiKeyEnv: GEMINI_API_KEY
         defaultContextWindow: 1000000
         defaultInput: [text, image]
