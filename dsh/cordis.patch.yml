@@ -7,8 +7,6 @@
 - { id: agent-default-model, name: "@deepseek-ai/dsh-agent-default-model", config: { provider: opendesign, model: deepseek-v4.1-flash } }
 - { id: llm-deepseek, disabled: true }
 - { id: web-search-deepseek, disabled: true }
-- { id: deepseek-llm-api-extensions, disabled: true }
-- { id: tool-web, config: { search: false } }
 - { id: ui-settings-account, name: "@deepseek-ai/dsh-client-ui-settings-account", config: { step: done } }
 - id: llm-pi-ai
   name: "@deepseek-ai/dsh-llm-pi-ai"
@@ -22,4 +20,4 @@
         defaultContextWindow: 1000000
         defaultInput: [text, image]
         models:
-          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 128000, reasoningEfforts: &efforts { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }
+          - { id: deepseek-v4.1-flash, name: DeepSeek V4.1 Flash (OpenDesign), contextWindow: 1000000, maxTokens: 128000, reasoningEfforts: { low: low, medium: medium, high: high, xhigh: xhigh, max: max } }

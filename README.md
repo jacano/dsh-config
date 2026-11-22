@@ -13,9 +13,9 @@ models in its menu.
 
 | Flavour | Platform | Get it |
 | --- | --- | --- |
-| Desktop | Windows x64 | [deepseek-harness-0.2.0-rc.2-win-x64.exe](https://download.deepseek.com/dsh-desk/bin/win-x64/deepseek-harness-0.2.0-rc.2-win-x64.exe) |
-| Desktop | macOS Apple Silicon | [deepseek-harness-0.2.0-rc.2-mac-arm64.zip](https://download.deepseek.com/dsh-desk/bin/mac-arm64/deepseek-harness-0.2.0-rc.2-mac-arm64.zip) |
-| Desktop | macOS Intel | [deepseek-harness-0.2.0-rc.2-mac-x64.zip](https://download.deepseek.com/dsh-desk/bin/mac-x64/deepseek-harness-0.2.0-rc.2-mac-x64.zip) |
+| Desktop | Windows x64 | [deepseek-harness-0.2.2-rc.5-win-x64.exe](https://download.deepseek.com/dsh-desk/bin/win-x64/deepseek-harness-0.2.2-rc.5-win-x64.exe) |
+| Desktop | macOS Apple Silicon | [deepseek-harness-0.2.2-rc.5-mac-arm64.zip](https://download.deepseek.com/dsh-desk/bin/mac-arm64/deepseek-harness-0.2.2-rc.5-mac-arm64.zip) |
+| Desktop | macOS Intel (no rc.5 build) | [deepseek-harness-0.2.0-rc.2-mac-x64.zip](https://download.deepseek.com/dsh-desk/bin/mac-x64/deepseek-harness-0.2.0-rc.2-mac-x64.zip) |
 | Web | any | `npm install -g @deepseek-ai/dsh`, then `dsh web` |
 
 Release-candidate builds: a later one can change the configuration format.
@@ -43,9 +43,9 @@ Six rules worth knowing before editing it:
 - **This file outranks Settings.** A preference pinned here shadows the form below it.
 - **Images** are declared once, `defaultInput: [text, image]`. A text-only model added later
   needs `input: [text]`, or its images arrive as `(image omitted…)`.
-- **`api:`** is one of `openai-completions`, `openai-responses` or `anthropic-messages`, and
-  it is the block's business, not the model's. A `claude-*` id that earns a 400 on the
-  OpenAI shape wants `anthropic-messages`.
+- **`api:`** is one of `openai-completions`, `openai-responses`, `anthropic-messages` or
+  `google-generative-ai`, and it is the block's business, not the model's. A `claude-*` id
+  that earns a 400 on the OpenAI shape wants `anthropic-messages`.
 - **Never commit a key.** `.gitignore` refuses the file.
 
 What each row costs and measured, and why the menu holds what it holds, is in
